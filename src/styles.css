@@ -302,6 +302,21 @@ pre code {
   animation: dotPulse 1.2s ease-in-out infinite;
 }
 
+@keyframes caretBlink {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  55%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.caret-blink {
+  animation: caretBlink 1s steps(1, end) infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .fade-up {
     opacity: 1;
@@ -316,7 +331,8 @@ pre code {
     animation: none;
   }
 
-  .dot-pulse {
+  .dot-pulse,
+  .caret-blink {
     animation: none;
   }
 

@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AiOptimized } from "@/components/landing/ai-optimized";
 import { Hero } from "@/components/landing/hero";
+import { SixtySeconds } from "@/components/landing/sixty-seconds";
 import { Statement } from "@/components/landing/statement";
 import { SwapAnything } from "@/components/landing/swap-anything";
 import { TestedByDefault } from "@/components/landing/tested-by-default";
@@ -22,6 +23,7 @@ function Home() {
 				<TestedByDefault />
 				<SwapAnything />
 				<AiOptimized />
+				<SixtySeconds />
 			</main>
 		</>
 	);

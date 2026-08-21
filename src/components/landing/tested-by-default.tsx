@@ -28,12 +28,12 @@ type Suite = { name: string; files: string; tests: number };
  */
 const SUITES: Suite[] = [
 	{ name: "Unit", files: "src/lib", tests: 17 },
-	{ name: "Component", files: "src/components", tests: 140 },
+	{ name: "Component", files: "src/components", tests: 161 },
 	{ name: "Schema", files: "src/db", tests: 5 },
 ];
 
 const TOTAL_TESTS = SUITES.reduce((sum, s) => sum + s.tests, 0);
-const TOTAL_FILES = 11;
+const TOTAL_FILES = 12;
 
 type Gate = { cmd: string; label: string };
 

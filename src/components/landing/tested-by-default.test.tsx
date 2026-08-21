@@ -90,7 +90,7 @@ describe("TestedByDefault", () => {
 		it("starts every suite running and every gate queued", () => {
 			render(<TestedByDefault />);
 
-			for (const label of ["17 passed", "140 passed", "5 passed"]) {
+			for (const label of ["17 passed", "161 passed", "5 passed"]) {
 				expect(isHidden(screen.getByText(label))).toBe(true);
 			}
 			for (const gate of screen.getAllByText("passed")) {
@@ -106,13 +106,13 @@ describe("TestedByDefault", () => {
 
 			act(() => void vi.advanceTimersByTime(SUITE_PASSES_AT[0]));
 			expect(isHidden(screen.getByText("17 passed"))).toBe(false);
-			expect(isHidden(screen.getByText("140 passed"))).toBe(true);
+			expect(isHidden(screen.getByText("161 passed"))).toBe(true);
 
 			act(
 				() =>
 					void vi.advanceTimersByTime(SUITE_PASSES_AT[1] - SUITE_PASSES_AT[0]),
 			);
-			expect(isHidden(screen.getByText("162 passed"))).toBe(false);
+			expect(isHidden(screen.getByText("183 passed"))).toBe(false);
 			expect(isHidden(screen.getByText("5 passed"))).toBe(true);
 
 			act(
@@ -136,7 +136,7 @@ describe("TestedByDefault", () => {
 			render(<TestedByDefault />);
 
 			act(() => void vi.advanceTimersByTime(SUMMARY_AT));
-			expect(isHidden(screen.getByText("162 passed"))).toBe(false);
+			expect(isHidden(screen.getByText("183 passed"))).toBe(false);
 
 			act(() => void vi.advanceTimersByTime(GATES_PASS_AT[3] - SUMMARY_AT));
 			for (const gate of screen.getAllByText("passed")) {
@@ -174,7 +174,7 @@ describe("TestedByDefault", () => {
 			setReducedMotion(true);
 			render(<TestedByDefault />);
 
-			for (const label of ["17 passed", "140 passed", "5 passed"]) {
+			for (const label of ["17 passed", "161 passed", "5 passed"]) {
 				expect(isHidden(screen.getByText(label))).toBe(false);
 			}
 			for (const gate of screen.getAllByText("passed")) {

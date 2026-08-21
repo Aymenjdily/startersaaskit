@@ -1,0 +1,38 @@
+import { fileURLToPath } from "node:url";
+import viteReact from "@vitejs/plugin-react";
+import { defineConfig } from "vitest/config";
+
+/**
+ * Deliberately separate from `vite.config.ts`.
+ *
+ * The app config loads `tanstackStart()`, which generates the route tree and
+ * applies SSR/server-function transforms. Under Vitest that machinery is both
+ * unnecessary and actively harmful — it rewrites module graphs the tests never
+ * exercise. Components are plain React, so `@vitejs/plugin-react` is all we need
+ * to compile them. Route-level behaviour is covered by the production build.
+ */
+export default defineConfig({
+	plugins: [viteReact()],
+	resolve: {
+		alias: {
+			"@": fileURLToPath(new URL("./src", import.meta.url)),
+			"#": fileURLToPath(new URL("./src", import.meta.url)),
+		},
+	},
+	test: {
+		environment: "jsdom",
+		globals: true,
+		setupFiles: ["./src/test/setup.ts"],
+		include: ["src/**/*.{test,spec}.{ts,tsx}"],
+		coverage: {
+			provider: "v8",
+			reporter: ["text", "html"],
+			include: ["src/**/*.{ts,tsx}"],
+			exclude: [
+				"src/**/*.{test,spec}.{ts,tsx}",
+				"src/test/**",
+				"src/routeTree.gen.ts",
+			],
+		},
+	},
+});

@@ -1,0 +1,22 @@
+node_modules
+.DS_Store
+dist
+dist-ssr
+*.local
+.env
+.nitro
+.tanstack
+.wrangler
+.output
+.vinxi
+__unconfig*
+todos.json
+coverage
+
+# Machine-specific Claude Code permission allowlist.
+.claude/settings.local.json
+
+# Design reference scraped from deck.co. Kept locally for comparison while
+# building the landing page; not ours to redistribute.
+deck.html
+deck.css

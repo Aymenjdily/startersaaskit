@@ -1,9 +1,11 @@
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
 import { render, screen } from "@testing-library/react";
 import { act } from "react";
 import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { setReducedMotion } from "@/test/setup";
-import { TestedByDefault } from "./tested-by-default";
+import { SPEC_PAIRS, TestedByDefault } from "./tested-by-default";
 
 /** Timeline offsets, mirroring STEP_MS in the component. */
 const SUITE_PASSES_AT = [900, 1700, 2500];
@@ -23,6 +25,38 @@ describe("TestedByDefault", () => {
 
 	afterEach(() => {
 		vi.useRealTimers();
+	});
+
+	/**
+	 * The first pillar claims every module ships with a spec beside it. A pair
+	 * naming a file that does not exist — or a spec that is not actually next to
+	 * its module — would be the exact failure the claim denies.
+	 */
+	describe("the module/spec pairs it shows", () => {
+		it.each(SPEC_PAIRS)("$module and $spec both exist in $dir", ({
+			dir,
+			module,
+			spec,
+		}) => {
+			expect(existsSync(resolve(process.cwd(), dir, module))).toBe(true);
+			expect(existsSync(resolve(process.cwd(), dir, spec))).toBe(true);
+		});
+
+		it("names the spec after the module it covers", () => {
+			for (const { module, spec } of SPEC_PAIRS) {
+				const base = module.replace(/\.(ts|tsx)$/, "");
+				expect(spec).toMatch(new RegExp(`^${base}\\.test\\.(ts|tsx)$`));
+			}
+		});
+
+		it("renders both halves of every pair", () => {
+			render(<TestedByDefault />);
+
+			for (const { module, spec } of SPEC_PAIRS) {
+				expect(screen.getByText(module)).toBeInTheDocument();
+				expect(screen.getByText(spec)).toBeInTheDocument();
+			}
+		});
 	});
 
 	it("renders the section heading and pillar copy", () => {
@@ -56,7 +90,7 @@ describe("TestedByDefault", () => {
 		it("starts every suite running and every gate queued", () => {
 			render(<TestedByDefault />);
 
-			for (const label of ["17 passed", "113 passed", "5 passed"]) {
+			for (const label of ["17 passed", "140 passed", "5 passed"]) {
 				expect(isHidden(screen.getByText(label))).toBe(true);
 			}
 			for (const gate of screen.getAllByText("passed")) {
@@ -72,13 +106,13 @@ describe("TestedByDefault", () => {
 
 			act(() => void vi.advanceTimersByTime(SUITE_PASSES_AT[0]));
 			expect(isHidden(screen.getByText("17 passed"))).toBe(false);
-			expect(isHidden(screen.getByText("113 passed"))).toBe(true);
+			expect(isHidden(screen.getByText("140 passed"))).toBe(true);
 
 			act(
 				() =>
 					void vi.advanceTimersByTime(SUITE_PASSES_AT[1] - SUITE_PASSES_AT[0]),
 			);
-			expect(isHidden(screen.getByText("113 passed"))).toBe(false);
+			expect(isHidden(screen.getByText("162 passed"))).toBe(false);
 			expect(isHidden(screen.getByText("5 passed"))).toBe(true);
 
 			act(
@@ -102,7 +136,7 @@ describe("TestedByDefault", () => {
 			render(<TestedByDefault />);
 
 			act(() => void vi.advanceTimersByTime(SUMMARY_AT));
-			expect(isHidden(screen.getByText("135 passed"))).toBe(false);
+			expect(isHidden(screen.getByText("162 passed"))).toBe(false);
 
 			act(() => void vi.advanceTimersByTime(GATES_PASS_AT[3] - SUMMARY_AT));
 			for (const gate of screen.getAllByText("passed")) {
@@ -140,7 +174,7 @@ describe("TestedByDefault", () => {
 			setReducedMotion(true);
 			render(<TestedByDefault />);
 
-			for (const label of ["17 passed", "113 passed", "5 passed"]) {
+			for (const label of ["17 passed", "140 passed", "5 passed"]) {
 				expect(isHidden(screen.getByText(label))).toBe(false);
 			}
 			for (const gate of screen.getAllByText("passed")) {

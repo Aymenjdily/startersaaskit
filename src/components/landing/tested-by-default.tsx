@@ -28,12 +28,12 @@ type Suite = { name: string; files: string; tests: number };
  */
 const SUITES: Suite[] = [
 	{ name: "Unit", files: "src/lib", tests: 17 },
-	{ name: "Component", files: "src/components", tests: 113 },
+	{ name: "Component", files: "src/components", tests: 140 },
 	{ name: "Schema", files: "src/db", tests: 5 },
 ];
 
 const TOTAL_TESTS = SUITES.reduce((sum, s) => sum + s.tests, 0);
-const TOTAL_FILES = 10;
+const TOTAL_FILES = 11;
 
 type Gate = { cmd: string; label: string };
 
@@ -267,11 +267,21 @@ function QualityGatesMock({ step }: { step: number }) {
 	);
 }
 
-/** Every pair below is a file that exists in this repo, with its real count. */
-const SPEC_PAIRS = [
-	{ module: "utils.ts", spec: "utils.test.ts", tests: 7 },
-	{ module: "wired-grid.tsx", spec: "wired-grid.test.tsx", tests: 16 },
-	{ module: "schema.ts", spec: "schema.test.ts", tests: 5 },
+/**
+ * Real module/spec pairs, given as repo-relative paths so the suite can check
+ * both halves still exist. Deliberately no per-file test count: `it.each`
+ * expands at runtime, so a number here could not be verified without running
+ * the suite, and an unverifiable number is exactly what this section argues
+ * against.
+ */
+export const SPEC_PAIRS = [
+	{ dir: "src/lib", module: "utils.ts", spec: "utils.test.ts" },
+	{
+		dir: "src/components/landing",
+		module: "wired-grid.tsx",
+		spec: "wired-grid.test.tsx",
+	},
+	{ dir: "src/db", module: "schema.ts", spec: "schema.test.ts" },
 ];
 
 function SpecPairsVisual() {
@@ -279,13 +289,10 @@ function SpecPairsVisual() {
 		<div className="flex h-full flex-col justify-center gap-2.5">
 			{SPEC_PAIRS.map((pair) => (
 				<div key={pair.module} className="flex items-center gap-2">
+					<Check className="size-3 shrink-0 text-sage" />
 					<span className="text-ink-soft">{pair.module}</span>
 					<span className="text-ink-muted">→</span>
 					<span className="text-sage">{pair.spec}</span>
-					<span className="ml-auto flex items-center gap-1 text-ink-muted">
-						<Check className="size-3 text-sage" />
-						{pair.tests}
-					</span>
 				</div>
 			))}
 		</div>

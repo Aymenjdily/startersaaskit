@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { AiOptimized } from "@/components/landing/ai-optimized";
 import { Hero } from "@/components/landing/hero";
 import { Statement } from "@/components/landing/statement";
 import { SwapAnything } from "@/components/landing/swap-anything";
@@ -20,6 +21,7 @@ function Home() {
 				<WiredGrid />
 				<TestedByDefault />
 				<SwapAnything />
+				<AiOptimized />
 			</main>
 		</>
 	);

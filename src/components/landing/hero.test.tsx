@@ -1,6 +1,33 @@
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { Hero } from "./hero";
+
+const repoPath = (path: string) => resolve(process.cwd(), path);
+
+const installed = (): string[] =>
+	Object.keys(
+		JSON.parse(readFileSync(repoPath("package.json"), "utf8")).dependencies,
+	);
+
+/**
+ * The subtitle is the broadest claim on the page, and it named billing, email
+ * and CI for a while when the repo shipped none of them.
+ *
+ * Each entry releases itself: the word is only forbidden while nothing that
+ * could deliver it is installed. Add Stripe and "billing" becomes sayable.
+ */
+const NOT_YET_SHIPPED = [
+	{
+		word: "billing",
+		needs: ["stripe", "@polar-sh/sdk", "@lemonsqueezy/lemonsqueezy.js"],
+	},
+	{
+		word: "email",
+		needs: ["resend", "nodemailer", "postmark", "@react-email/render"],
+	},
+];
 
 describe("Hero", () => {
 	it("leads with a single h1", () => {
@@ -10,6 +37,33 @@ describe("Hero", () => {
 		expect(h1s[0]).toHaveTextContent(
 			"Skip the boilerplate. Keep the tests. Ship the product.",
 		);
+	});
+
+	describe("what the subtitle promises", () => {
+		/**
+		 * Selected by `data-subtitle`, not by class: three elements share
+		 * `hero-in`, and matching on it silently read the licence line instead.
+		 */
+		const subtitle = () => {
+			const { container } = render(<Hero />);
+			const el = container.querySelector("[data-subtitle]");
+			expect(el).not.toBeNull();
+			return el?.textContent ?? "";
+		};
+
+		it.each(NOT_YET_SHIPPED)("does not offer $word while nothing ships it", ({
+			word,
+			needs,
+		}) => {
+			const deps = installed();
+			if (needs.some((pkg) => deps.includes(pkg))) return;
+			expect(subtitle().toLowerCase()).not.toContain(word);
+		});
+
+		it("does not offer CI while no workflow ships", () => {
+			if (existsSync(repoPath(".github"))) return;
+			expect(subtitle()).not.toMatch(/\bCI\b/);
+		});
 	});
 
 	it("states the licence up front", () => {

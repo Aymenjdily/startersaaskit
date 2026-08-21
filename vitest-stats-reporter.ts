@@ -28,16 +28,29 @@ function countSpecsOnDisk(dir: string): number {
 	return found;
 }
 
-/** `src/components/landing/hero.test.tsx` → `src/components`. */
-const groupOf = (file: string) => file.split("/").slice(0, 2).join("/");
+/**
+ * `src/components/landing/hero.test.tsx` → `src/components`, and a spec sitting
+ * directly in `src` → `src`. Slicing the path before dropping the filename got
+ * the second case wrong and published `src/styles.test.ts` as a directory.
+ */
+const groupOf = (file: string) =>
+	file.split("/").slice(0, -1).slice(0, 2).join("/");
 
 const toRepoPath = (id: string) =>
 	relative(process.cwd(), id).split("\\").join("/");
 
+/**
+ * Quoted only when it has to be. Biome strips redundant quotes on format, so
+ * emitting `"src"` here would have the formatter and this reporter overwrite
+ * each other's output run after run.
+ */
+const asKey = (dir: string) =>
+	/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(dir) ? dir : `"${dir}"`;
+
 function render(files: number, byDir: Map<string, number>) {
 	const entries = [...byDir]
 		.sort(([a], [b]) => a.localeCompare(b))
-		.map(([dir, tests]) => `\t\t"${dir}": ${tests},`)
+		.map(([dir, tests]) => `\t\t${asKey(dir)}: ${tests},`)
 		.join("\n");
 
 	const total = [...byDir.values()].reduce((sum, n) => sum + n, 0);

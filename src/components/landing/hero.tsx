@@ -24,10 +24,11 @@ export function Hero() {
 				<div className="grid items-start gap-6 md:grid-cols-[2fr_1fr] md:gap-10">
 					<p
 						className="hero-in max-w-[600px] text-body-lg leading-[1.5] tracking-[-0.01em] text-white/80"
+						data-subtitle
 						style={{ animationDelay: "0.2s" }}
 					>
-						An open-source SaaS starter on TanStack Start — auth, billing,
-						database, email and CI already wired together, with a test suite
+						An open-source SaaS starter on TanStack Start — typed routing, auth
+						and a Postgres database already wired together, with a test suite
 						that proves it.
 					</p>
 

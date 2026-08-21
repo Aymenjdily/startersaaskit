@@ -184,22 +184,30 @@
   letter-spacing: -0.03em;
 }
 
-code {
-  font-family: var(--font-mono);
-  font-size: 0.9em;
-  border: 1px solid var(--color-line);
-  background: var(--color-elevated);
-  border-radius: var(--radius-sm);
-  padding: 2px 7px;
-}
+/*
+ * Layered on purpose. Unlayered rules beat everything Tailwind emits, so a bare
+ * `code {}` here silently won against `text-[12px]`, `bg-base` and friends on
+ * every inline chip on the page. Inside `base` these are still the default and
+ * a utility on the element can now do its job.
+ */
+@layer base {
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    border: 1px solid var(--color-line);
+    background: var(--color-elevated);
+    border-radius: var(--radius-sm);
+    padding: 2px 7px;
+  }
 
-pre code {
-  border: 0;
-  background: transparent;
-  padding: 0;
-  border-radius: 0;
-  font-size: inherit;
-  color: inherit;
+  pre code {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    font-size: inherit;
+    color: inherit;
+  }
 }
 
 .prose pre {

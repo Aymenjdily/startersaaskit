@@ -6,6 +6,7 @@ import { Statement } from "@/components/landing/statement";
 import { SwapAnything } from "@/components/landing/swap-anything";
 import { TestedByDefault } from "@/components/landing/tested-by-default";
 import { TrustStrip } from "@/components/landing/trust-strip";
+import { UseCases } from "@/components/landing/use-cases";
 import { WiredGrid } from "@/components/landing/wired-grid";
 import { Navbar } from "@/components/Navbar";
 
@@ -24,6 +25,7 @@ function Home() {
 				<SwapAnything />
 				<AiOptimized />
 				<SixtySeconds />
+				<UseCases />
 			</main>
 		</>
 	);

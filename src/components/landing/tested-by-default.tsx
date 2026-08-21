@@ -4,6 +4,7 @@ import { Container } from "@/components/ui/container";
 import { FadeUp } from "@/components/ui/fade-up";
 import { Section } from "@/components/ui/section";
 import { cn } from "@/lib/utils";
+import { SUITE_STATS } from "@/test/suite-stats";
 
 /**
  * Section 06 — "Tested by default". Mirrors the reference's `.auth-section`:
@@ -19,21 +20,20 @@ import { cn } from "@/lib/utils";
  * out of the copy until they actually land — same rule as WiredGrid.
  */
 
-type Suite = { name: string; files: string; tests: number };
-
 /**
- * Real counts from `pnpm test`, not illustrative ones. If you add or remove
- * tests, update these — the whole point of the section is that the numbers on
- * the page are the numbers the suite actually produces.
+ * Only the labels live here. Every number comes from `SUITE_STATS`, which
+ * `vitest-stats-reporter.ts` rewrites at the end of each full `pnpm test`, so
+ * the counts on the page are the counts the suite last produced and there is
+ * nothing to keep in sync by hand.
  */
-const SUITES: Suite[] = [
-	{ name: "Unit", files: "src/lib", tests: 17 },
-	{ name: "Component", files: "src/components", tests: 161 },
-	{ name: "Schema", files: "src/db", tests: 5 },
-];
+export const SUITES = [
+	{ name: "Unit", dir: "src/lib" },
+	{ name: "Component", dir: "src/components" },
+	{ name: "Schema", dir: "src/db" },
+] as const;
 
-const TOTAL_TESTS = SUITES.reduce((sum, s) => sum + s.tests, 0);
-const TOTAL_FILES = 12;
+export const testsIn = (dir: string) =>
+	SUITE_STATS.byDir[dir as keyof typeof SUITE_STATS.byDir];
 
 type Gate = { cmd: string; label: string };
 
@@ -170,11 +170,11 @@ function TestRunnerMock({ step }: { step: number }) {
 								{suite.name}
 							</span>
 							<span className="hidden shrink-0 text-ink-muted sm:inline">
-								{suite.files}
+								{suite.dir}
 							</span>
 							<SwapLabel
 								hidden="running"
-								shown={`${suite.tests} passed`}
+								shown={`${testsIn(suite.dir)} passed`}
 								showSecond={suitePassed(step, i)}
 							/>
 						</div>
@@ -190,12 +190,13 @@ function TestRunnerMock({ step }: { step: number }) {
 					)}
 				>
 					<span className="text-ink-muted">
-						Test Files <span className="text-sage">{TOTAL_FILES} passed</span> (
-						{TOTAL_FILES})
+						Test Files{" "}
+						<span className="text-sage">{SUITE_STATS.files} passed</span> (
+						{SUITE_STATS.files})
 					</span>
 					<span className="text-ink-muted">
-						Tests <span className="text-sage">{TOTAL_TESTS} passed</span> (
-						{TOTAL_TESTS})
+						Tests <span className="text-sage">{SUITE_STATS.total} passed</span>{" "}
+						({SUITE_STATS.total})
 					</span>
 					<span className="text-ink-muted">Duration 3.17s</span>
 				</div>

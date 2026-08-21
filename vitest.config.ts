@@ -1,6 +1,7 @@
 import { fileURLToPath } from "node:url";
 import viteReact from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
+import StatsReporter from "./vitest-stats-reporter.ts";
 
 /**
  * Deliberately separate from `vite.config.ts`.
@@ -24,6 +25,12 @@ export default defineConfig({
 		globals: true,
 		setupFiles: ["./src/test/setup.ts"],
 		include: ["src/**/*.{test,spec}.{ts,tsx}"],
+		/**
+		 * `default` keeps the usual console output; the second one writes the
+		 * suite's own totals to `src/test/suite-stats.ts` so the landing page can
+		 * quote them without a human keeping the number in sync.
+		 */
+		reporters: ["default", new StatsReporter()],
 		coverage: {
 			provider: "v8",
 			reporter: ["text", "html"],

@@ -1,6 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
+import { BRAND, LOGO_SRC } from "@/lib/brand";
 import { Navbar } from "./Navbar";
 
 const USE_CASES = [
@@ -15,8 +16,8 @@ describe("Navbar", () => {
 	describe("branding", () => {
 		it("links the logo home and names the product for screen readers", () => {
 			render(<Navbar />);
-			const logo = screen.getByAltText("NextSaaS Kit");
-			expect(logo).toHaveAttribute("src", "/logo-trimmed.png");
+			const logo = screen.getByAltText(BRAND);
+			expect(logo).toHaveAttribute("src", LOGO_SRC);
 			expect(logo.closest("a")).toHaveAttribute("href", "/");
 		});
 	});

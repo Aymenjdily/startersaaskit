@@ -1,7 +1,7 @@
-# Landing Page Plan — NextSaaS Kit
+# Landing Page Plan — StarterSaaSKit
 
 Section-by-section blueprint. Design language comes from `reference-ui.md`; the narrative and copy
-below are ours, written for NextSaaS Kit.
+below are ours, written for StarterSaaSKit.
 
 **Product:** an open-source, fully-tested SaaS starter template on TanStack Start.
 **Promise:** skip the 2–4 weeks of auth/billing/testing/CI boilerplate; clone and customize in 60 seconds.

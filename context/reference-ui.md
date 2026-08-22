@@ -1,10 +1,10 @@
 # UI / Design Reference — deck.co
 
-Design language reference for the NextSaaS Kit landing page, derived from **https://deck.co**.
+Design language reference for the StarterSaaSKit landing page, derived from **https://deck.co**.
 
 All values below were extracted from the reference site's shipped stylesheet, so they are exact
 rather than approximated. We adopt the **design system** (palette, type scale, spacing, motion,
-section archetypes). All copy, product visuals, and section content are written for NextSaaS Kit —
+section archetypes). All copy, product visuals, and section content are written for StarterSaaSKit —
 we do not reuse the reference's wording.
 
 ---
@@ -173,7 +173,7 @@ Two distinct layers:
    that mimics the product doing something (typing, filling a code, connecting, encrypting). These
    are the centerpiece of the page and carry most of its personality.
 
-For our page, the equivalent of layer 2 should demonstrate **NextSaaS Kit** doing its thing —
+For our page, the equivalent of layer 2 should demonstrate **StarterSaaSKit** doing its thing —
 scaffolding a project, tests going green, CI passing, modules swapping.
 
 Respect `prefers-reduced-motion: reduce` on everything in both layers.
@@ -186,5 +186,5 @@ Respect `prefers-reduced-motion: reduce` on everything in both layers.
 section archetypes, the two-layer motion approach.
 
 **Originate:** all copy, all product imagery and diagrams, section ordering specific to our
-narrative, and the feature set itself. The page must describe NextSaaS Kit — an open-source,
+narrative, and the feature set itself. The page must describe StarterSaaSKit — an open-source,
 fully-tested SaaS starter template — in our own words.

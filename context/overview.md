@@ -1,4 +1,4 @@
-# NextSaaS Kit — Project Overview
+# StarterSaaSKit — Project Overview
 
 ## Vision
 The open-source, fully-tested SaaS starter template that developers choose when they want to ship fast without sacrificing quality.

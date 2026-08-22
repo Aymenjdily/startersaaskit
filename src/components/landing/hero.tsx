@@ -1,7 +1,6 @@
 import { buttonVariants } from "@/components/ui/button";
+import { REPO_URL as REPO_HREF } from "@/lib/brand";
 import { HeroPreview } from "./hero-preview";
-
-const REPO_HREF = "https://github.com/nextsaaskit/nextsaaskit";
 
 export function Hero() {
 	return (

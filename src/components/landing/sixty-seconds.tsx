@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Container } from "@/components/ui/container";
 import { FadeUp } from "@/components/ui/fade-up";
 import { Section, SectionHeading } from "@/components/ui/section";
+import { REPO_SLUG } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
 /**
@@ -130,7 +131,8 @@ function Transcript({ shown }: { shown: number }) {
 				<span className="size-2 rounded-full bg-white/10" />
 				<span className="size-2 rounded-full bg-white/10" />
 				<span className="size-2 rounded-full bg-white/10" />
-				<span className="ml-2 text-[11px] text-ink-muted">nextsaas-kit</span>
+				{/* The directory a clone of the repo actually leaves you in. */}
+				<span className="ml-2 text-[11px] text-ink-muted">{REPO_SLUG}</span>
 			</div>
 
 			{/* Fixed height so lines fill in without shoving the page around. */}

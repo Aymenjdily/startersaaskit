@@ -1,5 +1,12 @@
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
+import { USE_CASES } from "@/components/landing/use-cases";
+import {
+	BRAND,
+	README_URL as DOCS_HREF,
+	LOGO_SRC,
+	REPO_URL as REPO_HREF,
+} from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -7,16 +14,14 @@ const navLinks = [
 	{ label: "Testing", href: "#testing" },
 ];
 
-const useCases = [
-	{ label: "B2B SaaS", href: "#use-cases" },
-	{ label: "Internal tools", href: "#use-cases" },
-	{ label: "Side projects", href: "#use-cases" },
-	{ label: "Client work", href: "#use-cases" },
-	{ label: "AI apps", href: "#use-cases" },
-];
-
-const DOCS_HREF = "https://github.com/nextsaaskit/nextsaaskit#readme";
-const REPO_HREF = "https://github.com/nextsaaskit/nextsaaskit";
+/**
+ * Read off the section itself. Kept as its own copy, the menu named a use case
+ * the page had stopped making a case for.
+ */
+const useCases = USE_CASES.map(({ title }) => ({
+	label: title,
+	href: "#use-cases",
+}));
 
 export function Navbar() {
 	const [menuOpen, setMenuOpen] = useState(false);
@@ -27,11 +32,7 @@ export function Navbar() {
 			<nav className="fixed inset-x-0 top-0 z-[1000] flex h-[56px] items-center bg-base px-gutter transition-colors duration-300 md:h-[68px] md:px-6">
 				<div className="mx-auto flex w-full max-w-content items-center justify-between">
 					<a href="/" className="flex shrink-0 items-center">
-						<img
-							src="/logo-trimmed.png"
-							alt="NextSaaS Kit"
-							className="h-10 w-auto md:h-13"
-						/>
+						<img src={LOGO_SRC} alt={BRAND} className="h-10 w-auto md:h-13" />
 					</a>
 
 					<div className="hidden items-center gap-7 md:flex">

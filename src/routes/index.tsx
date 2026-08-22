@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Footer } from "@/components/Footer";
 import { AiOptimized } from "@/components/landing/ai-optimized";
+import { FinalCta } from "@/components/landing/final-cta";
 import { Hero } from "@/components/landing/hero";
 import { SixtySeconds } from "@/components/landing/sixty-seconds";
 import { Statement } from "@/components/landing/statement";
@@ -26,7 +28,9 @@ function Home() {
 				<AiOptimized />
 				<SixtySeconds />
 				<UseCases />
+				<FinalCta />
 			</main>
+			<Footer />
 		</>
 	);
 }

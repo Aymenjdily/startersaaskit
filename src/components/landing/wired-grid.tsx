@@ -147,7 +147,10 @@ export function WiredGrid() {
 	const { tiles, reduced } = useWiredTiles();
 
 	return (
-		<section className="relative mx-auto w-full max-w-[1348px] overflow-hidden pt-10 pb-[50px] sm:pt-15 sm:pb-20">
+		<section
+			className="relative mx-auto w-full max-w-[1348px] overflow-hidden pt-10 pb-[50px] sm:pt-15 sm:pb-20"
+			id="features"
+		>
 			{/* Edge fades so reflowing tiles dissolve into the page rather than clipping. */}
 			<div
 				aria-hidden="true"

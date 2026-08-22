@@ -162,7 +162,10 @@ function TestRunnerMock({ step }: { step: number }) {
 			<div className="rounded-xl border border-line bg-elevated p-4 font-mono text-[12px] sm:p-5 sm:text-[13px]">
 				<MockChrome label="vitest" />
 
-				<div className="divide-y divide-line/60">
+				{/* A suite's count and the file count are both "<n> passed", and they
+				    collide whenever the two numbers happen to match. These mark which
+				    is which so the spec can ask about one without catching the other. */}
+				<div className="divide-y divide-line/60" data-suites>
 					{SUITES.map((suite, i) => (
 						<div key={suite.name} className="flex items-center gap-3 py-2.5">
 							<StatusDot passed={suitePassed(step, i)} />
@@ -188,6 +191,7 @@ function TestRunnerMock({ step }: { step: number }) {
 							? "translate-y-0 opacity-100"
 							: "translate-y-1 opacity-0",
 					)}
+					data-summary
 				>
 					<span className="text-ink-muted">
 						Test Files{" "}
@@ -373,7 +377,7 @@ export function TestedByDefault() {
 	const step = useTestCycle();
 
 	return (
-		<Section tone="forest">
+		<Section id="testing" tone="forest">
 			<Container>
 				<FadeUp className="mb-12 grid items-end gap-6 md:mb-14 md:grid-cols-2 md:gap-10">
 					<h2 className="heading-tight text-h2 text-ink">Tested by default</h2>

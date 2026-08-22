@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { act } from "react";
 import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -13,8 +13,18 @@ import {
 	testsIn,
 } from "./tested-by-default";
 
-/** The label the runner mock shows for a suite, straight from the generator. */
-const passedLabel = (dir: string) => `${testsIn(dir)} passed`;
+/**
+ * A suite's row and the summary both read "<n> passed", so a bare text query
+ * finds two nodes the moment the two numbers agree — which they did, the run
+ * `src/lib` held 17 tests and the suite spanned 17 files. Every count below is
+ * asked for inside the region that owns it.
+ */
+const region = (name: "suites" | "summary") =>
+	within(document.querySelector(`[data-${name}]`) as HTMLElement);
+
+/** The count on a suite's own row, straight from the generator. */
+const suiteCount = (dir: string) =>
+	region("suites").getByText(`${testsIn(dir)} passed`);
 
 /** Timeline offsets, mirroring STEP_MS in the component. */
 const SUITE_PASSES_AT = [900, 1700, 2500];
@@ -68,8 +78,12 @@ describe("TestedByDefault", () => {
 
 			act(() => void vi.advanceTimersByTime(SUMMARY_AT));
 
-			expect(screen.getByText(`${SUITE_STATS.files} passed`)).toBeVisible();
-			expect(screen.getByText(`${SUITE_STATS.total} passed`)).toBeVisible();
+			expect(
+				region("summary").getByText(`${SUITE_STATS.files} passed`),
+			).toBeVisible();
+			expect(
+				region("summary").getByText(`${SUITE_STATS.total} passed`),
+			).toBeVisible();
 		});
 	});
 
@@ -137,8 +151,8 @@ describe("TestedByDefault", () => {
 			render(<TestedByDefault />);
 
 			for (const { dir } of SUITES) {
-				const label = passedLabel(dir);
-				expect(isHidden(screen.getByText(label))).toBe(true);
+				const label = suiteCount(dir);
+				expect(isHidden(label)).toBe(true);
 			}
 			for (const gate of screen.getAllByText("passed")) {
 				expect(isHidden(gate)).toBe(true);
@@ -152,27 +166,21 @@ describe("TestedByDefault", () => {
 			render(<TestedByDefault />);
 
 			act(() => void vi.advanceTimersByTime(SUITE_PASSES_AT[0]));
-			expect(isHidden(screen.getByText(passedLabel(SUITES[0].dir)))).toBe(
-				false,
-			);
-			expect(isHidden(screen.getByText(passedLabel(SUITES[1].dir)))).toBe(true);
+			expect(isHidden(suiteCount(SUITES[0].dir))).toBe(false);
+			expect(isHidden(suiteCount(SUITES[1].dir))).toBe(true);
 
 			act(
 				() =>
 					void vi.advanceTimersByTime(SUITE_PASSES_AT[1] - SUITE_PASSES_AT[0]),
 			);
-			expect(isHidden(screen.getByText(passedLabel(SUITES[1].dir)))).toBe(
-				false,
-			);
-			expect(isHidden(screen.getByText(passedLabel(SUITES[2].dir)))).toBe(true);
+			expect(isHidden(suiteCount(SUITES[1].dir))).toBe(false);
+			expect(isHidden(suiteCount(SUITES[2].dir))).toBe(true);
 
 			act(
 				() =>
 					void vi.advanceTimersByTime(SUITE_PASSES_AT[2] - SUITE_PASSES_AT[1]),
 			);
-			expect(isHidden(screen.getByText(passedLabel(SUITES[2].dir)))).toBe(
-				false,
-			);
+			expect(isHidden(suiteCount(SUITES[2].dir))).toBe(false);
 		});
 
 		it("keeps the gates queued until every suite has finished", () => {
@@ -189,9 +197,9 @@ describe("TestedByDefault", () => {
 			render(<TestedByDefault />);
 
 			act(() => void vi.advanceTimersByTime(SUMMARY_AT));
-			expect(isHidden(screen.getByText(`${SUITE_STATS.total} passed`))).toBe(
-				false,
-			);
+			expect(
+				isHidden(region("summary").getByText(`${SUITE_STATS.total} passed`)),
+			).toBe(false);
 
 			act(() => void vi.advanceTimersByTime(GATES_PASS_AT[3] - SUMMARY_AT));
 			for (const gate of screen.getAllByText("passed")) {
@@ -208,7 +216,7 @@ describe("TestedByDefault", () => {
 
 			act(() => void vi.advanceTimersByTime(RESET_AT + 100));
 
-			expect(isHidden(screen.getByText(passedLabel(SUITES[0].dir)))).toBe(true);
+			expect(isHidden(suiteCount(SUITES[0].dir))).toBe(true);
 			for (const gate of screen.getAllByText("passed")) {
 				expect(isHidden(gate)).toBe(true);
 			}
@@ -230,8 +238,8 @@ describe("TestedByDefault", () => {
 			render(<TestedByDefault />);
 
 			for (const { dir } of SUITES) {
-				const label = passedLabel(dir);
-				expect(isHidden(screen.getByText(label))).toBe(false);
+				const label = suiteCount(dir);
+				expect(isHidden(label)).toBe(false);
 			}
 			for (const gate of screen.getAllByText("passed")) {
 				expect(isHidden(gate)).toBe(false);

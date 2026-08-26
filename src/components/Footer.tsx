@@ -160,7 +160,7 @@ export function Footer() {
 						aria-hidden="true"
 						className="dot-pulse size-2 shrink-0 rounded-full bg-sage"
 					/>
-					{SUITE_STATS.total} tests passing
+					{SUITE_STATS.total} tests passing on this site
 				</p>
 			</div>
 		</footer>

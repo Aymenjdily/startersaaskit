@@ -22,7 +22,7 @@ export function TrustStrip() {
 			<Container>
 				<FadeUp className="flex flex-col items-center gap-8 md:gap-10">
 					<p className="text-center text-[13px] tracking-[-0.01em] text-ink-muted">
-						Built on tools you already trust
+						Pick the tools you already trust
 					</p>
 
 					{/* Gaps are tuned so all ten fit one line at >=1280px without an orphan row. */}

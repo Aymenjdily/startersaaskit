@@ -41,17 +41,33 @@ describe("Navbar", () => {
 			}
 		});
 
+		/**
+		 * `target="_blank"` without `rel="noreferrer"` leaks the referrer and hands
+		 * the opened page a live `window.opener` handle. Docs carries a decorative
+		 * ↗ inside a nested span, so match its name loosely.
+		 */
 		it("opens external destinations safely", () => {
 			render(<Navbar />);
-			// Docs carries a decorative ↗ inside a nested span, so match loosely.
-			for (const name of [/^Docs/, /^GitHub$/, /^Get started$/]) {
-				const link = screen.getByRole("link", { name });
-				expect(link).toHaveAttribute("target", "_blank");
-				expect(link).toHaveAttribute(
-					"rel",
-					expect.stringContaining("noreferrer"),
-				);
-				expect(link.getAttribute("href")).toMatch(/^https:\/\/github\.com\//);
+
+			const docs = screen.getByRole("link", { name: /^Docs/ });
+			expect(docs).toHaveAttribute("target", "_blank");
+			expect(docs).toHaveAttribute(
+				"rel",
+				expect.stringContaining("noreferrer"),
+			);
+		});
+
+		/**
+		 * Sign in and Get started are the product, not a repo. Opening either in a
+		 * new tab would break the flow the button is asking the reader to start.
+		 */
+		it("keeps the account actions in the same tab", () => {
+			render(<Navbar />);
+
+			for (const name of [/^Sign in$/, /^Get started$/]) {
+				const link = screen.getAllByRole("link", { name })[0];
+				expect(link).not.toHaveAttribute("target");
+				expect(link.getAttribute("href")).toMatch(/^\//);
 			}
 		});
 	});

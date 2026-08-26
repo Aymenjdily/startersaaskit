@@ -1,10 +1,9 @@
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { act } from "react";
 import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { setReducedMotion } from "@/test/setup";
+import { ANSWERS } from "./how-it-works";
 import { SEAMS, SwapAnything } from "./swap-anything";
 
 const CYCLE_MS = 4200;
@@ -12,22 +11,6 @@ const CYCLE_MS = 4200;
 const tabs = () => screen.getAllByRole("tab");
 const activeTab = () =>
 	tabs().find((t) => t.getAttribute("aria-selected") === "true");
-
-/** `wc -l` semantics: a trailing newline does not open a new line. */
-const countLines = (text: string) => {
-	const lines = text.split("\n");
-	if (lines.at(-1) === "") lines.pop();
-	return lines.length;
-};
-
-/** The `@theme { ... }` block, matching the `awk` range used to source the number. */
-const themeBlock = (css: string) => {
-	const start = css.split("\n").findIndex((l) => l.startsWith("@theme {"));
-	if (start === -1) return "";
-	const rest = css.split("\n").slice(start);
-	const end = rest.findIndex((l, i) => i > 0 && l.startsWith("}"));
-	return rest.slice(0, end + 1).join("\n");
-};
 
 describe("SwapAnything", () => {
 	beforeEach(() => {
@@ -39,63 +22,44 @@ describe("SwapAnything", () => {
 	});
 
 	/**
-	 * The section's entire persuasive weight rests on the line counts being real.
-	 * A number that silently drifts turns the strongest claim on the page into the
-	 * most embarrassing one, so the suite reads the actual files rather than
-	 * trusting a comment telling maintainers to remember.
+	 * This section used to print line counts measured against this repo's own
+	 * files, which was checkable because the pitch was "clone this one". The pitch
+	 * is now "we generate yours", so the only claim left worth pinning is that
+	 * every layer advertised as swappable is a layer the wizard actually asks
+	 * about. A tab here with no question behind it is the page selling a choice
+	 * nobody is ever offered.
 	 */
-	describe("the advertised line counts", () => {
-		it.each(
-			SEAMS.flatMap((s) => s.files.map((f) => ({ ...f, layer: s.layer }))),
-		)("$path really is $lines lines", ({ path, lines, scope }) => {
-			const source = readFileSync(resolve(process.cwd(), path), "utf8");
-			const measured = scope
-				? countLines(themeBlock(source))
-				: countLines(source);
+	describe("what it advertises as swappable", () => {
+		const asked = new Set(ANSWERS.map((a) => a.label));
 
-			expect(measured).toBe(lines);
+		it.each(SEAMS)("$layer is a question the wizard asks", ({ layer }) => {
+			expect(asked).toContain(layer);
 		});
 
-		it("scopes the count whenever it is not the whole file", () => {
-			for (const seam of SEAMS) {
-				for (const file of seam.files) {
-					const whole = countLines(
-						readFileSync(resolve(process.cwd(), file.path), "utf8"),
-					);
-					// If the printed number is not the file's real length, the UI has to
-					// say which part of it we mean.
-					if (whole !== file.lines) expect(file.scope).toBeTruthy();
-				}
+		it("offers at least two options per layer, or it is not a choice", () => {
+			for (const { options } of SEAMS) {
+				expect(options.length).toBeGreaterThan(1);
+				expect(new Set(options).size).toBe(options.length);
 			}
 		});
 
-		it("shows the summed total for the active seam", () => {
+		it("names every option of the active layer", () => {
 			render(<SwapAnything />);
-			const total = SEAMS[0].files.reduce((sum, f) => sum + f.lines, 0);
 
-			expect(screen.getByText(`${total} lines`)).toBeInTheDocument();
+			for (const option of SEAMS[0].options) {
+				expect(screen.getByText(option)).toBeInTheDocument();
+			}
 		});
-	});
 
-	/**
-	 * Nothing here may claim the template ships adapters, because it does not.
-	 */
-	describe("honesty of the pitch", () => {
-		it("states plainly that adapters are not included", () => {
+		it("counts the places it says the answer lands", () => {
 			render(<SwapAnything />);
 
 			expect(
-				screen.getByText(/no pre-built adapters are included/i),
+				screen.getByText(`${SEAMS[0].touches.length} places change`),
 			).toBeInTheDocument();
-		});
-
-		it("marks only the shipped provider, not the swap targets", () => {
-			render(<SwapAnything />);
-
-			expect(screen.getByText("Better Auth")).toBeInTheDocument();
-			for (const target of SEAMS[0].targets) {
-				expect(screen.getByText(target)).toBeInTheDocument();
-			}
+			expect(screen.getAllByText("generated")).toHaveLength(
+				SEAMS[0].touches.length,
+			);
 		});
 	});
 
@@ -139,12 +103,12 @@ describe("SwapAnything", () => {
 
 		it("swaps the file list when the seam changes", () => {
 			render(<SwapAnything />);
-			expect(screen.getByText("src/lib/auth.ts")).toBeInTheDocument();
+			expect(screen.getByText(SEAMS[0].touches[0])).toBeInTheDocument();
 
 			act(() => void vi.advanceTimersByTime(CYCLE_MS + 50));
 
-			expect(screen.queryByText("src/lib/auth.ts")).not.toBeInTheDocument();
-			expect(screen.getByText("src/db/index.ts")).toBeInTheDocument();
+			expect(screen.queryByText(SEAMS[0].touches[0])).not.toBeInTheDocument();
+			expect(screen.getByText(SEAMS[1].touches[0])).toBeInTheDocument();
 		});
 
 		it("holds still when the reader prefers reduced motion", () => {

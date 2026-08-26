@@ -1,3 +1,5 @@
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { BRAND_ICONS, type BrandIcon } from "./brand-icons";
 
@@ -32,5 +34,31 @@ describe("BRAND_ICONS", () => {
 	it("has no duplicate glyphs under different names", () => {
 		const paths = entries.map(([, path]) => path);
 		expect(new Set(paths).size).toBe(paths.length);
+	});
+
+	/**
+	 * The checks above catch a *malformed* copy. This one catches a copy that is
+	 * well-formed but wrong — Google's G filed under `github`, or a path that
+	 * drifted when the package was upgraded. Any key whose name matches a file
+	 * simple-icons ships is compared to that file; keys that do not (`neon`,
+	 * `betterauth` at the time of writing) are skipped rather than asserted
+	 * against nothing.
+	 */
+	describe("against the installed simple-icons", () => {
+		const iconsDir = resolve(process.cwd(), "node_modules/simple-icons/icons");
+
+		const upstream = entries.filter(([icon]) =>
+			existsSync(resolve(iconsDir, `${icon}.svg`)),
+		);
+
+		it("finds a file for at least half the glyphs", () => {
+			expect(upstream.length).toBeGreaterThanOrEqual(entries.length / 2);
+		});
+
+		it.each(upstream)("%s matches the shipped mark", (icon, path) => {
+			const svg = readFileSync(resolve(iconsDir, `${icon}.svg`), "utf8");
+
+			expect(path).toBe(svg.match(/ d="([^"]+)"/)?.[1]);
+		});
 	});
 });

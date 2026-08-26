@@ -1,6 +1,7 @@
 import { buttonVariants } from "@/components/ui/button";
 import { FadeUp } from "@/components/ui/fade-up";
-import { README_URL, REPO_URL } from "@/lib/brand";
+import { SIGN_UP_HREF } from "@/lib/brand";
+import { QUESTION_COUNT_WORD } from "@/lib/starter-questions";
 
 /**
  * Section 11 — `deck-cta`: one 640px column, centred, on flat black.
@@ -34,28 +35,25 @@ export function FinalCta() {
 						Start with the tests already written
 					</h2>
 					<p className="mb-7 text-[clamp(15px,1.5vw,18px)] leading-[1.5] text-ink-soft">
-						Clone it and the suite is green before you have touched anything.
+						Answer {QUESTION_COUNT_WORD} questions. The repo lands in your
+						GitHub with the suite already green. Free while in beta.
 					</p>
 
 					<div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
 						<a
 							className={`group ${buttonVariants({ variant: "primary" })}`}
-							href={REPO_URL}
-							rel="noreferrer"
-							target="_blank"
+							href={SIGN_UP_HREF}
 						>
-							Get started
+							Generate your starter
 							<span className="transition-transform duration-300 group-hover:translate-x-[3px]">
 								→
 							</span>
 						</a>
 						<a
 							className={buttonVariants({ variant: "secondary" })}
-							href={README_URL}
-							rel="noreferrer"
-							target="_blank"
+							href="#how-it-works"
 						>
-							Read the README
+							See how it works
 						</a>
 					</div>
 				</FadeUp>

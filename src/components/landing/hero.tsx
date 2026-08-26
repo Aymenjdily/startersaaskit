@@ -1,5 +1,5 @@
 import { buttonVariants } from "@/components/ui/button";
-import { REPO_URL as REPO_HREF } from "@/lib/brand";
+import { SIGN_UP_HREF } from "@/lib/brand";
 import { HeroPreview } from "./hero-preview";
 
 export function Hero() {
@@ -10,14 +10,14 @@ export function Hero() {
 					className="hero-in mb-4 text-[14px] font-medium text-white/70"
 					style={{ animationDelay: "0s" }}
 				>
-					Open source · MIT licensed
+					Free while in beta
 				</p>
 
 				<h1
 					className="hero-in mb-9 max-w-[900px] text-hero heading-tight text-ink"
 					style={{ animationDelay: "0.05s" }}
 				>
-					Skip the boilerplate. Keep the tests. Ship the product.
+					Skip the boilerplate. Keep your stack. Ship the product.
 				</h1>
 
 				<div className="grid items-start gap-6 md:grid-cols-[2fr_1fr] md:gap-10">
@@ -26,9 +26,10 @@ export function Hero() {
 						data-subtitle
 						style={{ animationDelay: "0.2s" }}
 					>
-						An open-source SaaS starter on TanStack Start — typed routing, auth
-						and a Postgres database already wired together, with a test suite
-						that proves it.
+						Answer a few questions — framework, components, database, ORM, auth,
+						billing, email, landing page, package manager — and a repo lands in
+						your GitHub with all of it wired together and the test suite already
+						passing.
 					</p>
 
 					<div
@@ -36,23 +37,19 @@ export function Hero() {
 						style={{ animationDelay: "0.35s" }}
 					>
 						<a
-							href={REPO_HREF}
-							target="_blank"
-							rel="noreferrer"
+							href={SIGN_UP_HREF}
 							className={`group ${buttonVariants({ variant: "primary" })}`}
 						>
-							Get started
+							Generate your starter
 							<span className="transition-transform duration-300 group-hover:translate-x-[3px]">
 								→
 							</span>
 						</a>
 						<a
-							href={REPO_HREF}
-							target="_blank"
-							rel="noreferrer"
+							href="#how-it-works"
 							className={buttonVariants({ variant: "secondary" })}
 						>
-							View on GitHub
+							See how it works
 						</a>
 					</div>
 				</div>

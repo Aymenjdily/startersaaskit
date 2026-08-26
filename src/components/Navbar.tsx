@@ -5,7 +5,8 @@ import {
 	BRAND,
 	README_URL as DOCS_HREF,
 	LOGO_SRC,
-	REPO_URL as REPO_HREF,
+	SIGN_IN_HREF,
+	SIGN_UP_HREF,
 } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
@@ -80,19 +81,16 @@ export function Navbar() {
 
 						<span className="h-4 w-px bg-white/20" />
 
+						{/* Both go into the product, so neither opens a new tab. */}
 						<div className="flex items-center gap-4">
 							<a
-								href={REPO_HREF}
-								target="_blank"
-								rel="noreferrer"
+								href={SIGN_IN_HREF}
 								className="text-[14px] text-white/70 transition-colors duration-300 hover:text-ink"
 							>
-								GitHub
+								Sign in
 							</a>
 							<a
-								href={REPO_HREF}
-								target="_blank"
-								rel="noreferrer"
+								href={SIGN_UP_HREF}
 								className="rounded-[4px] bg-brand px-3 py-2 text-[14px] font-medium text-ink-inverse transition-opacity duration-300 hover:opacity-85"
 							>
 								Get started
@@ -182,17 +180,13 @@ export function Navbar() {
 						Docs
 					</a>
 					<a
-						href={REPO_HREF}
-						target="_blank"
-						rel="noreferrer"
+						href={SIGN_IN_HREF}
 						className="border-b border-white/6 py-3.5 text-[18px] text-white/70 transition-colors hover:text-ink"
 					>
-						GitHub
+						Sign in
 					</a>
 					<a
-						href={REPO_HREF}
-						target="_blank"
-						rel="noreferrer"
+						href={SIGN_UP_HREF}
 						className="mt-5 rounded-full bg-brand px-6 py-3 text-center text-[16px] font-medium text-ink-inverse"
 					>
 						Get started

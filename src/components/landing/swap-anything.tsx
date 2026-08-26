@@ -7,62 +7,64 @@ import { cn } from "@/lib/utils";
 /**
  * Section 07 — modularity.
  *
- * The claim is deliberately narrow, because the broad version ("swap providers
- * with no work") would be false: this repo ships no pre-built adapters. What it
- * genuinely has is a very small seam per third-party service — `auth.ts` is 9
- * lines, `db/index.ts` is 5 — so the surface you rewrite to move providers is
- * one readable file rather than a grep across the app. The panel states the
- * line counts, and the footnote says outright that adapters aren't included.
+ * The claim is that a choice is a choice, not a fork. Each layer below is a
+ * question the wizard asks, and the answer swings an adapter rather than a
+ * rewrite: the files under `touches` are regenerated, and everything above them
+ * is shared by every combination we ship.
  *
- * Line counts below are real. If these files grow, update them.
+ * Deliberately no line counts. They used to be here and were checked against
+ * this repo's own files, which was honest when the pitch was "clone this". The
+ * pitch is now "we generate yours", and a number measured here would say
+ * nothing true about the repo you receive. `touches` names paths, which is an
+ * architectural commitment we can keep, rather than a count we would be
+ * guessing at.
  */
 
 type Seam = {
-	/** Tab label. */
+	/** Tab label. Must be a question the wizard actually asks — see `ANSWERS`. */
 	layer: string;
-	/** What the repo ships with today. */
-	shipped: string;
-	/** Plausible replacements. Framed as targets, never as included adapters. */
-	targets: string[];
-	/**
-	 * `scope` narrows the count to part of a file. `styles.css` is 331 lines
-	 * overall; only its `@theme` block is the seam, and printing "51 lines"
-	 * against the bare filename would read as a claim about the whole file.
-	 */
-	files: { path: string; lines: number; scope?: string }[];
+	/** What the wizard offers for this layer. Never more than we will ship. */
+	options: string[];
+	/** Where the answer lands in the repo you receive. */
+	touches: string[];
 	/** Why the seam holds — a concrete mechanism, not a slogan. */
 	note: string;
 };
 
-/** Exported so `swap-anything.test.tsx` can check every count against the real file. */
+/**
+ * Exported so the spec can hold these layers against the wizard's questions.
+ * If the two ever disagree, the page is advertising a choice nobody is offered.
+ */
 export const SEAMS: Seam[] = [
 	{
-		layer: "Authentication",
-		shipped: "Better Auth",
-		targets: ["Clerk", "Auth.js", "Lucia"],
-		files: [
-			{ path: "src/lib/auth.ts", lines: 9 },
-			{ path: "src/lib/auth-client.ts", lines: 3 },
-			{ path: "src/routes/api/auth/$.ts", lines: 11 },
-		],
-		note: "The provider is named in three files: server config, browser client, and the catch-all route handler. Nothing else imports it.",
+		layer: "Framework",
+		options: ["Next.js", "TanStack Start", "React + Vite"],
+		touches: ["app entry", "routing", "server handlers"],
+		note: "The widest choice on the list, and the reason the rest are cheap: routing and rendering live in a framework adapter, so nothing above them has to know which one you picked. React + Vite is the one that changes what else is possible — a browser-only app has nowhere to keep a secret, so the questions after it narrow to what can run without a server.",
 	},
 	{
 		layer: "Database",
-		shipped: "Postgres + Drizzle",
-		targets: ["Neon", "PlanetScale", "Supabase"],
-		files: [
-			{ path: "src/db/index.ts", lines: 5 },
-			{ path: "src/db/schema.ts", lines: 7 },
-		],
-		note: "Changing host means changing one Drizzle driver import. The query API is identical across drivers, so call sites never move.",
+		options: ["Neon", "Supabase", "PlanetScale", "Turso", "MongoDB"],
+		touches: ["db/client", "connection env"],
+		note: "Moving between the SQL hosts is one driver module and a connection string, so call sites never move. MongoDB is the honest exception — a document store is a different shape, and the next question narrows to match.",
 	},
 	{
-		layer: "Design system",
-		shipped: "Tailwind v4 tokens",
-		targets: ["Any palette", "Any type scale"],
-		files: [{ path: "src/styles.css", lines: 51, scope: "@theme block" }],
-		note: "Colour, type, and spacing are declared once in a single @theme block. Components reference tokens, never raw hex.",
+		layer: "ORM",
+		options: ["Drizzle", "Prisma", "Mongoose", "Supabase client"],
+		touches: ["db/schema", "migrations", "db/client"],
+		note: "Drizzle is SQL-only and Mongoose is MongoDB-only; Prisma spans both. You are shown whichever of the three your database can actually work with, not all three and a footnote. All three open a connection with a credential, so a browser-only app is offered the Supabase client instead — the same data, reached over HTTP with row level security doing the work.",
+	},
+	{
+		layer: "Auth",
+		options: ["Better Auth", "Supabase Auth", "Neon Auth", "Clerk", "Auth0"],
+		touches: ["auth config", "auth client", "route handler"],
+		note: "Supabase Auth and Neon Auth are parts of their host, so they appear only when you have chosen it — a pairing that cannot work is never offered in the first place. The rest hold their own users and work with any database.",
+	},
+	{
+		layer: "Email",
+		options: ["Resend", "Mailgun", "Brevo", "Not yet"],
+		touches: ["lib/email", "provider key"],
+		note: "One module, `src/lib/email.ts`, and one function — `sendEmail`. The rest of the app asks for an email to be sent and never learns which service sent it, so changing provider is one file and one key.",
 	},
 ];
 
@@ -98,57 +100,31 @@ function useSeamCycle(count: number) {
 	};
 }
 
-function Chip({
-	children,
-	tone,
-}: {
-	children: React.ReactNode;
-	tone: "shipped" | "target";
-}) {
+function Chip({ children }: { children: React.ReactNode }) {
 	return (
-		<span
-			className={cn(
-				"inline-flex items-center rounded-[6px] border px-2.5 py-1 font-mono text-[12px] whitespace-nowrap",
-				tone === "shipped"
-					? "border-brand/40 bg-brand-dim text-brand"
-					: "border-line-bright bg-white/3 text-ink-muted",
-			)}
-		>
+		<span className="inline-flex items-center rounded-[6px] border border-brand/40 bg-brand-dim px-2.5 py-1 font-mono text-[12px] whitespace-nowrap text-brand">
 			{children}
 		</span>
 	);
 }
 
 function SeamPanel({ seam }: { seam: Seam }) {
-	const total = seam.files.reduce((sum, f) => sum + f.lines, 0);
-
 	return (
 		<div className="flex flex-col gap-5">
 			<div className="flex flex-wrap items-center gap-2">
-				<Chip tone="shipped">{seam.shipped}</Chip>
-				<span aria-hidden="true" className="text-ink-muted text-[13px]">
-					&rarr;
-				</span>
-				{seam.targets.map((t) => (
-					<Chip key={t} tone="target">
-						{t}
-					</Chip>
+				{seam.options.map((option) => (
+					<Chip key={option}>{option}</Chip>
 				))}
 			</div>
 
 			<ul className="flex flex-col gap-px overflow-hidden rounded-[10px] border border-line bg-line">
-				{seam.files.map((file) => (
+				{seam.touches.map((path) => (
 					<li
-						key={file.path}
+						key={path}
 						className="flex items-center justify-between gap-4 bg-elevated px-3.5 py-2.5 font-mono text-[12px] sm:text-[13px]"
 					>
-						<span className="truncate text-ink-soft">
-							{file.path}
-							{file.scope && (
-								<span className="text-ink-muted"> {file.scope}</span>
-							)}
-						</span>
-						<span className="shrink-0 text-sage">{file.lines} lines</span>
+						<span className="truncate text-ink-soft">{path}</span>
+						<span className="shrink-0 text-sage">generated</span>
 					</li>
 				))}
 			</ul>
@@ -156,8 +132,10 @@ function SeamPanel({ seam }: { seam: Seam }) {
 			<p className="text-[14px] leading-[1.6] text-ink-muted">{seam.note}</p>
 
 			<p className="border-line border-t pt-4 font-mono text-[12px] text-ink-muted">
-				<span className="text-ink-soft">{total} lines</span> to rewrite &middot;
-				routes, components, and business logic untouched
+				<span className="text-ink-soft">
+					{seam.touches.length} places change
+				</span>{" "}
+				&middot; routes, components, and business logic untouched
 			</p>
 		</div>
 	);
@@ -175,13 +153,13 @@ export function SwapAnything() {
 						<SectionHeading
 							eyebrow="Modularity"
 							title="Swap anything"
-							description="Every third-party service sits behind a file you can read in one sitting. Moving off Better Auth or Postgres means rewriting that file — not refactoring your application."
+							description="Every question the wizard asks maps to an adapter, not a fork. Picking Prisma over Drizzle changes the files below and nothing above them."
 						/>
 						<p className="mt-6 max-w-[520px] text-[14px] leading-[1.6] text-ink-muted">
-							No pre-built adapters are included, and that is the honest version
-							of this claim. What the template gives you is a small, named seam
-							per service, so the cost of changing your mind is bounded and you
-							can see exactly where it lands.
+							This is also why the list can grow. A new framework or a new
+							database is another adapter behind the same seam, so adding one
+							does not multiply the templates we maintain — and every
+							combination still has to go green in CI before it is offered.
 						</p>
 					</FadeUp>
 

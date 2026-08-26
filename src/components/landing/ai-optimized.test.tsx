@@ -1,11 +1,11 @@
-import { existsSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { render, screen } from "@testing-library/react";
 import { act } from "react";
 import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { setReducedMotion } from "@/test/setup";
-import { AiOptimized, LOOKUPS, TS_FLAGS } from "./ai-optimized";
+import { AiOptimized, LOOKUPS, TREE, TS_FLAGS } from "./ai-optimized";
 
 const CYCLE_MS = 3800;
 
@@ -19,13 +19,19 @@ describe("AiOptimized", () => {
 	});
 
 	/**
-	 * The section claims an assistant can find things because the structure is
-	 * predictable. A lookup pointing at a file that no longer exists would be
-	 * precisely the failure being denied, so the paths are checked against disk.
+	 * These paths used to be checked against disk, which worked while the tree
+	 * described this repo. It now describes a generated starter, so disk says
+	 * nothing. The claim that survives is internal and is the one that actually
+	 * breaks the UI: a lookup whose path is not a node in the tree highlights
+	 * nothing, and the panel silently answers a question by pointing at empty air.
 	 */
 	describe("the paths it points at", () => {
-		it.each(LOOKUPS)("$ask resolves to a file that exists", ({ path }) => {
-			expect(existsSync(resolve(process.cwd(), path))).toBe(true);
+		const nodes = new Set(
+			TREE.map((n) => n.path).filter((p): p is string => Boolean(p)),
+		);
+
+		it.each(LOOKUPS)("$ask lands on a node in the tree", ({ path }) => {
+			expect(nodes).toContain(path);
 		});
 
 		it("never points twice at the same file", () => {
@@ -33,23 +39,38 @@ describe("AiOptimized", () => {
 			expect(new Set(paths).size).toBe(paths.length);
 		});
 
+		/** The label a path highlights, which is what the reader actually sees. */
+		const leafOf = (path: string) =>
+			TREE.find((n) => n.path === path)?.label as string;
+
 		it("highlights the answer in the tree", () => {
 			render(<AiOptimized />);
 
-			const leaf = screen.getByText("index.tsx");
-			expect(leaf.className).toContain("text-brand");
+			expect(screen.getByText(leafOf(LOOKUPS[0].path)).className).toContain(
+				"text-brand",
+			);
 		});
 
 		it("moves the highlight when the question changes", () => {
 			render(<AiOptimized />);
-			expect(screen.getByText("index.tsx").className).toContain("text-brand");
+			expect(screen.getByText(leafOf(LOOKUPS[0].path)).className).toContain(
+				"text-brand",
+			);
 
 			act(() => void vi.advanceTimersByTime(CYCLE_MS + 50));
 
-			expect(screen.getByText("index.tsx").className).not.toContain(
+			expect(screen.getByText(leafOf(LOOKUPS[0].path)).className).not.toContain(
 				"text-brand",
 			);
-			expect(screen.getByText("auth.ts").className).toContain("text-brand");
+			expect(screen.getByText(leafOf(LOOKUPS[1].path)).className).toContain(
+				"text-brand",
+			);
+		});
+
+		/** Two nodes sharing a label would make the highlight ambiguous on screen. */
+		it("labels every node uniquely", () => {
+			const labels = TREE.map((n) => n.label);
+			expect(new Set(labels).size).toBe(labels.length);
 		});
 	});
 

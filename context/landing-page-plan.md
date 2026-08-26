@@ -1,113 +1,155 @@
 # Landing Page Plan — StarterSaaSKit
 
-Section-by-section blueprint. Design language comes from `reference-ui.md`; the narrative and copy
-below are ours, written for StarterSaaSKit.
+Section-by-section blueprint for the storefront. Design language comes from `reference-ui.md`; the
+product model it sells is in `product-model.md`. The narrative and copy below are ours.
 
-**Product:** an open-source, fully-tested SaaS starter template on TanStack Start.
-**Promise:** skip the 2–4 weeks of auth/billing/testing/CI boilerplate; clone and customize in 60 seconds.
+**Product:** a SaaS that *generates* a customized starter repo and delivers it to your GitHub.
+Not a template you clone. See `product-model.md` — the distinction drives every line of copy here.
+
+**Promise:** answer six questions, get a repo with your stack wired together and the suite already
+green.
+
 **Audience:** developers and small teams starting a new SaaS.
 
-**Narrative arc:** the cost of boilerplate → what you get instead → proof it's real → how fast it is → start now.
+**Narrative arc:** you should not have to pick someone else's stack → here is what arrives wired →
+here is the proof it is tested → here is how little of it is locked in → here is how it works →
+start now.
+
+### Copy rules this page lives by
+
+- **Never say "clone this repo."** Nothing on the page asks the reader to take *this* codebase.
+- **Never privilege a framework.** This storefront happens to be TanStack Start; that is an
+  implementation detail and appears nowhere as a selling point. Next.js and TanStack Start are
+  named as peers everywhere, in that order as often as not.
+- **Never print a number the repo cannot back.** Where a count is shown it is derived from the same
+  exported data the tests read, so the page cannot drift from itself. Prefer deleting an
+  unverifiable number over hand-syncing it.
+- The tone is "your stack, already assembled" — not "our stack, take it."
 
 ---
 
 ## Section order
 
-| #  | Section        | Archetype             | Job                                              |
-| -- | -------------- | --------------------- | ------------------------------------------------ |
-| 01 | Navbar         | fixed nav             | Wayfinding + persistent CTA                      |
-| 02 | Hero           | `hero`                | State the promise, one primary CTA                |
-| 03 | Trust strip    | `trusted-section`     | Show the stack it's built on                      |
-| 04 | Statement      | `marquee-statement`   | Palate cleanser, reinforce the promise            |
-| 05 | What's wired   | `agent-grid-section`  | The modules you'd otherwise build by hand         |
-| 06 | Tested by default | `auth-section`     | Deep-dive: the testing story, animated            |
-| 07 | Swap anything  | `split-section`       | Deep-dive: modularity                             |
-| 08 | AI-optimized   | `split-section reverse` | Deep-dive: structured for AI assistants        |
-| 09 | 60 seconds     | `cu-section`          | Deep-dive: clone → configure → deploy             |
-| 10 | Use cases      | `uc-home-section`     | Breadth — what people ship with it                |
-| 11 | Final CTA      | `split-section`       | Convert                                           |
-| 12 | Footer         | footer                | Links, repo, license                              |
+| #  | Section           | Archetype               | Job                                                  |
+| -- | ----------------- | ----------------------- | ---------------------------------------------------- |
+| 01 | Navbar            | fixed nav               | Wayfinding + persistent Sign in / Get started          |
+| 02 | Hero              | `hero`                  | State the promise, one primary CTA                     |
+| 03 | Trust strip       | `trusted-section`       | The stack you can *pick from*, not the stack we chose  |
+| 04 | Statement         | `marquee-statement`     | Palate cleanser, reinforce the promise                 |
+| 05 | What's wired      | `agent-grid-section`    | The catalogue a generated repo draws from              |
+| 06 | Tested by default | `auth-section`          | Deep-dive: the CI matrix, animated                     |
+| 07 | Swap anything     | `split-section`         | Deep-dive: the seams the wizard actually asks about    |
+| 08 | AI reads it correctly | `split-section reverse` | Deep-dive: structured for AI assistants            |
+| 09 | How it works      | `cu-section`            | Deep-dive: the wizard, six answers → GitHub            |
+| 10 | Use cases         | `uc-home-section`       | Breadth — what people generate it for                  |
+| 11 | Final CTA         | `split-section`         | Convert                                                |
+| 12 | Footer            | footer                  | Links, docs, legal                                     |
+
+Rendered in this order by `src/routes/index.tsx`.
 
 ---
 
 ## 02 — Hero
 
-- **H1** (`text-hero`, weight 500, tracking `-0.03em`, `max-w-[900px]`): lead with the outcome —
-  shipping a production SaaS, not assembling one. Three short clauses works well with this type
-  treatment.
-- **Subtitle** (`text-body-lg`, `max-w-[600px]`, `rgba(255,255,255,0.8)`): one sentence naming the
-  concrete inclusions — auth, billing, tests, CI.
-- **CTAs:** primary = butter background, dark text (`Get started` / copy the clone command).
-  Secondary = ghost, `ink-soft` (`View on GitHub`).
-- **Visual:** terminal / editor mock with a soft glow behind it (`hero-image-glow` equivalent).
-  A scaffold command running and tests going green is the strongest single image for this product.
-- Padding: ~`200px` top to clear the fixed navbar.
+- **Eyebrow:** `Free while in beta` — the actual commercial position, not a license badge.
+- **H1:** *Skip the boilerplate. Keep your stack. Ship the product.* Three clauses; "keep your
+  stack" is load-bearing, because it is what separates this from a template.
+- **Subtitle:** names the six questions and the outcome — *"Answer a few questions — framework,
+  database, ORM, auth, billing — and a repo lands in your GitHub with all of it wired together and
+  the test suite already passing."*
+- **CTAs:** primary `Generate your starter` → sign-up. Secondary ghost → `#how-it-works`. Both
+  same-tab: these are the product, not a repo, so a new tab would break the flow.
+- **Visual:** `hero-preview.tsx` — the wizard's answers resolving into a file tree.
 
 ## 03 — Trust strip
 
-Low-emphasis logo row of the stack: TanStack Start, Neon, Drizzle, Better Auth, Vercel, Biome.
-Muted (`ink-muted`), small, no card chrome. Frames it as "built on tools you already trust."
+Muted logo row, labelled **"Pick the tools you already trust."** The label is the section's whole
+job: this is a *menu*, not a stack declaration. Deliberately carries both frameworks (TanStack
+Start, Next.js) and both ORMs (Drizzle, Prisma) side by side, since no single generated repo
+contains all ten.
 
 ## 04 — Statement
 
 Static centred `h2` on the page background — **not** a scrolling marquee, despite the reference's
-`marquee-statement` class name. Three short parallel clauses, broken onto separate lines below 768px.
-Purely rhythmic — no CTA, no detail. Verified against the reference's CSS; see `reference-ui.md`.
+`marquee-statement` class name. **"Any stack. Any provider. Already wired."** Three parallel
+clauses, broken onto separate lines below 768px. Verified against the reference's CSS; see
+`reference-ui.md`.
 
 ## 05 — What's wired
 
-Tile grid of the modules included out of the box: auth, billing/subscriptions, database + migrations,
-email, CI pipeline, testing, rate limiting, env validation. Tiles animate in/out on a loop
-(`agTileIn` / `agTileOut` equivalent). Each tile = icon + label + one-line description.
+Looping tile grid (`agTileIn` / `agTileOut`), no heading — the tiles are the statement. `TASKS` is
+the **catalogue a generated starter draws from**, not an inventory of this repo: Next.js beside
+TanStack Start, Prisma beside Drizzle. The grid is the menu; the wizard is what picks from it.
+
+Supabase and Stripe belong here but have no brand glyph yet, so they stay out rather than borrow
+another mark.
 
 ## 06 — Tested by default
 
-The strongest differentiator, so it gets the most elaborate treatment. Header + animated mock of a
-test suite: unit → component → E2E, going green in sequence, then CI passing. Supporting points:
-every feature ships with tests; CI gates every merge; coverage is visible from day one.
+The strongest differentiator, so the most elaborate treatment. Animated CI run: every
+framework × stack **combination** goes green in sequence, then the summary count, then the quality
+gates, then the banner.
+
+`COMBINATIONS` and `SPEC_PAIRS` are exported from here and **imported by section 10**, so the two
+sections cannot tell different stories. The summary count is asserted by reading it back out of the
+rendered DOM — comparing it to `COMBINATIONS.length` would be vacuous, since that is what renders it.
+
+Pillars: tests ship with the feature · strict by default · coverage from day one.
 
 ## 07 — Swap anything
 
-`split-section`. Modularity: change auth provider, database, billing, or UI library without
-rewriting business logic. Visual: a module block swapping its label/logo while the surrounding
-architecture stays fixed.
+`split-section`. `SEAMS` are the four layers the wizard genuinely asks about — Framework, Database,
+ORM, Auth — each with its options and the files the answer lands in. A test asserts every
+`SEAMS.layer` is an `ANSWERS.label` from section 09; a tab with no question behind it would be the
+page selling a choice nobody is ever offered.
 
-## 08 — AI-optimized
+The panel counts *places that change* rather than lines of code. Line counts were retired with the
+"clone this one" pitch — they measured this repo, which is no longer what is being sold.
 
-`split-section reverse`. Codebase structured so AI assistants understand it immediately —
-predictable layout, typed boundaries, documented modules, context files. Visual: an assistant
-correctly navigating the file tree.
+## 08 — AI reads it correctly
 
-## 09 — 60 seconds
+`split-section reverse`. Eyebrow "Built for assistants". A generated repo's file tree with an
+assistant resolving questions to files. `TREE` is deliberately framework-neutral (`db/`, `lib/`,
+no `app/` or `routes/`).
 
-Three numbered steps: clone → add env vars → push. Wide visual, ideally a real terminal transcript.
-Concrete and literal; this section answers "how much work is this actually."
+Every `LOOKUPS.path` must be a node in `TREE`, and every node label must be unique — otherwise the
+highlight points at empty air or lands ambiguously. `TS_FLAGS` is still checked against this repo's
+real `tsconfig.json`, because that claim is still about a file we ship.
+
+Does **not** claim CLAUDE.md or a rules file; a test enforces the absence until one exists.
+
+## 09 — How it works
+
+The wizard demo. Eyebrow "How it works", title **"Six answers and it is in your GitHub."**
+`ANSWERS` are the canonical six: Framework · Database · ORM · Auth · Billing · Project. This is the
+page's source of truth for what the wizard asks — section 07 imports from it.
 
 ## 10 — Use cases
 
-Grid of short cards: B2B SaaS, internal tools, side projects, client work, AI apps. Two lines each,
-no imagery. Establishes breadth cheaply.
+Auto-rotating name list (stops on click or focus, holds still under reduced motion) with a screen
+per case: B2B SaaS, Internal tools, Side projects, Client work, AI apps. Heading: **"Your starting
+point, whatever you are building."**
+
+The screens picture a *generated* repo, so disk proves nothing about them. What replaces the old
+fs-backed guards is agreement with section 06: the matrix and the spec pairs are imported, so a
+screen that quietly stopped rendering them would leave two parts of the page contradicting each
+other. `DELIVERY_STEPS` ends in the reader's GitHub, and a test pins that last step.
 
 ## 11 — Final CTA
 
-Restate the promise in one line, primary butter CTA, and the clone command in a copyable code block.
+**"Start with the tests already written."** Sub: *"Answer six questions. The repo lands in your
+GitHub with the suite already green. Free while in beta."* Primary → sign-up, secondary →
+`#how-it-works`. No clone command — there is nothing to clone.
 
 ## 12 — Footer
 
-Multi-column: Product, Docs, Community, Legal. Repo link, license, social. Muted throughout.
+Five columns: Product, Repository, Stack, Tooling, and "Point your agent at it". Its numbers and
+package names are still measured against real files in this repo, so unlike the sections above it
+kept its fs-backed guards. The status line names the repo it counts ("on this site") because an
+unqualified test count reads as a promise about the generated starter.
 
----
-
-## Build order
-
-Ship top-to-bottom so the page is always viewable end-to-end:
-
-1. Design tokens + UI primitives *(done — see `src/styles.css`, `src/components/ui/`)*
-2. Navbar + Hero + Footer — establishes the frame
-3. Trust strip + Statement — cheap, high visual payoff
-4. Feature deep-dives (05–09), each with its own animated visual
-5. Use cases + Final CTA
-6. Responsive pass, then `prefers-reduced-motion` pass
+There is no Legal column and no `/terms` or `/privacy` route, so nothing else on the site may link
+to one.
 
 ---
 
@@ -118,4 +160,6 @@ Ship top-to-bottom so the page is always viewable end-to-end:
   it's overused.
 - Alternate `base` and `forest` section backgrounds; alternate split-section sides.
 - Every section gets `fade-up` on scroll; every looping animation respects reduced motion.
+- Every animated section must render identically across two server renders — state starts at 0 and
+  all motion lives in `useEffect`, or hydration mismatches.
 - Copy stays ours. Match the reference's *structure and restraint*, not its wording.

@@ -117,6 +117,18 @@
   --color-line: #27331f;
   --color-line-bright: #39482a;
 
+  /*
+   * Console surfaces. Neutral rather than the green-tinted `line`/`forest`
+   * above, which belong to the landing page: an application chrome that picks
+   * up a hue reads as themed, and this one wants to disappear.
+   *
+   * Three planes, darkest outward: the rail sits behind, the working area in
+   * front of it, and panels on top of that.
+   */
+  --color-surface-sunken: #0a0c0b;
+  --color-surface: #101413;
+  --color-surface-raised: #161b19;
+
   /* accent — our brand orange, sampled from public/logo.png */
   --color-brand: #fd6101;
   --color-brand-dim: rgba(253, 97, 1, 0.1);
@@ -159,6 +171,16 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+  }
+
+  /*
+   * There is no light mode, and saying so is what makes the browser's own
+   * widgets match. Without it a `<select>`'s popup is drawn light while the
+   * closed control is dark, so the options — which inherit our near-white ink
+   * — arrive white on white. Also darkens scrollbars and focus rings.
+   */
+  :root {
+    color-scheme: dark;
   }
 
   body {
@@ -215,6 +237,39 @@
   border-radius: var(--radius-lg);
   background: var(--color-elevated);
   color: var(--color-ink);
+}
+
+/*
+ * Skeletons.
+ *
+ * A sheen that travels left across the block rather than a whole-element fade:
+ * a pulsing rectangle reads as a broken image, while a moving highlight reads
+ * as work in progress. Slow enough (1.4s) not to draw the eye away from the
+ * content it is standing in for.
+ *
+ * The colours are white alphas rather than tokens on purpose — this sits on
+ * `surface` and `surface-raised` both, and a fixed pair would be invisible on
+ * one of them.
+ */
+@keyframes skeletonSheen {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton {
+  background-color: rgba(255, 255, 255, 0.05);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 20%,
+    rgba(255, 255, 255, 0.07) 50%,
+    rgba(255, 255, 255, 0) 80%
+  );
+  background-size: 200% 100%;
+  animation: skeletonSheen 1.4s ease-in-out infinite;
 }
 
 /* ── Motion layer 1: scroll reveal ───────────────────────────── */
@@ -341,6 +396,13 @@
 
   .dot-pulse,
   .caret-blink {
+    animation: none;
+  }
+
+  /* The block stays — it is the shape of what is coming, which is the useful
+     half. Only the travelling sheen goes. */
+  .skeleton {
+    background-image: none;
     animation: none;
   }
 

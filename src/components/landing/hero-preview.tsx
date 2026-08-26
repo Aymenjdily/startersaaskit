@@ -20,7 +20,7 @@ export function HeroPreview() {
 						Product preview
 					</span>
 					<p className="text-body-lg text-ink-muted">
-						A walkthrough of the kit is on the way.
+						A walkthrough of the generator is on the way.
 					</p>
 				</div>
 			</div>

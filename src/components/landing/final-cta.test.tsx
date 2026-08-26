@@ -1,8 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { README_URL, REPO_URL } from "@/lib/brand";
+import { SIGN_UP_HREF } from "@/lib/brand";
 import { FinalCta } from "./final-cta";
+import { HowItWorks } from "./how-it-works";
 
 const dots = (container: HTMLElement) =>
 	container.querySelector("[data-dots]") as HTMLElement;
@@ -32,29 +33,34 @@ describe("FinalCta", () => {
 	});
 
 	describe("calls to action", () => {
-		it("offers one primary and one secondary destination", () => {
+		it("sends the primary action into the product", () => {
 			render(<FinalCta />);
 
 			const links = screen.getAllByRole("link");
-			expect(links[0]).toHaveAccessibleName(/Get started/);
-			expect(links[0]).toHaveAttribute("href", REPO_URL);
-			expect(links[1]).toHaveAccessibleName("Read the README");
-			expect(links[1]).toHaveAttribute("href", README_URL);
+			expect(links[0]).toHaveAccessibleName(/Generate your starter/);
+			expect(links[0]).toHaveAttribute("href", SIGN_UP_HREF);
+		});
+
+		/** A dead anchor would scroll nowhere and look like a broken button. */
+		it("points the secondary action at a section this page renders", () => {
+			render(<FinalCta />);
+			const href = screen.getAllByRole("link")[1].getAttribute("href");
+			expect(href).toBe("#how-it-works");
+
+			const { container } = render(<HowItWorks />);
+			expect(container.querySelector(href as string)).not.toBeNull();
 		});
 
 		/**
-		 * `target="_blank"` without `rel="noreferrer"` leaks the referrer and hands
-		 * the opened page a live `window.opener` handle.
+		 * Both destinations are ours now — one into the product, one up the page.
+		 * `target="_blank"` on either would throw the reader out of the flow the
+		 * button is asking them to enter.
 		 */
-		it("opens external destinations safely", () => {
+		it("keeps both actions in the same tab", () => {
 			render(<FinalCta />);
 
 			for (const link of screen.getAllByRole("link")) {
-				expect(link).toHaveAttribute("target", "_blank");
-				expect(link).toHaveAttribute(
-					"rel",
-					expect.stringContaining("noreferrer"),
-				);
+				expect(link).not.toHaveAttribute("target");
 			}
 		});
 	});

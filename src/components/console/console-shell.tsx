@@ -1,0 +1,104 @@
+import { useEffect, useState } from "react";
+import { SIGN_IN_HREF } from "@/lib/brand";
+import { getSupabase } from "@/lib/supabase";
+import { IconRail, type RailUser } from "./icon-rail";
+import { ConsoleChromeSkeleton } from "./skeletons";
+
+/**
+ * The frame every signed-in page sits in: an icon rail, a top bar that names
+ * the page, and the working area.
+ *
+ * It owns the session because the rail should not — a presentational rail that
+ * fetches its own user cannot be rendered in a test, and every page would
+ * fetch the same user again.
+ *
+ * Nothing renders until we know who is asking. Showing the console first and
+ * bouncing afterwards flashes someone else's shell at a signed-out visitor.
+ */
+export function ConsoleShell({
+	actions,
+	back,
+	children,
+	currentPath,
+	title,
+}: {
+	/** Buttons for the top bar's right side, opposite the title. */
+	actions?: React.ReactNode;
+	/** Where a nested page goes back to. Absent on top-level pages. */
+	back?: { href: string; label: string };
+	children: React.ReactNode;
+	currentPath: string;
+	title: string;
+}) {
+	const [user, setUser] = useState<RailUser | null>(null);
+
+	useEffect(() => {
+		getSupabase()
+			.auth.getUser()
+			.then(({ data }) => {
+				if (!data.user) {
+					window.location.replace(SIGN_IN_HREF);
+					return;
+				}
+				setUser(data.user);
+			})
+			.catch(() => window.location.replace(SIGN_IN_HREF));
+	}, []);
+
+	async function signOut() {
+		await getSupabase().auth.signOut();
+		window.location.assign("/");
+	}
+
+	if (!user) return <ConsoleChromeSkeleton title={title} />;
+
+	return (
+		<div className="flex min-h-screen bg-surface">
+			<IconRail currentPath={currentPath} onSignOut={signOut} user={user} />
+
+			<div className="flex min-w-0 flex-1 flex-col">
+				<header className="flex h-14 shrink-0 items-center gap-3 border-white/8 border-b px-4 md:px-6">
+					{back && (
+						<a
+							aria-label={back.label}
+							className="-ml-1 flex size-8 items-center justify-center rounded-[8px] text-white/50 transition-colors duration-200 hover:bg-white/6 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+							href={back.href}
+							title={back.label}
+						>
+							<svg
+								aria-hidden="true"
+								className="size-4"
+								fill="none"
+								stroke="currentColor"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								strokeWidth="1.5"
+								viewBox="0 0 24 24"
+							>
+								<path d="M15 5l-7 7 7 7" />
+							</svg>
+							{/* Real text, not only `aria-label`: an anchor whose whole
+							    content is a decorative SVG has no accessible name at all
+							    if the attribute is ever dropped in a refactor. */}
+							<span className="sr-only">{back.label}</span>
+						</a>
+					)}
+
+					<h1 className="min-w-0 truncate font-medium text-[15px] text-ink tracking-[-0.01em]">
+						{title}
+					</h1>
+
+					{actions && (
+						<div className="ml-auto flex items-center gap-2">{actions}</div>
+					)}
+				</header>
+
+				<main className="flex-1 px-4 py-8 md:px-6 md:py-10">
+					{/* Capped and centred: full-bleed text at 2560px is unreadable, and
+					    every page here is reading rather than canvas work. */}
+					<div className="mx-auto w-full max-w-[1040px]">{children}</div>
+				</main>
+			</div>
+		</div>
+	);
+}

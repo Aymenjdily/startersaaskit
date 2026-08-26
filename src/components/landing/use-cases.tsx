@@ -2,8 +2,9 @@ import { type ReactNode, useEffect, useState } from "react";
 import { Container } from "@/components/ui/container";
 import { FadeUp } from "@/components/ui/fade-up";
 import { Section, SectionHeading } from "@/components/ui/section";
+import { QUESTION_COUNT_WORD_CAPITALISED } from "@/lib/starter-questions";
 import { cn } from "@/lib/utils";
-import { SUITE_STATS } from "@/test/suite-stats";
+import { COMBINATIONS, SPEC_PAIRS } from "./tested-by-default";
 
 /**
  * Section 10 — `uc-home-section`: breadth, shown rather than listed.
@@ -12,11 +13,10 @@ import { SUITE_STATS } from "@/test/suite-stats";
  * screen belonging to whichever name is lit. The panel is sticky, so the list
  * scrolls past a picture that stays put.
  *
- * Every screen is drawn from something in this repo — the columns are the
- * columns `db/schema.ts` declares, the run is the run the suite last reported,
- * the provisioning steps are the ones `neon-vite-plugin.ts` configures. That is
- * what `use-cases.test.tsx` checks, so a screen cannot drift from the thing it
- * is a picture of.
+ * The screens used to be pictures of this repo, checked back against its files.
+ * They are now pictures of a repo we generate, so the matrix and the spec pairs
+ * are imported from section 06 rather than restated — one list, one place to be
+ * wrong, and the spec holds the two sections together.
  */
 
 const ROTATE_MS = 3600;
@@ -134,91 +134,74 @@ function StudioScreen() {
 	);
 }
 
-/**
- * The first start, in the order `neon-vite-plugin.ts` makes it happen. Both the
- * env key and the seed path are read back out of that file by the tests.
- */
-export const PROVISION_STEPS = [
-	{ text: "reading DATABASE_URL", done: true },
-	{ text: "provisioning Postgres", done: true },
-	{ text: "seeding db/init.sql", done: true },
-	{ text: "ready — nothing to sign up for", done: true },
+/** What happens after the last question, in the order it happens. */
+export const DELIVERY_STEPS = [
+	"resolving your answers",
+	"generating the repo",
+	"installing dependencies",
+	"running the suite — 0 failures",
+	"pushed to your GitHub",
 ];
 
-function ProvisionScreen() {
+function DeliveryScreen() {
 	return (
-		<Screen label="pnpm dev">
+		<Screen label="Generating your starter">
 			<div className="font-mono text-[11px] leading-[2.2] sm:text-[12px]">
-				<p className="text-ink-soft">
-					<span aria-hidden="true" className="mr-2 select-none text-brand">
-						$
-					</span>
-					pnpm dev
-				</p>
-				{PROVISION_STEPS.map((step) => (
-					<p className="flex items-center gap-2 text-ink-muted" key={step.text}>
+				{DELIVERY_STEPS.map((step) => (
+					<p className="flex items-center gap-2 text-ink-muted" key={step}>
 						<span aria-hidden="true" className="text-sage">
 							✓
 						</span>
-						{step.text}
+						{step}
 					</p>
 				))}
 			</div>
 		</Screen>
 	);
 }
-
-const RUN_ROWS = Object.entries(SUITE_STATS.byDir);
 
 function GreenRunScreen() {
 	return (
-		<Screen label="pnpm test">
+		<Screen label="CI — every combination">
 			<div className="font-mono text-[11px] leading-[2.1] sm:text-[12px]">
-				{RUN_ROWS.map(([dir, count]) => (
-					<p className="flex items-center gap-2.5" key={dir}>
+				{COMBINATIONS.map((combination) => (
+					<p
+						className="flex items-center gap-2.5"
+						key={`${combination.framework} ${combination.stack}`}
+					>
 						<span aria-hidden="true" className="text-sage">
 							✓
 						</span>
-						<span className="flex-1 truncate text-ink-muted">{dir}</span>
-						<span className="text-ink-soft">{count}</span>
+						<span className="flex-1 truncate text-ink-muted">
+							{combination.framework} · {combination.stack}
+						</span>
 					</p>
 				))}
 				<p className="mt-3 border-t border-line pt-3 text-sage">
-					{SUITE_STATS.total} passed ({SUITE_STATS.files} files)
+					{COMBINATIONS.length} passed
 				</p>
 			</div>
 		</Screen>
 	);
 }
 
-/** Modules that have a spec sitting next to them, checked against disk. */
-export const SPEC_PAIRS = [
-	"src/lib/utils.ts",
-	"src/components/landing/hero.tsx",
-	"src/db/schema.ts",
-];
-
-/** `src/lib/utils.ts` → `src/lib/utils.test.ts`. */
-export const specFor = (module: string) =>
-	module.replace(/\.tsx?$/, (extension) => `.test${extension}`);
-
 function SpecPairScreen() {
 	return (
-		<Screen label=".cursorrules">
+		<Screen label="a spec beside every module">
 			<div className="flex flex-col gap-2.5">
-				{SPEC_PAIRS.map((module) => (
+				{SPEC_PAIRS.map(({ module, spec }) => (
 					<div
 						className="rounded-[10px] border border-line bg-elevated px-3.5 py-3"
 						key={module}
 					>
 						<p className="truncate font-mono text-[11px] text-ink-soft">
-							{module.split("/").pop()}
+							{module}
 						</p>
 						<p className="mt-1.5 flex items-center gap-2 truncate font-mono text-[11px] text-ink-muted">
 							<span aria-hidden="true" className="text-brand">
 								└
 							</span>
-							{specFor(module).split("/").pop()}
+							{spec}
 						</p>
 					</div>
 				))}
@@ -237,7 +220,7 @@ export type UseCase = {
 export const USE_CASES: UseCase[] = [
 	{
 		title: "B2B SaaS",
-		text: "Sign-in and cookie sessions are already configured, so the account model is the first thing you extend rather than the first thing you build.",
+		text: "Sign-in and sessions arrive configured against whichever auth provider you picked, so the account model is the first thing you extend rather than the first thing you build.",
 		Screen: SignInScreen,
 	},
 	{
@@ -247,17 +230,17 @@ export const USE_CASES: UseCase[] = [
 	},
 	{
 		title: "Side projects",
-		text: "No account to create and no key to paste before it runs. The database provisions itself on the first start.",
-		Screen: ProvisionScreen,
+		text: `${QUESTION_COUNT_WORD_CAPITALISED} answers and the repo is in your GitHub, dependencies installed and suite green. The part you were going to procrastinate on is already done.`,
+		Screen: DeliveryScreen,
 	},
 	{
 		title: "Client work",
-		text: "Strict TypeScript and a suite that is green on the clone, so what you hand over has a baseline the next person can check.",
+		text: "Pick the stack the client already runs rather than talking them out of it. Every combination we offer has gone green in CI before it is offered.",
 		Screen: GreenRunScreen,
 	},
 	{
 		title: "AI apps",
-		text: "The conventions are written down and every module has a spec beside it, so when an agent writes the next feature something exists to catch it.",
+		text: "Every module arrives with a spec beside it, so when an agent writes the next feature something already exists to catch it.",
 		Screen: SpecPairScreen,
 	},
 ];
@@ -271,7 +254,7 @@ export function UseCases() {
 				<FadeUp className="mb-10 md:mb-14">
 					<SectionHeading
 						eyebrow="Use cases"
-						title="The same starting point, whatever you are building"
+						title="Your starting point, whatever you are building"
 					/>
 				</FadeUp>
 
@@ -281,8 +264,9 @@ export function UseCases() {
 						step={1}
 					>
 						<p className="max-w-[420px] text-body-lg leading-[1.5] tracking-[-0.01em] text-ink-soft">
-							Nothing here is a vertical template. It is the plumbing every one
-							of these needs, already wired and already tested.
+							We do not sell a vertical template for each of these. They need
+							the same plumbing wired to different choices — which is the one
+							thing a generator is better at than a repo you clone.
 						</p>
 
 						<div className="flex flex-col" data-cases>

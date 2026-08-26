@@ -1,38 +1,15 @@
-import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { act } from "react";
 import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { SUITE_STATS } from "@/test/suite-stats";
+import { COMBINATIONS, SPEC_PAIRS } from "./tested-by-default";
 import {
-	PROVISION_STEPS,
+	DELIVERY_STEPS,
 	SIGN_IN_FIELDS,
-	SPEC_PAIRS,
-	specFor,
 	TODO_COLUMNS,
 	USE_CASES,
 	UseCases,
 } from "./use-cases";
-
-const repoPath = (path: string) => resolve(process.cwd(), path);
-const read = (path: string) => readFileSync(repoPath(path), "utf8");
-
-const scripts = (): Record<string, string> =>
-	JSON.parse(read("package.json")).scripts;
-
-/**
- * The column names Postgres would actually show, which is not always the key:
- * `createdAt: timestamp("created_at")` is `created_at` in the table. Reading
- * the keys alone would have let the screen print a name no query returns.
- */
-function columnsOf(table: string): string[] {
-	const body = read("src/db/schema.ts").split(`pgTable("${table}"`)[1] ?? "";
-
-	return [...body.matchAll(/(\w+):\s*\w+\((?:"([^"]+)")?/g)].map(
-		([, key, name]) => name ?? key,
-	);
-}
 
 const names = (container: HTMLElement) =>
 	within(container.querySelector("[data-cases]") as HTMLElement);
@@ -80,7 +57,7 @@ describe("UseCases", () => {
 
 		expect(
 			screen.getByRole("heading", {
-				name: "The same starting point, whatever you are building",
+				name: "Your starting point, whatever you are building",
 			}),
 		).toBeInTheDocument();
 	});
@@ -193,9 +170,11 @@ describe("UseCases", () => {
 	});
 
 	/**
-	 * Each panel is a picture of something in this repo. A picture of a thing
-	 * that changed underneath it is the one failure this section can have, so
-	 * every screen is checked back against its source.
+	 * These screens used to be pictures of this repo, checked back against its
+	 * files. They now picture a repo we generate, so disk proves nothing. What
+	 * replaces those guards is agreement between sections: the matrix and the
+	 * spec pairs are section 06's data, and a screen that quietly stopped
+	 * rendering them would leave two parts of the page telling different stories.
 	 */
 	describe("the screens each one shows", () => {
 		it("gives every use case its own screen", () => {
@@ -204,67 +183,51 @@ describe("UseCases", () => {
 			expect(rendered.size).toBe(USE_CASES.length);
 		});
 
-		it("signs in with the fields auth.ts turns on", () => {
-			const source = read("src/lib/auth.ts");
-
-			expect(source).toContain("emailAndPassword");
-			expect(source).toContain("enabled: true");
-			expect(SIGN_IN_FIELDS).toEqual(["Email", "Password"]);
-
+		it("signs in with the fields the generated auth module turns on", () => {
 			render(<UseCases />);
+
+			expect(SIGN_IN_FIELDS).toEqual(["Email", "Password"]);
 			for (const field of SIGN_IN_FIELDS) {
 				expect(screen.getByText(field)).toBeInTheDocument();
 			}
 		});
 
-		it("browses the columns the schema actually declares", () => {
+		it("browses the columns the generated schema declares", () => {
 			render(<UseCases />);
 
-			expect(columnsOf("todos")).toEqual(TODO_COLUMNS);
 			for (const column of TODO_COLUMNS) {
 				expect(screen.getByText(column)).toBeInTheDocument();
 			}
 		});
 
-		it("provisions from the file the plugin is pointed at", () => {
-			const source = read("neon-vite-plugin.ts");
-			const shown = PROVISION_STEPS.map(({ text }) => text).join(" ");
-
-			expect(shown).toContain("DATABASE_URL");
-			expect(source).toContain("dotEnvKey: 'DATABASE_URL'");
-			expect(shown).toContain("db/init.sql");
-			expect(source).toContain("path: 'db/init.sql'");
-			expect(existsSync(repoPath("db/init.sql"))).toBe(true);
-		});
-
-		it("reports the run the suite last published", () => {
+		it("ends the delivery in the reader's GitHub", () => {
 			render(<UseCases />);
 
-			expect(
-				screen.getByText(
-					`${SUITE_STATS.total} passed (${SUITE_STATS.files} files)`,
-				),
-			).toBeInTheDocument();
-			for (const dir of Object.keys(SUITE_STATS.byDir)) {
-				expect(screen.getByText(dir)).toBeInTheDocument();
+			for (const step of DELIVERY_STEPS) {
+				expect(screen.getByText(step)).toBeInTheDocument();
 			}
+			expect(DELIVERY_STEPS.at(-1)).toMatch(/GitHub/);
 		});
 
-		it("pairs modules with specs that are really beside them", () => {
-			for (const module of SPEC_PAIRS) {
-				expect(existsSync(repoPath(module))).toBe(true);
-				expect(existsSync(repoPath(specFor(module)))).toBe(true);
+		/** Same matrix as section 06, or the page contradicts itself. */
+		it("reports the combination matrix, not a suite count", () => {
+			render(<UseCases />);
+
+			for (const { framework, stack } of COMBINATIONS) {
+				expect(screen.getByText(`${framework} · ${stack}`)).toBeInTheDocument();
 			}
+			expect(screen.getAllByText(`${COMBINATIONS.length} passed`).length).toBe(
+				1,
+			);
 		});
 
-		it("derives the spec name from the module's own extension", () => {
-			expect(specFor("src/lib/utils.ts")).toBe("src/lib/utils.test.ts");
-			expect(specFor("a/b/hero.tsx")).toBe("a/b/hero.test.tsx");
-		});
+		/** Same pairs as section 06's first pillar. */
+		it("pairs each module with the spec beside it", () => {
+			render(<UseCases />);
 
-		it("labels screens with commands this repo defines", () => {
-			for (const name of ["db:studio", "dev", "test"]) {
-				expect(scripts()).toHaveProperty(name);
+			for (const { module, spec } of SPEC_PAIRS) {
+				expect(screen.getAllByText(module).length).toBeGreaterThan(0);
+				expect(screen.getAllByText(spec).length).toBeGreaterThan(0);
 			}
 		});
 	});

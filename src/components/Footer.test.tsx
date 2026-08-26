@@ -170,8 +170,21 @@ describe("Footer", () => {
 			render(<Footer />);
 
 			expect(
-				screen.getByText(`${SUITE_STATS.total} tests passing`),
+				screen.getByText(`${SUITE_STATS.total} tests passing on this site`),
 			).toBeVisible();
+		});
+
+		/**
+		 * The count measures this storefront, not the starter the reader would
+		 * receive — and we cannot measure that one from here. Unqualified, a status
+		 * dot beside a test count reads as a promise about the product.
+		 */
+		it("says which repo the count belongs to", () => {
+			render(<Footer />);
+
+			expect(
+				screen.getByText(new RegExp(`${SUITE_STATS.total} tests passing`)),
+			).toHaveTextContent(/on this site$/);
 		});
 
 		/** The dot is the reference's status light. It must stop for reduced motion. */

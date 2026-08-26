@@ -7,21 +7,23 @@ import { cn } from "@/lib/utils";
 /**
  * Section 08 — `split-section reverse`: visual left, text right.
  *
- * The pitch is that an assistant can *guess* correctly here, because the layout
- * is predictable and the compiler catches it when the guess is wrong. That is a
- * claim about structure, so every path the panel shows is a real file and the
- * suite asserts it still exists — a lookup pointing at a deleted file would be
- * the exact failure the section says cannot happen.
+ * The pitch is that an assistant can *guess* correctly in the repo you receive,
+ * because the layout is predictable and the compiler catches a wrong guess. The
+ * tree below therefore describes a generated starter, not this codebase.
  *
- * Note there is deliberately no mention of a CLAUDE.md or a rules file: this
- * repo has neither worth advertising, and inventing one would undercut the
- * whole point.
+ * That means it is deliberately framework-neutral: `src/db` and `src/lib` are
+ * shared by every combination we generate, whereas the routing layer is the one
+ * part that differs between Next.js and TanStack Start. Showing a route path
+ * here would make the panel true of exactly one answer to question one.
+ *
+ * Note there is deliberately no mention of a CLAUDE.md or a rules file: we do
+ * not generate either yet, and inventing one would undercut the whole point.
  */
 
 type Lookup = {
 	/** What someone (or something) is trying to find. */
 	ask: string;
-	/** The file that answers it. Must exist — `ai-optimized.test.tsx` checks. */
+	/** The file that answers it. Must be a node in `TREE`, or nothing highlights. */
 	path: string;
 	/** The convention that makes it findable without searching. */
 	because: string;
@@ -29,22 +31,22 @@ type Lookup = {
 
 export const LOOKUPS: Lookup[] = [
 	{
-		ask: "Which file renders the home page?",
-		path: "src/routes/index.tsx",
-		because:
-			"File-based routing, so the path on disk is the path in the URL. There is no central route table to read first.",
-	},
-	{
 		ask: "Where is authentication configured?",
 		path: "src/lib/auth.ts",
 		because:
 			"One module per integration, named after the thing it integrates. Nothing else reaches for the provider.",
 	},
 	{
-		ask: "What behaviour does the tile grid guarantee?",
-		path: "src/components/landing/wired-grid.test.tsx",
+		ask: "What behaviour does checkout guarantee?",
+		path: "src/lib/checkout.test.ts",
 		because:
 			"The spec sits beside the module and runs, so intent is executable rather than described in a stale comment.",
+	},
+	{
+		ask: "Where are the database tables defined?",
+		path: "src/db/schema.ts",
+		because:
+			"One schema module, whichever ORM you picked. The adapter changes underneath it; the place you look does not.",
 	},
 	{
 		ask: "Where do the brand colours come from?",
@@ -54,33 +56,28 @@ export const LOOKUPS: Lookup[] = [
 	},
 ];
 
-/** Flat node list — cheaper to render and to reason about than nesting. */
-const TREE: { depth: number; label: string; path?: string }[] = [
+/**
+ * Flat node list — cheaper to render and to reason about than nesting.
+ * Exported so the spec can check every lookup actually lands on a node.
+ */
+export const TREE: { depth: number; label: string; path?: string }[] = [
 	{ depth: 0, label: "src/" },
-	{ depth: 1, label: "routes/" },
-	{ depth: 2, label: "__root.tsx" },
-	{ depth: 2, label: "index.tsx", path: "src/routes/index.tsx" },
-	{ depth: 1, label: "components/" },
-	{ depth: 2, label: "landing/" },
-	{
-		depth: 3,
-		label: "wired-grid.tsx",
-		path: "src/components/landing/wired-grid.tsx",
-	},
-	{
-		depth: 3,
-		label: "wired-grid.test.tsx",
-		path: "src/components/landing/wired-grid.test.tsx",
-	},
+	{ depth: 1, label: "db/" },
+	{ depth: 2, label: "client.ts", path: "src/db/client.ts" },
+	{ depth: 2, label: "schema.ts", path: "src/db/schema.ts" },
+	{ depth: 2, label: "schema.test.ts", path: "src/db/schema.test.ts" },
 	{ depth: 1, label: "lib/" },
 	{ depth: 2, label: "auth.ts", path: "src/lib/auth.ts" },
-	{ depth: 2, label: "utils.ts", path: "src/lib/utils.ts" },
+	{ depth: 2, label: "auth.test.ts", path: "src/lib/auth.test.ts" },
+	{ depth: 2, label: "checkout.ts", path: "src/lib/checkout.ts" },
+	{ depth: 2, label: "checkout.test.ts", path: "src/lib/checkout.test.ts" },
 	{ depth: 1, label: "styles.css", path: "src/styles.css" },
 ];
 
 /**
- * Real flags from `tsconfig.json`. These are what turn a wrong guess into a
- * build error instead of a runtime surprise.
+ * Read off this repo's `tsconfig.json`, which is the config we generate from —
+ * so the suite can hold the printed list against a real file. It proves the
+ * flags are ones we actually run under, not that your repo has been built yet.
  */
 export const TS_FLAGS = [
 	"strict",
@@ -175,17 +172,18 @@ export function AiOptimized() {
 						<SectionHeading
 							eyebrow="Built for assistants"
 							title="AI reads it correctly"
-							description="Predictable layout, typed boundaries, and a spec beside every module. An assistant can guess where something lives — and when it guesses wrong, the compiler says so before you run anything."
+							description="Every repo we generate has the same shape: predictable layout, typed boundaries, and a spec beside every module. An assistant can guess where something lives — and when it guesses wrong, the compiler says so before you run anything."
 						/>
 
 						<dl className="mt-8 flex flex-col gap-5">
 							<div>
 								<dt className="text-[15px] font-medium text-ink">
-									The path is the route
+									One module per concern
 								</dt>
 								<dd className="mt-1 text-[14px] leading-[1.6] text-ink-muted">
-									Routes are files. There is no registry to keep in sync and no
-									indirection to trace before making a change.
+									Every integration gets a file named after it, in the same
+									place in every repo we generate. There is no registry to keep
+									in sync and no indirection to trace before making a change.
 								</dd>
 							</div>
 							<div>

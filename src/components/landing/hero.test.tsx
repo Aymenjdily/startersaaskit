@@ -1,33 +1,14 @@
-import { existsSync, readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import { SIGN_UP_HREF } from "@/lib/brand";
 import { Hero } from "./hero";
-
-const repoPath = (path: string) => resolve(process.cwd(), path);
-
-const installed = (): string[] =>
-	Object.keys(
-		JSON.parse(readFileSync(repoPath("package.json"), "utf8")).dependencies,
-	);
+import { ANSWERS, HowItWorks } from "./how-it-works";
 
 /**
- * The subtitle is the broadest claim on the page, and it named billing, email
- * and CI for a while when the repo shipped none of them.
- *
- * Each entry releases itself: the word is only forbidden while nothing that
- * could deliver it is installed. Add Stripe and "billing" becomes sayable.
+ * The last answer names the repo; everything before it is a stack choice. The
+ * subtitle lists those choices, so it is the slice the two have to agree on.
  */
-const NOT_YET_SHIPPED = [
-	{
-		word: "billing",
-		needs: ["stripe", "@polar-sh/sdk", "@lemonsqueezy/lemonsqueezy.js"],
-	},
-	{
-		word: "email",
-		needs: ["resend", "nodemailer", "postmark", "@react-email/render"],
-	},
-];
+const STACK_AXES = ANSWERS.slice(0, -1);
 
 describe("Hero", () => {
 	it("leads with a single h1", () => {
@@ -35,14 +16,14 @@ describe("Hero", () => {
 		const h1s = container.querySelectorAll("h1");
 		expect(h1s).toHaveLength(1);
 		expect(h1s[0]).toHaveTextContent(
-			"Skip the boilerplate. Keep the tests. Ship the product.",
+			"Skip the boilerplate. Keep your stack. Ship the product.",
 		);
 	});
 
 	describe("what the subtitle promises", () => {
 		/**
 		 * Selected by `data-subtitle`, not by class: three elements share
-		 * `hero-in`, and matching on it silently read the licence line instead.
+		 * `hero-in`, and matching on it silently read the eyebrow instead.
 		 */
 		const subtitle = () => {
 			const { container } = render(<Hero />);
@@ -51,24 +32,26 @@ describe("Hero", () => {
 			return el?.textContent ?? "";
 		};
 
-		it.each(NOT_YET_SHIPPED)("does not offer $word while nothing ships it", ({
-			word,
-			needs,
+		/**
+		 * This used to forbid words the repo could not deliver, back when the
+		 * subtitle described this codebase. It now describes the wizard, so the
+		 * check that matters is different: every choice the hero advertises has to
+		 * be a question the wizard actually asks.
+		 */
+		it.each(STACK_AXES)("offers $label, which the wizard asks about", ({
+			label,
 		}) => {
-			const deps = installed();
-			if (needs.some((pkg) => deps.includes(pkg))) return;
-			expect(subtitle().toLowerCase()).not.toContain(word);
+			expect(subtitle().toLowerCase()).toContain(label.toLowerCase());
 		});
 
-		it("does not offer CI while no workflow ships", () => {
-			if (existsSync(repoPath(".github"))) return;
-			expect(subtitle()).not.toMatch(/\bCI\b/);
+		it("promises the repo arrives passing its tests", () => {
+			expect(subtitle()).toMatch(/test/i);
 		});
 	});
 
-	it("states the licence up front", () => {
+	it("states the offer up front", () => {
 		render(<Hero />);
-		expect(screen.getByText("Open source · MIT licensed")).toBeVisible();
+		expect(screen.getByText("Free while in beta")).toBeVisible();
 	});
 
 	describe("calls to action", () => {
@@ -76,30 +59,38 @@ describe("Hero", () => {
 			render(<Hero />);
 			const links = screen.getAllByRole("link");
 			expect(links).toHaveLength(2);
-			expect(links[0]).toHaveAccessibleName(/Get started/);
-			expect(links[1]).toHaveAccessibleName(/View on GitHub/);
+			expect(links[0]).toHaveAccessibleName(/Generate your starter/);
+			expect(links[1]).toHaveAccessibleName(/See how it works/);
 		});
 
 		/**
-		 * `target="_blank"` without `rel="noreferrer"` leaks the referrer and hands
-		 * the opened page a live `window.opener` handle.
+		 * Both actions stay on our own site now — one into the product, one down
+		 * the page. `target="_blank"` on either would throw the reader out of a
+		 * flow they are already in.
 		 */
-		it("opens external links safely", () => {
+		it("keeps both actions in the same tab", () => {
 			render(<Hero />);
 			for (const link of screen.getAllByRole("link")) {
-				expect(link).toHaveAttribute("target", "_blank");
-				expect(link).toHaveAttribute(
-					"rel",
-					expect.stringContaining("noreferrer"),
-				);
+				expect(link).not.toHaveAttribute("target");
 			}
 		});
 
-		it("points both actions at the repository", () => {
+		it("sends the primary action into the product", () => {
 			render(<Hero />);
-			for (const link of screen.getAllByRole("link")) {
-				expect(link.getAttribute("href")).toMatch(/^https:\/\/github\.com\//);
-			}
+			expect(screen.getAllByRole("link")[0]).toHaveAttribute(
+				"href",
+				SIGN_UP_HREF,
+			);
+		});
+
+		/** A dead anchor would scroll nowhere and look like a broken button. */
+		it("points the secondary action at a section this page renders", () => {
+			render(<Hero />);
+			const href = screen.getAllByRole("link")[1].getAttribute("href");
+			expect(href).toBe("#how-it-works");
+
+			const { container } = render(<HowItWorks />);
+			expect(container.querySelector(href as string)).not.toBeNull();
 		});
 	});
 
@@ -108,7 +99,7 @@ describe("Hero", () => {
 			render(<Hero />);
 			expect(screen.getByText("Product preview")).toBeVisible();
 			expect(
-				screen.getByText("A walkthrough of the kit is on the way."),
+				screen.getByText("A walkthrough of the generator is on the way."),
 			).toBeVisible();
 		});
 

@@ -5,7 +5,7 @@ import { TrustStrip } from "./trust-strip";
 describe("TrustStrip", () => {
 	it("labels the row", () => {
 		render(<TrustStrip />);
-		expect(screen.getByText("Built on tools you already trust")).toBeVisible();
+		expect(screen.getByText("Pick the tools you already trust")).toBeVisible();
 	});
 
 	/**

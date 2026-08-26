@@ -6,11 +6,19 @@ import type { BrandIcon } from "./brand-icons";
 type WiredTask = { icon: BrandIcon; module: string; detail: string };
 
 /**
- * Every entry describes wiring that exists in this repo today. Anything on the
- * roadmap but not yet installed (tests, billing, email, CI) stays out until the
- * code lands — a tile that says "Completed" is a claim, not decoration.
+ * The wiring a generated starter arrives with, not an inventory of this repo.
+ * Entries span the whole catalogue on purpose — Next.js beside TanStack Start,
+ * Prisma beside Drizzle — because no single generated repo contains all of it.
+ * The grid is the menu, and the wizard is what picks from it.
+ *
+ * Supabase and Stripe belong here too. Their glyphs now exist in
+ * `brand-icons.ts` — added for the console's starter dialog — so the reason
+ * they were left out has gone; adding them here is a copy decision, not a
+ * blocked one.
  */
 const TASKS: WiredTask[] = [
+	{ icon: "nextdotjs", module: "Next.js", detail: "App Router + layouts" },
+	{ icon: "nextdotjs", module: "Next.js", detail: "Server actions" },
 	{ icon: "tanstack", module: "TanStack Start", detail: "File-based routing" },
 	{
 		icon: "tanstack",
@@ -30,19 +38,20 @@ const TASKS: WiredTask[] = [
 	},
 	{ icon: "betterauth", module: "Better Auth", detail: "Cookie sessions" },
 	{ icon: "drizzle", module: "Drizzle ORM", detail: "Typed table schema" },
-	{ icon: "drizzle", module: "Drizzle ORM", detail: "Migration scripts" },
-	{ icon: "drizzle", module: "Drizzle Kit", detail: "Studio + introspection" },
+	{ icon: "drizzle", module: "Drizzle Kit", detail: "Migrations + studio" },
+	{ icon: "prisma", module: "Prisma", detail: "Generated client" },
+	{ icon: "prisma", module: "Prisma Migrate", detail: "Versioned migrations" },
 	{ icon: "neon", module: "Neon", detail: "Serverless Postgres driver" },
-	{ icon: "neon", module: "Neon", detail: "Postgres over HTTP" },
+	{ icon: "neon", module: "Neon", detail: "Branch per preview" },
 	{ icon: "tailwindcss", module: "Tailwind CSS", detail: "v4 design tokens" },
 	{ icon: "tailwindcss", module: "Tailwind CSS", detail: "Dark mode variant" },
 	{ icon: "typescript", module: "TypeScript", detail: "Strict compiler" },
 	{ icon: "typescript", module: "TypeScript", detail: "Path aliases" },
-	{ icon: "biome", module: "Biome", detail: "Lint rules" },
-	{ icon: "biome", module: "Biome", detail: "Formatter" },
+	{ icon: "biome", module: "Biome", detail: "Lint + format" },
+	{ icon: "vite", module: "Vitest", detail: "Suite green on arrival" },
 	{ icon: "vite", module: "Vite", detail: "HMR dev server" },
-	{ icon: "vite", module: "Vite", detail: "Production bundling" },
 	{ icon: "react", module: "React 19", detail: "Concurrent runtime" },
+	{ icon: "vercel", module: "Vercel", detail: "Deploy config included" },
 ];
 
 /** 6 x 3, matching the reference. Below `lg` the grid reflows and tiles 11+ are hidden. */

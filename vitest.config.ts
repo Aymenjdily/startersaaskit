@@ -23,6 +23,18 @@ export default defineConfig({
 	test: {
 		environment: "jsdom",
 		globals: true,
+		/**
+		 * Four times the default, because some of these tests genuinely are slow
+		 * rather than stuck: `build-starter` and `guide` each generate every
+		 * stack the wizard allows — 2784 of them — and assert something about
+		 * all of them. Under a full run, with workers competing, that crossed
+		 * the 5s default and took unrelated suites down with it.
+		 *
+		 * The matrix itself is generated once per file (`test/starter-matrix.ts`)
+		 * rather than once per test. This is the headroom on top of that, not
+		 * instead of it.
+		 */
+		testTimeout: 20_000,
 		setupFiles: ["./src/test/setup.ts"],
 		include: ["src/**/*.{test,spec}.{ts,tsx}"],
 		/**

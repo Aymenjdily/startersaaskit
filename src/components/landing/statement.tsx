@@ -29,6 +29,20 @@ export function Statement() {
 					<MobileBr /> Any provider.
 					<MobileBr /> Already wired.
 				</h2>
+
+				{/**
+				 * A supporting line, because the heading had none.
+				 *
+				 * This is the grid's header, and it was the only heading on the page
+				 * standing on its own — every other section pairs one with a sentence.
+				 * Alone above a wall of tiles it read as a caption someone forgot to
+				 * finish rather than as the start of a band.
+				 */}
+				<p className="mx-auto mt-5 max-w-[640px] text-center text-body-lg leading-[1.5] tracking-[-0.01em] text-ink-soft">
+					Every tile below is a module the generator can wire for you. No single
+					starter contains all of them — the grid is the menu, and the questions
+					are what pick from it.
+				</p>
 			</FadeUp>
 		</section>
 	);

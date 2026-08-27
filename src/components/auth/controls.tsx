@@ -21,9 +21,23 @@ export const CALLBACK_PATH = "/auth/callback";
  * from it rather than stored alongside it — a button cannot end up wearing one
  * provider's mark while signing you in to another.
  */
-export const OAUTH_PROVIDERS = [
+export const OAUTH_PROVIDERS = [{ id: "google", label: "Google" }] as const;
+
+/**
+ * GitHub, switched off rather than deleted.
+ *
+ * The button worked; what is not ready is the OAuth app behind it, and a
+ * provider that hands people to a consent screen for an application that
+ * cannot complete the exchange is worse than one that is simply absent — the
+ * failure lands after they have already agreed to something.
+ *
+ * Kept here rather than removed so turning it back on is moving one line, and
+ * so the reason is written down instead of being rediscovered from a diff. The
+ * `id` is still the Supabase provider name and the `BRAND_ICONS` key, so it
+ * needs nothing else when it returns.
+ */
+export const DISABLED_OAUTH_PROVIDERS = [
 	{ id: "github", label: "GitHub" },
-	{ id: "google", label: "Google" },
 ] as const;
 
 /**

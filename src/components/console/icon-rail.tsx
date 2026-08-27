@@ -5,7 +5,7 @@ import {
 	avatarFor,
 	displayNameFor,
 	initialsFor,
-	NAV_ITEMS,
+	navItemsFor,
 } from "@/lib/console-nav";
 import { cn } from "@/lib/utils";
 import { NavGlyph } from "./nav-icon";
@@ -70,15 +70,21 @@ function Avatar({ name, src }: { name: string; src: string | null }) {
 
 export function IconRail({
 	currentPath,
+	isAdmin = false,
+	onReport,
 	onSignOut,
 	user,
 }: {
 	currentPath: string;
+	/** Draws the admin row. The policies are what protect it; this is courtesy. */
+	isAdmin?: boolean;
+	onReport: () => void;
 	onSignOut: () => void;
 	user: RailUser;
 }) {
 	const active = activeHref(currentPath);
 	const name = displayNameFor(user);
+	const items = navItemsFor(isAdmin);
 
 	return (
 		<nav
@@ -102,7 +108,7 @@ export function IconRail({
 			</a>
 
 			<ul className="flex flex-col items-center gap-1">
-				{NAV_ITEMS.map((item) => {
+				{items.map((item) => {
 					const current = item.href === active;
 
 					return (
@@ -130,6 +136,27 @@ export function IconRail({
 			</ul>
 
 			<div className="mt-auto flex flex-col items-center gap-1">
+				{/**
+				 * Reporting is an action, not a destination, so it opens a dialog
+				 * rather than taking a row in the list above — the same reasoning
+				 * that keeps Generate out of the nav.
+				 *
+				 * In the footer because it is always available and never the thing
+				 * someone came here to do.
+				 */}
+				<button
+					aria-label="Report a problem"
+					className={cn(
+						RAIL_ITEM,
+						"text-white/45 hover:bg-white/5 hover:text-ink",
+					)}
+					onClick={onReport}
+					title="Report a problem"
+					type="button"
+				>
+					<NavGlyph icon="bug" />
+				</button>
+
 				<button
 					aria-label="Sign out"
 					className={cn(

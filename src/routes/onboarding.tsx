@@ -6,10 +6,19 @@ import { OnboardingSkeleton } from "@/components/console/skeletons";
 import { OnboardingWizard } from "@/components/onboarding/wizard";
 import { SIGN_IN_HREF } from "@/lib/brand";
 import { type Answers, firstUnansweredStep, QUESTIONS } from "@/lib/onboarding";
+import { pageHead } from "@/lib/seo";
 import { getSupabase } from "@/lib/supabase";
 import { explain, NO_ROW } from "@/lib/supabase-errors";
 
 export const Route = createFileRoute("/onboarding")({
+	head: () =>
+		pageHead({
+			path: "/onboarding",
+			title: "Welcome",
+			description:
+				"A few questions so the console can fit what you are building.",
+			noIndex: true,
+		}),
 	component: Onboarding,
 });
 

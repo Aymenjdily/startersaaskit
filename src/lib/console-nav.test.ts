@@ -7,6 +7,7 @@ import {
 	displayNameFor,
 	initialsFor,
 	NAV_ITEMS,
+	navItemsFor,
 } from "./console-nav";
 
 describe("the console navigation", () => {
@@ -45,10 +46,32 @@ describe("the console navigation", () => {
 		expect(isServedRoute("/generate")).toBe(true);
 	});
 
-	it("marks Overview as the only built page for now", () => {
+	/**
+	 * `built: false` is an admission, so the list of what is finished is worth
+	 * pinning: it should only ever grow in the commit that finishes a page.
+	 * Overview was alone here until Admin arrived.
+	 */
+	it("names the pages that are actually finished", () => {
 		expect(
-			NAV_ITEMS.filter((item) => item.built).map((item) => item.href),
-		).toEqual([CONSOLE_HREF]);
+			NAV_ITEMS.filter((item) => item.built)
+				.map((item) => item.href)
+				.sort(),
+		).toEqual([CONSOLE_HREF, "/admin"].sort());
+	});
+
+	/**
+	 * The admin row is hidden from ordinary accounts, and that hiding is a
+	 * courtesy rather than a lock — the row level security in
+	 * `0003_feedback.sql` is what protects the data. Still worth asserting, or
+	 * every signed-in visitor gets a door they cannot open.
+	 */
+	it("keeps admin-only rows out of an ordinary rail", () => {
+		const ordinary = navItemsFor(false).map((item) => item.href);
+
+		expect(ordinary).not.toContain("/admin");
+		expect(navItemsFor(true)).toContain(
+			NAV_ITEMS.find((item) => item.href === "/admin"),
+		);
 	});
 });
 

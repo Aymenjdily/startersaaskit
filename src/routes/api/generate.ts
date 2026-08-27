@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { buildStarter } from "@/lib/generate/build-starter";
 import { zipStarter } from "@/lib/generate/zip";
+import { QUOTA_EXHAUSTED_MESSAGE } from "@/lib/quota";
 import {
 	answerProblems,
 	backfillAnswers,
@@ -109,27 +110,42 @@ export const Route = createFileRoute("/api/generate")({
 				 * Creating: record it, and answer with the row so the console can
 				 * send the reader to its page.
 				 *
-				 * The failure is returned rather than logged, which it was not when
-				 * the zip went out alongside it — without a record there is now
-				 * nothing to navigate to, so swallowing it would strand them on a
-				 * finished wizard with nothing to show for it.
+				 * Creation goes through `create_starter`, the function from
+				 * 0004_generation_quota.sql — it spends one of the account's five
+				 * generations and inserts the row in the same transaction, and it
+				 * is the *only* way in: the direct insert policy is dropped in the
+				 * same migration, so the quota cannot be sidestepped with a
+				 * PostgREST call. Re-downloads come here with a `starterId` and
+				 * never touch this branch, so re-fetching your own zip is free.
+				 *
+				 * The failure is returned rather than logged: without a record
+				 * there is nothing to navigate to, so swallowing it would strand
+				 * them on a finished wizard with nothing to show for it.
 				 */
 				if (!existing) {
-					const { data: created, error: recordFailed } = await supabase
-						.from("starters")
-						.insert({
-							user_id: user.id,
-							answers,
-							project: answers.project,
-						})
-						.select("id, project")
-						.single();
+					const { data: created, error: recordFailed } = await supabase.rpc(
+						"create_starter",
+						{ p_answers: answers, p_project: answers.project },
+					);
 
-					if (recordFailed || !created) {
+					if (recordFailed) {
+						/* The quota refusal is the one the reader can act on, so it is
+					   the one that gets its own status rather than a generic 500. */
+						if (recordFailed.message.includes(QUOTA_EXHAUSTED_MESSAGE)) {
+							return problem(
+								429,
+								"You have used all five generations. Delete nothing — the counter does not reset — and contact us if you need more.",
+							);
+						}
 						return problem(500, "Built it, but could not save the record.");
 					}
 
-					return new Response(JSON.stringify(created), {
+					const row = Array.isArray(created) ? created[0] : created;
+					if (!row) {
+						return problem(500, "Built it, but could not save the record.");
+					}
+
+					return new Response(JSON.stringify(row), {
 						status: 201,
 						headers: {
 							"Content-Type": "application/json",

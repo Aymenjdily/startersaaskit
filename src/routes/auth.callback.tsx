@@ -3,9 +3,26 @@ import { useEffect, useRef, useState } from "react";
 import { AuthBackdrop } from "@/components/auth/auth-backdrop";
 import { SIGN_IN_HREF } from "@/lib/brand";
 import { ONBOARDING_HREF } from "@/lib/onboarding";
+import { pageHead } from "@/lib/seo";
 import { getSupabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/auth/callback")({
+	/**
+	 * A head on a page nobody reads, because a crawler might.
+	 *
+	 * This route exists for the few hundred milliseconds between a provider
+	 * handing someone back and the redirect landing. Indexed, it would put a
+	 * blank "Signing you in" page in search results under the product's name —
+	 * and its URL carries the OAuth code, which is not a string that belongs in
+	 * anybody's index.
+	 */
+	head: () =>
+		pageHead({
+			path: "/auth/callback",
+			title: "Signing you in",
+			description: "Completing sign-in.",
+			noIndex: true,
+		}),
 	component: AuthCallback,
 });
 

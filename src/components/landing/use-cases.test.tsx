@@ -200,13 +200,20 @@ describe("UseCases", () => {
 			}
 		});
 
-		it("ends the delivery in the reader's GitHub", () => {
+		/**
+		 * The steps have to describe what the generator does, not what it might
+		 * do later. This animation claimed dependencies were installed and the
+		 * repo pushed to GitHub; neither happens, and a moving picture is as much
+		 * of a promise as a sentence.
+		 */
+		it("ends with the download, which is what actually happens", () => {
 			render(<UseCases />);
 
 			for (const step of DELIVERY_STEPS) {
 				expect(screen.getByText(step)).toBeInTheDocument();
 			}
-			expect(DELIVERY_STEPS.at(-1)).toMatch(/GitHub/);
+			expect(DELIVERY_STEPS.at(-1)).toMatch(/download/i);
+			expect(DELIVERY_STEPS.join(" ")).not.toMatch(/GitHub|installing/i);
 		});
 
 		/** Same matrix as section 06, or the page contradicts itself. */

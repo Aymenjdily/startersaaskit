@@ -82,7 +82,7 @@ function useTestCycle() {
 	return step;
 }
 
-/** Small window chrome, kept consistent with HeroPreview. */
+/** Small window chrome, kept consistent with the hero's generator panel. */
 function MockChrome({ label }: { label: string }) {
 	return (
 		<div className="mb-4 flex items-center gap-1.5">

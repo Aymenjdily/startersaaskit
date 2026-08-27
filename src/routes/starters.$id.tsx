@@ -7,7 +7,6 @@ import { StackMarks } from "@/components/starters/stack-marks";
 import { StarterGuide } from "@/components/starters/starter-guide";
 import { buttonVariants } from "@/components/ui/button";
 import { File, Folder, Tree } from "@/components/ui/file-tree";
-import { BRAND } from "@/lib/brand";
 import { buildStarter } from "@/lib/generate/build-starter";
 import { downloadStarter } from "@/lib/generate/download";
 import {
@@ -17,11 +16,18 @@ import {
 } from "@/lib/generate/file-tree";
 import { starterGuide, starterTour } from "@/lib/generate/guide";
 import { getStarter, type StarterRecord } from "@/lib/generate/starters";
+import { pageHead } from "@/lib/seo";
 import { answerProblems, STARTER_QUESTIONS } from "@/lib/starter-questions";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/starters/$id")({
-	head: () => ({ meta: [{ title: `Starter · ${BRAND}` }] }),
+	head: () =>
+		pageHead({
+			path: "/starters",
+			title: "Starter",
+			description: "A generated starter and the guide that ships with it.",
+			noIndex: true,
+		}),
 	component: StarterDetail,
 });
 

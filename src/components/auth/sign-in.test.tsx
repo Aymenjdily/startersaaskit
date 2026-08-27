@@ -8,7 +8,12 @@ import { BRAND, SIGN_UP_HREF } from "@/lib/brand";
 import { getSupabase } from "@/lib/supabase";
 import { isServedRoute } from "@/test/served-route";
 import { SCENE_TITLE } from "./auth-backdrop";
-import { AFTER_SIGN_IN_HREF, CALLBACK_PATH, OAUTH_PROVIDERS } from "./controls";
+import {
+	AFTER_SIGN_IN_HREF,
+	CALLBACK_PATH,
+	DISABLED_OAUTH_PROVIDERS,
+	OAUTH_PROVIDERS,
+} from "./controls";
 import { SignIn } from "./sign-in";
 
 vi.mock("@/lib/supabase", () => ({ getSupabase: vi.fn() }));
@@ -257,6 +262,22 @@ describe("SignIn", () => {
 			expect(isServedRoute(CALLBACK_PATH)).toBe(true);
 		});
 
+		/**
+		 * GitHub is listed in `DISABLED_OAUTH_PROVIDERS` rather than deleted, so
+		 * it would be easy to re-export it by accident. A provider whose OAuth
+		 * app is not ready hands people to a consent screen and fails after they
+		 * have agreed — so its absence is worth asserting.
+		 */
+		it("offers no button for a disabled provider", () => {
+			render(<SignIn />);
+
+			for (const { label } of DISABLED_OAUTH_PROVIDERS) {
+				expect(
+					screen.queryByRole("button", { name: `Continue with ${label}` }),
+				).not.toBeInTheDocument();
+			}
+		});
+
 		it("reports a provider that refuses to start", async () => {
 			const user = userEvent.setup();
 			captureNavigation();
@@ -266,7 +287,7 @@ describe("SignIn", () => {
 			render(<SignIn />);
 
 			await user.click(
-				screen.getByRole("button", { name: "Continue with GitHub" }),
+				screen.getByRole("button", { name: "Continue with Google" }),
 			);
 
 			expect(await screen.findByRole("alert")).toHaveTextContent(

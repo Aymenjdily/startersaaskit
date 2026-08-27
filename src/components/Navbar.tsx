@@ -10,9 +10,17 @@ import {
 } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 
+/**
+ * Rooted at `/`, not bare fragments.
+ *
+ * These sections exist on the home page only, so `#features` from `/privacy`
+ * scrolled nowhere and the whole menu was dead on any standalone page. Rooting
+ * them costs nothing where they already worked: a link to the current path with
+ * a different fragment is still a same-document scroll, not a reload.
+ */
 const navLinks = [
-	{ label: "Features", href: "#features" },
-	{ label: "Testing", href: "#testing" },
+	{ label: "Features", href: "/#features" },
+	{ label: "Testing", href: "/#testing" },
 ];
 
 /**
@@ -21,7 +29,7 @@ const navLinks = [
  */
 const useCases = USE_CASES.map(({ title }) => ({
 	label: title,
-	href: "#use-cases",
+	href: "/#use-cases",
 }));
 
 export function Navbar() {

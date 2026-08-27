@@ -1,8 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SignIn } from "@/components/auth/sign-in";
-import { BRAND } from "@/lib/brand";
+import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/sign-in")({
-	head: () => ({ meta: [{ title: `Sign in · ${BRAND}` }] }),
+	head: () =>
+		pageHead({
+			path: "/sign-in",
+			title: "Sign in",
+			description:
+				"Sign in to generate a starter repository wired to the stack you already use.",
+			noIndex: true,
+		}),
 	component: SignIn,
 });

@@ -19,9 +19,9 @@ type Link = { label: string; href: string };
 
 /** In-page anchors. Each one is an `id` some section on this page carries. */
 export const PRODUCT_LINKS: Link[] = [
-	{ label: "Features", href: "#features" },
-	{ label: "Testing", href: "#testing" },
-	{ label: "Use cases", href: "#use-cases" },
+	{ label: "Features", href: "/#features" },
+	{ label: "Testing", href: "/#testing" },
+	{ label: "Use cases", href: "/#use-cases" },
 ];
 
 /**

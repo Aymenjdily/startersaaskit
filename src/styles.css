@@ -110,7 +110,12 @@
 
   /* surfaces */
   --color-base: #0d100f;
-  --color-forest: #152512;
+  /* The alternating band, and it has to be far enough from `base` to see.
+     At #152512 the step between consecutive sections measured 1.19:1 — the
+     sections were alternating and no one could tell, which is the same as not
+     alternating at all. #20391c puts it at about 1.5:1: a change you notice
+     without a stripe you have to look away from. */
+  --color-forest: #20391c;
   --color-card-deep: #2b4420;
   --color-card-hover: #283a20;
   --color-elevated: #1e1e1e;

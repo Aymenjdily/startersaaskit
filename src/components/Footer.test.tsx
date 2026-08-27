@@ -97,8 +97,10 @@ describe("Footer", () => {
 			for (const { label, href } of PRODUCT_LINKS) {
 				expect(link(label)).toHaveAttribute("href", href);
 			}
+			/* Rooted at `/`, because the footer is rendered on the legal pages too
+			   and a bare `#features` scrolls nowhere from there. */
 			expect(PRODUCT_LINKS.map(({ href }) => href)).toEqual(
-				ANCHOR_TARGETS.map(({ id }) => `#${id}`),
+				ANCHOR_TARGETS.map(({ id }) => `/#${id}`),
 			);
 		});
 

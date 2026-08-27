@@ -1,0 +1,64 @@
+# The gate behind the claim this site makes.
+#
+# The landing page says every combination goes green before it is offered. That
+# was true of the test suite and not true of anything automated — there was no
+# CI. This is the workflow that makes the sentence honest.
+#
+# What actually proves the claim is `pnpm test`: `starter-matrix.test.ts` builds
+# every combination the wizard can produce, `syntax.test.ts` parses every
+# generated `.ts` and `.tsx` with the TypeScript compiler, and
+# `build-starter.test.ts` checks the assembled `package.json` and stylesheet.
+# A combination that cannot be generated fails here rather than in someone's
+# download.
+
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+# A second push to the same branch makes the first run irrelevant. Cancelling it
+# keeps the queue short and the feedback fast.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          # Caches the pnpm store, which is most of the install time.
+          cache: pnpm
+
+      # `--frozen-lockfile` so a lockfile that disagrees with package.json fails
+      # here instead of quietly resolving to something nobody has run locally.
+      - run: pnpm install --frozen-lockfile
+
+      # Formatting and lint first: they are the fastest to run and the cheapest
+      # to fix, so a failure arrives before anyone waits on the type checker.
+      - run: pnpm check
+
+      # `tsr generate` writes the route tree, which typecheck reads. Running it
+      # separately makes a failure here say "routes" rather than surfacing as a
+      # hundred missing-module errors.
+      - run: pnpm generate-routes
+
+      - run: npx tsc --noEmit
+
+      - run: pnpm test
+
+      # The site has to build, not just typecheck. A broken import in a route
+      # only appears here.
+      - run: pnpm build

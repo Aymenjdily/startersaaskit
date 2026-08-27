@@ -1,10 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ConsoleShell } from "@/components/console/console-shell";
 import { Panel, Section } from "@/components/console/panel";
-import { BRAND } from "@/lib/brand";
+import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/generate")({
-	head: () => ({ meta: [{ title: `Generate · ${BRAND}` }] }),
+	head: () =>
+		pageHead({
+			path: "/generate",
+			title: "Generate",
+			description: "Answer the questions and take delivery of a repository.",
+			noIndex: true,
+		}),
 	component: GeneratePage,
 });
 

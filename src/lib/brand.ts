@@ -5,13 +5,13 @@
  * called itself one thing while the logo in the navbar plainly read another.
  * There is one spelling here now, so the two cannot disagree again.
  *
- * The URL is still a placeholder. When the repo gets its real home, this is the
- * only line that changes.
+ * The URL points at the product's public repo; when the repo moves, this is
+ * the only line that changes.
  */
 
 export const BRAND = "StarterSaaSKit";
 
-export const REPO_URL = "https://github.com/startersaaskit/startersaaskit";
+export const REPO_URL = "https://github.com/Aymenjdily/startersaaskit";
 
 export const README_URL = `${REPO_URL}#readme`;
 
@@ -48,3 +48,32 @@ export const LOGO_SIZE = { width: 2086, height: 607 };
 export const LOGO_MARK_SRC = "/logo-mark.png";
 
 export const LOGO_MARK_SIZE = { width: 680, height: 680 };
+
+/**
+ * The mark on its own, square and transparent, cut from `logo.png` at the
+ * gutter that separates the tiger from the first letter of the name.
+ *
+ * `LOGO_MARK_SRC` above is the console rail's copy and carries its own baked-in
+ * margin. This one is trimmed to the artwork's bounds, so it fills whatever box
+ * it is given rather than floating in the middle of one.
+ */
+export const ICON_SRC = "/icon.png";
+
+/**
+ * The tab icons, and the one place the brand is not transparent.
+ *
+ * The mark is a white face with orange stripes. On a light tab strip a
+ * transparent version loses the face entirely and leaves the stripes floating,
+ * so these are baked onto `--color-base` — the same near-black the page sits
+ * on — which holds up under either browser theme.
+ *
+ * Three files rather than one scaled down: browsers pick a size by display
+ * density, and a 512px tiger resampled to 16 by the browser is a smudge.
+ */
+export const FAVICON_SIZES = [16, 32, 48] as const;
+
+export const faviconSrc = (size: (typeof FAVICON_SIZES)[number]) =>
+	`/favicon-${size}.png`;
+
+/** Home-screen icon. iOS composites onto white, so this one is opaque too. */
+export const APPLE_TOUCH_ICON_SRC = "/apple-touch-icon.png";

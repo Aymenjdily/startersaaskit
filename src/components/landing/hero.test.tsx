@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { SIGN_UP_HREF } from "@/lib/brand";
+import type { StarterPreview } from "@/lib/starter-preview";
 import { Hero } from "./hero";
 import { ANSWERS, HowItWorks } from "./how-it-works";
 
@@ -10,9 +11,32 @@ import { ANSWERS, HowItWorks } from "./how-it-works";
  */
 const STACK_AXES = ANSWERS.slice(0, -1);
 
+/**
+ * One combination is enough for these tests.
+ *
+ * They are about the hero's copy, not its panel — the generator preview has its
+ * own tests. A fixture keeps the real `buildStarter` out of a suite that has no
+ * opinion about file trees.
+ */
+const PREVIEWS: StarterPreview[] = [
+	{
+		framework: "nextjs",
+		database: "neon",
+		tree: [
+			{ id: "src", name: "src", children: [{ id: "src/app", name: "app" }] },
+		],
+		files: 44,
+		tests: 7,
+		opening: {
+			path: "src/db/schema.ts",
+			source: "export const users = table(",
+		},
+	},
+];
+
 describe("Hero", () => {
 	it("leads with a single h1", () => {
-		const { container } = render(<Hero />);
+		const { container } = render(<Hero previews={PREVIEWS} />);
 		const h1s = container.querySelectorAll("h1");
 		expect(h1s).toHaveLength(1);
 		expect(h1s[0]).toHaveTextContent(
@@ -26,7 +50,7 @@ describe("Hero", () => {
 		 * `hero-in`, and matching on it silently read the eyebrow instead.
 		 */
 		const subtitle = () => {
-			const { container } = render(<Hero />);
+			const { container } = render(<Hero previews={PREVIEWS} />);
 			const el = container.querySelector("[data-subtitle]");
 			expect(el).not.toBeNull();
 			return el?.textContent ?? "";
@@ -50,13 +74,13 @@ describe("Hero", () => {
 	});
 
 	it("states the offer up front", () => {
-		render(<Hero />);
+		render(<Hero previews={PREVIEWS} />);
 		expect(screen.getByText("Free while in beta")).toBeVisible();
 	});
 
 	describe("calls to action", () => {
 		it("offers exactly one primary and one secondary action", () => {
-			render(<Hero />);
+			render(<Hero previews={PREVIEWS} />);
 			const links = screen.getAllByRole("link");
 			expect(links).toHaveLength(2);
 			expect(links[0]).toHaveAccessibleName(/Generate your starter/);
@@ -69,14 +93,14 @@ describe("Hero", () => {
 		 * flow they are already in.
 		 */
 		it("keeps both actions in the same tab", () => {
-			render(<Hero />);
+			render(<Hero previews={PREVIEWS} />);
 			for (const link of screen.getAllByRole("link")) {
 				expect(link).not.toHaveAttribute("target");
 			}
 		});
 
 		it("sends the primary action into the product", () => {
-			render(<Hero />);
+			render(<Hero previews={PREVIEWS} />);
 			expect(screen.getAllByRole("link")[0]).toHaveAttribute(
 				"href",
 				SIGN_UP_HREF,
@@ -85,7 +109,7 @@ describe("Hero", () => {
 
 		/** A dead anchor would scroll nowhere and look like a broken button. */
 		it("points the secondary action at a section this page renders", () => {
-			render(<Hero />);
+			render(<Hero previews={PREVIEWS} />);
 			const href = screen.getAllByRole("link")[1].getAttribute("href");
 			expect(href).toBe("#how-it-works");
 
@@ -94,24 +118,21 @@ describe("Hero", () => {
 		});
 	});
 
-	describe("product preview", () => {
-		it("renders the placeholder rather than a broken recording", () => {
-			render(<Hero />);
-			expect(screen.getByText("Product preview")).toBeVisible();
-			expect(
-				screen.getByText("A walkthrough of the generator is on the way."),
-			).toBeVisible();
+	describe("the generator panel", () => {
+		it("shows real generated files rather than a promise of some", () => {
+			render(<Hero previews={PREVIEWS} />);
+
+			/* The placeholder this replaced said a walkthrough was "on the way".
+			   A hero whose largest element is an IOU is worse than a smaller
+			   hero, and it is the kind of copy that survives to launch. */
+			expect(screen.queryByText(/on the way/i)).not.toBeInTheDocument();
+			expect(screen.getByText("src/")).toBeVisible();
 		});
 
-		/**
-		 * The frame is aspect-locked so dropping in the real recording later causes
-		 * no layout shift. Losing the ratio would regress CLS silently.
-		 */
-		it("reserves the aspect ratio the recording will occupy", () => {
-			const { container } = render(<Hero />);
-			expect(
-				container.querySelector('[class*="aspect-[16/10]"]'),
-			).toBeInTheDocument();
+		it("reports counts taken from the generated paths", () => {
+			render(<Hero previews={PREVIEWS} />);
+
+			expect(screen.getByText("44 files · 7 tests")).toBeVisible();
 		});
 	});
 });

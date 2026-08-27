@@ -34,9 +34,10 @@ describe("Navbar", () => {
 		it("lists every use case in the dropdown", () => {
 			render(<Navbar />);
 			for (const label of USE_CASES) {
+				/* Rooted, so the dropdown still works from `/privacy`. */
 				expect(screen.getByRole("link", { name: label })).toHaveAttribute(
 					"href",
-					"#use-cases",
+					"/#use-cases",
 				);
 			}
 		});

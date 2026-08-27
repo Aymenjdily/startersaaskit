@@ -1,8 +1,9 @@
 import { buttonVariants } from "@/components/ui/button";
 import { SIGN_UP_HREF } from "@/lib/brand";
-import { HeroPreview } from "./hero-preview";
+import type { StarterPreview } from "@/lib/starter-preview";
+import { HeroGenerator } from "./hero-generator";
 
-export function Hero() {
+export function Hero({ previews }: { previews: StarterPreview[] }) {
 	return (
 		<section className="relative flex flex-col items-center overflow-hidden px-gutter pt-[180px] pb-[30px] sm:pt-[200px] sm:pb-10 md:px-6 md:pt-[240px] md:pb-8">
 			<div className="relative z-10 mb-8 w-full max-w-content text-left md:mb-15">
@@ -27,9 +28,9 @@ export function Hero() {
 						style={{ animationDelay: "0.2s" }}
 					>
 						Answer a few questions — framework, components, database, ORM, auth,
-						billing, email, landing page, package manager — and a repo lands in
-						your GitHub with all of it wired together and the test suite already
-						passing.
+						billing, email, landing page, package manager — and the whole repo
+						downloads, wired together, with its test suite already written and
+						green on the first run.
 					</p>
 
 					<div
@@ -60,7 +61,7 @@ export function Hero() {
 					aria-hidden
 					className="-z-10 pointer-events-none absolute inset-x-[10%] top-[10%] bottom-[20%] rounded-full bg-pine/20 blur-[120px]"
 				/>
-				<HeroPreview />
+				<HeroGenerator previews={previews} />
 			</div>
 		</section>
 	);

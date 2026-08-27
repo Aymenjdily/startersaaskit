@@ -5,7 +5,7 @@ import userEvent from "@testing-library/user-event";
 import { renderToString } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { BRAND, LOGO_MARK_SIZE, LOGO_MARK_SRC } from "@/lib/brand";
-import { CONSOLE_HREF, NAV_ITEMS } from "@/lib/console-nav";
+import { CONSOLE_HREF, navItemsFor } from "@/lib/console-nav";
 import { IconRail } from "./icon-rail";
 
 const ada = {
@@ -17,6 +17,7 @@ function renderIconRail(props: Partial<Parameters<typeof IconRail>[0]> = {}) {
 	return render(
 		<IconRail
 			currentPath={CONSOLE_HREF}
+			onReport={vi.fn()}
 			onSignOut={vi.fn()}
 			user={ada}
 			{...props}
@@ -27,7 +28,12 @@ function renderIconRail(props: Partial<Parameters<typeof IconRail>[0]> = {}) {
 describe("IconRail", () => {
 	it("renders identical markup across separate server renders", () => {
 		const rail = (
-			<IconRail currentPath={CONSOLE_HREF} onSignOut={vi.fn()} user={ada} />
+			<IconRail
+				currentPath={CONSOLE_HREF}
+				onReport={vi.fn()}
+				onSignOut={vi.fn()}
+				user={ada}
+			/>
 		);
 
 		expect(renderToString(rail)).toBe(renderToString(rail));
@@ -39,8 +45,15 @@ describe("IconRail", () => {
 		expect(screen.getByRole("navigation", { name: "Console" })).toBeVisible();
 	});
 
-	it.each(NAV_ITEMS)("offers $label", ({ href, label }) => {
-		renderIconRail();
+	/**
+	 * `navItemsFor(true)`, not `NAV_ITEMS`.
+	 *
+	 * The list now holds a row the rail hides from ordinary accounts, so
+	 * iterating the raw constant asserts the rail draws a link it is supposed to
+	 * withhold. Rendering as an admin is what makes "offers every item" true.
+	 */
+	it.each(navItemsFor(true))("offers $label", ({ href, label }) => {
+		renderIconRail({ isAdmin: true });
 
 		expect(
 			screen.getByRole("link", { name: new RegExp(label) }),
@@ -91,7 +104,7 @@ describe("IconRail", () => {
 	 */
 	describe("pages that do not exist yet", () => {
 		it.each(
-			NAV_ITEMS.filter((item) => !item.built),
+			navItemsFor(true).filter((item) => !item.built),
 		)("warns that $label is not built, in its name and its tooltip", ({
 			label,
 		}) => {
@@ -102,9 +115,9 @@ describe("IconRail", () => {
 		});
 
 		it.each(
-			NAV_ITEMS.filter((item) => item.built),
+			navItemsFor(true).filter((item) => item.built),
 		)("says nothing of the sort about $label", ({ label }) => {
-			renderIconRail();
+			renderIconRail({ isAdmin: true });
 
 			const link = screen.getByRole("link", { name: label });
 			expect(link).toHaveAttribute("title", label);

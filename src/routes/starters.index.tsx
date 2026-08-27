@@ -5,13 +5,13 @@ import { StarterGridSkeleton } from "@/components/console/skeletons";
 import { CreateStarterDialog } from "@/components/starters/create-starter-dialog";
 import { StarterBrowser } from "@/components/starters/starter-browser";
 import { buttonVariants } from "@/components/ui/button";
-import { BRAND } from "@/lib/brand";
 import { createStarter, downloadStarter } from "@/lib/generate/download";
 import {
 	deleteStarter,
 	listStarters,
 	type StarterRecord,
 } from "@/lib/generate/starters";
+import { pageHead } from "@/lib/seo";
 import {
 	QUESTION_COUNT_WORD,
 	type StarterAnswers,
@@ -19,7 +19,13 @@ import {
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/starters/")({
-	head: () => ({ meta: [{ title: `Starters · ${BRAND}` }] }),
+	head: () =>
+		pageHead({
+			path: "/starters",
+			title: "Starters",
+			description: "Every starter this account has generated.",
+			noIndex: true,
+		}),
 	component: Starters,
 });
 

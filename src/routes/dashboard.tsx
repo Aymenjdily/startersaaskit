@@ -8,13 +8,20 @@ import {
 	RecentStartersSkeleton,
 } from "@/components/console/skeletons";
 import { StackMarks } from "@/components/starters/stack-marks";
-import { BRAND } from "@/lib/brand";
 import { CONSOLE_HREF } from "@/lib/console-nav";
 import { listStarters, type StarterRecord } from "@/lib/generate/starters";
+import { GENERATION_LIMIT, generationsUsed } from "@/lib/quota";
+import { pageHead } from "@/lib/seo";
 import { QUESTION_COUNT_WORD } from "@/lib/starter-questions";
 
 export const Route = createFileRoute("/dashboard")({
-	head: () => ({ meta: [{ title: `Console · ${BRAND}` }] }),
+	head: () =>
+		pageHead({
+			path: "/dashboard",
+			title: "Console",
+			description: "Your generated starters and account.",
+			noIndex: true,
+		}),
 	component: Dashboard,
 });
 
@@ -23,11 +30,13 @@ const RECENT = 4;
 
 function Dashboard() {
 	const [starters, setStarters] = useState<StarterRecord[] | null>(null);
+	const [used, setUsed] = useState<number | null>(null);
 
 	useEffect(() => {
 		listStarters()
 			.then(setStarters)
 			.catch(() => setStarters([]));
+		generationsUsed().then(setUsed);
 	}, []);
 
 	const recent = (starters ?? []).slice(0, RECENT);
@@ -59,6 +68,13 @@ function Dashboard() {
 							title="Settings"
 						/>
 					</div>
+					{used !== null && (
+						<p className="text-[13px] text-white/50">
+							{GENERATION_LIMIT - used > 0
+								? `${GENERATION_LIMIT - used} of ${GENERATION_LIMIT} generations left. Re-downloading a starter you already made is always free.`
+								: `All ${GENERATION_LIMIT} generations used. Your starters stay downloadable — the quota only limits new ones.`}
+						</p>
+					)}
 				</Section>
 
 				<Section

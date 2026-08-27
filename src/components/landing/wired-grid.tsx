@@ -157,7 +157,9 @@ export function WiredGrid() {
 
 	return (
 		<section
-			className="relative mx-auto w-full max-w-[1348px] overflow-hidden pt-10 pb-[50px] sm:pt-15 sm:pb-20"
+			/* Tight to the heading above it — this grid is that heading's content, and
+			   a section-sized gap between the two made them read as separate bands. */
+			className="relative mx-auto w-full max-w-[1348px] overflow-hidden pt-8 pb-[50px] sm:pt-10 sm:pb-20"
 			id="features"
 		>
 			{/* Edge fades so reflowing tiles dissolve into the page rather than clipping. */}

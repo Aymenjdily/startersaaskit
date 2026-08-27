@@ -37,12 +37,12 @@ export const STEPS: Step[] = [
 	{
 		n: "02",
 		title: "See it before it exists",
-		text: "The full file tree and the suite it ships with, laid out before anything is created. Nothing reaches your account until you approve it.",
+		text: "The full file tree and the suite it ships with, laid out before anything is generated. Nothing is built until you approve it.",
 	},
 	{
 		n: "03",
 		title: "Take delivery",
-		text: "A new repo in your GitHub, or a zip if you would rather keep us out of your account. Clone it and the suite is green on the first run.",
+		text: "A zip of the whole repo, yours to unpack and push wherever you like. Install, run the suite, and it is green on the first run.",
 	},
 ];
 
@@ -178,7 +178,7 @@ export function HowItWorks() {
 					<SectionHeading
 						align="center"
 						eyebrow="How it works"
-						title={`${QUESTION_COUNT_WORD_CAPITALISED} answers and it is in your GitHub`}
+						title={`${QUESTION_COUNT_WORD_CAPITALISED} answers and the repo is on your machine`}
 						description="Every question narrows the next one, so you cannot assemble a stack that does not fit together. You see the whole repo before it is created."
 					/>
 				</FadeUp>

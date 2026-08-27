@@ -135,12 +135,21 @@ function StudioScreen() {
 }
 
 /** What happens after the last question, in the order it happens. */
+/**
+ * What the generator actually does, in order.
+ *
+ * It used to end "pushed to your GitHub", with "installing dependencies" and
+ * "running the suite" along the way. None of the three happen: what ships is a
+ * zip of source, and nothing is installed or executed on anyone's behalf. An
+ * animation is still a claim, and this one described a product that does not
+ * exist yet.
+ */
 export const DELIVERY_STEPS = [
 	"resolving your answers",
 	"generating the repo",
-	"installing dependencies",
-	"running the suite — 0 failures",
-	"pushed to your GitHub",
+	"wiring the test suite",
+	"packing the zip",
+	"downloaded — ready to push",
 ];
 
 function DeliveryScreen() {
@@ -230,7 +239,7 @@ export const USE_CASES: UseCase[] = [
 	},
 	{
 		title: "Side projects",
-		text: `${QUESTION_COUNT_WORD_CAPITALISED} answers and the repo is in your GitHub, dependencies installed and suite green. The part you were going to procrastinate on is already done.`,
+		text: `${QUESTION_COUNT_WORD_CAPITALISED} answers and the repo is on your machine, wired together with its suite already written. The part you were going to procrastinate on is already done.`,
 		Screen: DeliveryScreen,
 	},
 	{

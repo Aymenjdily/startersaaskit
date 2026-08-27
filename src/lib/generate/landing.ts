@@ -104,6 +104,65 @@ body {
 }
 
 /**
+ * The client strip's drift.
+ *
+ * Two identical halves in one track, shifted by exactly -50%: at the end of the
+ * cycle the second half sits precisely where the first began, so the restart is
+ * invisible and no JavaScript is involved.
+ *
+ * The chips carry \`margin-right\` rather than the track carrying \`gap\`, and
+ * that is the whole trick. With a gap, a half measures \`N*w + (N-1)*g\` while the
+ * shift needs \`N*w + N*g\` — half a gap adrift, which shows up as a small jump
+ * once per loop.
+ *
+ * 105s is not an arbitrary slow number. The reference drifts at roughly 18px a
+ * second, and one half of this row is about 1,880px wide, so a full cycle takes
+ * about that long. Fast enough to read as alive, slow enough that nobody is
+ * chasing a name across the screen.
+ *
+ * The mask fades both ends so chips enter and leave rather than being sliced off
+ * at a hard edge.
+ */
+@keyframes drift {
+	from {
+		transform: translateX(0);
+	}
+	to {
+		transform: translateX(-50%);
+	}
+}
+
+.drift-frame {
+	overflow: hidden;
+	mask-image: linear-gradient(
+		90deg,
+		transparent,
+		#000 4%,
+		#000 92%,
+		transparent
+	);
+	-webkit-mask-image: linear-gradient(
+		90deg,
+		transparent,
+		#000 4%,
+		#000 92%,
+		transparent
+	);
+}
+
+.drift-track {
+	animation: drift 105s linear infinite;
+}
+
+/* Motion for its own sake is the first thing to go. The chips stay put and stay
+   readable; nothing is lost but the drift. */
+@media (prefers-reduced-motion: reduce) {
+	.drift-track {
+		animation: none;
+	}
+}
+
+/**
  * The entrance: the page arriving rather than appearing.
  *
  * ## The hidden state lives in the keyframe, never on the element
@@ -362,6 +421,12 @@ export const content = {
 		 * Each href has to match an id a section actually sets — the shipped
 		 * test checks it, because a nav link that scrolls nowhere is the first
 		 * thing a visitor clicks.
+		 *
+		 * Hrefs repeat, on purpose: six menu items can all point at \`#product\`.
+		 * That is why every list here is keyed by **label** rather than href —
+		 * React needs the key to identify a row, and four rows claiming to be
+		 * \`#product\` makes it drop three of them. Labels are what the shipped
+		 * test checks for uniqueness.
 		 *
 		 * A \`menu\` is optional. Add one and the link grows a chevron and a
 		 * dropdown; leave it off and the link stays a link. No component changes
@@ -1506,7 +1571,7 @@ export function Nav() {
 						 * top half of it — the links sat 8px above the logo, which is
 						 * the kind of misalignment you see at once and cannot name.
 						 */
-						<li className="group relative" key={link.href}>
+						<li className="group relative" key={link.label}>
 							<a
 								className={
 									papered
@@ -1572,7 +1637,7 @@ export function Nav() {
 											<a
 												className="rounded-[4px] px-2 py-2 transition-colors hover:bg-[#f4f2ef]"
 												href={item.href}
-												key={item.href}
+												key={item.label}
 											>
 												<span className="block text-[14px] text-ink">
 													{item.label}
@@ -1719,7 +1784,7 @@ export function Nav() {
 					<div className="gutter flex min-h-full flex-col py-6">
 						<ul className="flex flex-col">
 							{content.nav.links.map((link) => (
-								<li className="border-paper/10 border-b" key={link.href}>
+								<li className="border-paper/10 border-b" key={link.label}>
 									<a
 										className="block py-4 text-[22px] text-paper tracking-[-0.01em]"
 										href={link.href}
@@ -1731,7 +1796,7 @@ export function Nav() {
 									{link.menu && (
 										<ul className="-mt-1 flex flex-col gap-1 pb-4 pl-4">
 											{link.menu.items.map((item) => (
-												<li key={item.href}>
+												<li key={item.label}>
 													<a
 														className="block py-1.5 text-[15px] text-paper/60"
 														href={item.href}
@@ -3006,7 +3071,7 @@ export function Integrations() {
 const LOGOS = `import { content } from "./content";
 
 /**
- * The client strip: a caption, then a row of marks running off both edges.
+ * The client strip: a caption, then a slow drift of client marks.
  *
  * ## The marks are placeholders
  *
@@ -3018,48 +3083,61 @@ const LOGOS = `import { content } from "./content";
  * The chip is the sizing box and the image is capped at 24px tall, so any
  * replacement lands at the same height whatever its own dimensions are.
  *
- * ## It does not scroll
+ * ## Why it moves
  *
- * This was a marquee. It looked fine and it was wrong for the job: a strip that
- * slides is a strip you cannot read, and the names are the only reason it is
- * here. The row is simply wider than the screen and fades out at both ends —
- * the crop says "and more" without moving anything.
+ * Fourteen marks laid flat either wrap onto two lines or shrink to nothing. The
+ * drift holds them at a readable size in a fixed-height band, and the motion is
+ * what tells you the list continues past the edge — a cropped row that never
+ * moves reads as one that ran out.
+ *
+ * The second list is \`aria-hidden\`: it exists only so the loop has something to
+ * scroll into, and a screen reader reading every client twice is worse than no
+ * marquee at all.
  */
 export function Logos() {
+	/**
+	 * The list twice over, per half.
+	 *
+	 * A half has to be at least as wide as the visible strip, or the loop runs
+	 * out of chips and a gap slides through once per cycle. Fourteen marks come
+	 * to roughly 1,880px against a strip that caps near 950px, so one pass is
+	 * already enough — but the duplication is what makes the two halves of the
+	 * track identical, which is what makes the restart invisible.
+	 */
+	const chips = content.logos.marks.map((mark) => (
+		<li
+			className="mr-4 flex h-[51px] shrink-0 items-center rounded-[6px] bg-[rgba(84,82,82,0.06)] px-4"
+			key={mark.name}
+		>
+			{/* \`h-6 w-auto\` — height fixed, width free. Constraining both would
+			    squash a wide wordmark into a narrow one, and a strip where every
+			    mark is the same width is the tell of a fake logo row. */}
+			<img
+				alt=""
+				className="h-6 w-auto shrink-0 opacity-70"
+				loading="lazy"
+				src={mark.src}
+				title={mark.name}
+			/>
+		</li>
+	));
+
 	return (
-		<section className="relative overflow-hidden border-rule border-b py-7">
-			<div className="gutter flex flex-col gap-5 md:flex-row md:items-center md:gap-12">
-				<p className="max-w-[240px] shrink-0 text-[14px] text-ink/80 leading-5">
-					{content.logos.caption}
-				</p>
+		<section className="gutter flex flex-col gap-5 border-rule border-b py-7 md:flex-row md:items-center md:gap-12">
+			<p className="max-w-[240px] shrink-0 text-[14px] text-ink/80 leading-5">
+				{content.logos.caption}
+			</p>
 
-				{/* \`w-max\` so the row keeps its natural width and overruns the
-				    container rather than squeezing the chips to fit. */}
-				<ul className="flex w-max min-w-0 gap-4">
-					{content.logos.marks.map((mark) => (
-						<li
-							className="flex h-[51px] shrink-0 items-center rounded-[6px] bg-[rgba(84,82,82,0.06)] px-4"
-							key={mark.name}
-						>
-							{/* \`h-6 w-auto\` — height fixed, width free. Constraining both
-							    would squash a wide wordmark into a narrow one, and a strip
-							    where every mark is the same width is the tell of a fake
-							    logo row. */}
-							<img
-								alt=""
-								className="h-6 w-auto shrink-0 opacity-70"
-								loading="lazy"
-								src={mark.src}
-								title={mark.name}
-							/>
-						</li>
-					))}
-				</ul>
+			{/* \`min-w-0\` on a flex child, or the track's intrinsic width wins and
+			    the caption gets squeezed to nothing beside it. */}
+			<div className="drift-frame min-w-0 flex-1">
+				<div className="drift-track flex w-max">
+					<ul className="flex">{chips}</ul>
+					<ul aria-hidden="true" className="flex">
+						{chips}
+					</ul>
+				</div>
 			</div>
-
-			{/* Only the trailing edge needs fading: the row starts at the page
-			    gutter like everything else and runs off to the right. */}
-			<div className="pointer-events-none absolute inset-y-0 right-0 w-[160px] bg-gradient-to-l from-paper from-40% to-transparent" />
 		</section>
 	);
 }
@@ -3778,7 +3856,7 @@ export function Footer() {
 
 							<ul className="mt-7 flex flex-col gap-[13px]">
 								{column.links.map((link) => (
-									<li key={link.href}>
+									<li key={link.label}>
 										<a
 											className="text-[14px] text-ink leading-5 transition-colors hover:text-ink/60"
 											href={link.href}
@@ -3976,6 +4054,50 @@ describe("the landing page", () => {
 
 			expect(existsSync(\`public\${source}\`), \`missing public\${source}\`).toBe(
 				true,
+			);
+		}
+	});
+
+	/**
+	 * Every list React renders is keyed by label, so labels have to be unique
+	 * within their list.
+	 *
+	 * They cannot be keyed by href: a menu of six links can point all six at
+	 * \`#product\`, and duplicate keys make React drop rows rather than render
+	 * them. That failure is quiet — a warning in the console and a menu missing
+	 * three items, which reads as a styling bug.
+	 *
+	 * Checked per list rather than across the page, because the same label in
+	 * two different columns is fine and common.
+	 */
+	it("keeps labels unique inside every list it renders", () => {
+		const lists: [string, string[]][] = [
+			["nav", content.nav.links.map((link) => link.label)],
+			...content.nav.links
+				.filter((link) => link.menu)
+				.map(
+					(link): [string, string[]] => [
+						\`\${link.label} menu\`,
+						link.menu?.items.map((item) => item.label) ?? [],
+					],
+				),
+			...content.footer.columns.map(
+				(column): [string, string[]] => [
+					\`footer/\${column.title}\`,
+					column.links.map((link) => link.label),
+				],
+			),
+			...content.workflow.tabs.map(
+				(tab): [string, string[]] => [
+					\`workflow/\${tab.label}\`,
+					tab.links.map((link) => link.title),
+				],
+			),
+		];
+
+		for (const [where, labels] of lists) {
+			expect(new Set(labels).size, \`duplicate label in \${where}\`).toBe(
+				labels.length,
 			);
 		}
 	});

@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { SIGN_IN_HREF } from "@/lib/brand";
+import { isAdmin as checkAdmin } from "@/lib/feedback";
 import { getSupabase } from "@/lib/supabase";
 import { IconRail, type RailUser } from "./icon-rail";
+import { ReportDialog } from "./report-dialog";
 import { ConsoleChromeSkeleton } from "./skeletons";
 
 /**
@@ -31,6 +33,8 @@ export function ConsoleShell({
 	title: string;
 }) {
 	const [user, setUser] = useState<RailUser | null>(null);
+	const [admin, setAdmin] = useState(false);
+	const [reporting, setReporting] = useState(false);
 
 	useEffect(() => {
 		getSupabase()
@@ -41,6 +45,12 @@ export function ConsoleShell({
 					return;
 				}
 				setUser(data.user);
+
+				/* Whether to draw the admin row. Deliberately not awaited with the
+				   session: the console should not wait on a permission check that
+				   only decides one icon, and a false answer costs nothing because
+				   the route and its data are protected by policy either way. */
+				checkAdmin().then(setAdmin);
 			})
 			.catch(() => window.location.replace(SIGN_IN_HREF));
 	}, []);
@@ -54,7 +64,15 @@ export function ConsoleShell({
 
 	return (
 		<div className="flex min-h-screen bg-surface">
-			<IconRail currentPath={currentPath} onSignOut={signOut} user={user} />
+			<IconRail
+				currentPath={currentPath}
+				isAdmin={admin}
+				onReport={() => setReporting(true)}
+				onSignOut={signOut}
+				user={user}
+			/>
+
+			<ReportDialog onClose={() => setReporting(false)} open={reporting} />
 
 			<div className="flex min-w-0 flex-1 flex-col">
 				<header className="flex h-14 shrink-0 items-center gap-3 border-white/8 border-b px-4 md:px-6">

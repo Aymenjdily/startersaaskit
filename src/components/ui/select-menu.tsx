@@ -183,6 +183,7 @@ export function SelectMenu({
 					className="absolute top-[calc(100%+4px)] left-0 z-50 max-h-[280px] w-full min-w-[180px] overflow-auto rounded-[10px] border border-white/12 bg-surface-raised p-1 shadow-[0_16px_40px_rgba(0,0,0,0.55)]"
 					id={`${id}-list`}
 					ref={list}
+					// biome-ignore lint/a11y/noNoninteractiveElementToInteractiveRole: a listbox is a <ul> of role="option" children; that is the pattern, not a workaround
 					role="listbox"
 					tabIndex={-1}
 				>
@@ -190,6 +191,18 @@ export function SelectMenu({
 						const isSelected = row.id === value;
 
 						return (
+							/**
+							 * \`role="option"\` on an \`<li>\`, and no \`tabIndex\` on it.
+							 *
+							 * Biome objects on both counts and is wrong for this pattern.
+							 * A listbox is exactly \`<ul role="listbox">\` containing
+							 * \`role="option"\` children, and in the \`aria-activedescendant\`
+							 * form of it the *listbox* holds focus while the active option
+							 * is named by id. Making each option focusable would put every
+							 * row in the tab order, which is the behaviour the pattern
+							 * exists to avoid.
+							 */
+							// biome-ignore lint/a11y/useFocusableInteractive: focus stays on the listbox; the active option is named by aria-activedescendant
 							<li
 								aria-selected={isSelected}
 								className={cn(
@@ -206,6 +219,7 @@ export function SelectMenu({
 								   the menu had already been told to close. */
 								onPointerUp={() => commit(index)}
 								onMouseEnter={() => setActive(index)}
+								// biome-ignore lint/a11y/noNoninteractiveElementToInteractiveRole: see the listbox above — <li role="option"> is the required markup
 								role="option"
 							>
 								{row.icon ? (

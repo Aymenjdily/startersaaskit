@@ -35,8 +35,9 @@ export function FinalCta() {
 						Start with the tests already written
 					</h2>
 					<p className="mb-7 text-[clamp(15px,1.5vw,18px)] leading-[1.5] text-ink-soft">
-						Answer {QUESTION_COUNT_WORD} questions. The repo lands in your
-						GitHub with the suite already green. Free while in beta.
+						Answer {QUESTION_COUNT_WORD} questions. The whole repo downloads,
+						ready to push wherever you like, with the suite already green. Free
+						while in beta.
 					</p>
 
 					<div className="flex flex-col items-center justify-center gap-4 sm:flex-row">

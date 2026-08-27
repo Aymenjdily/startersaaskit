@@ -15,15 +15,9 @@
     "check": "biome check",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push",
-    "db:pull": "drizzle-kit pull",
-    "db:studio": "drizzle-kit studio"
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^1.0.2",
     "@radix-ui/react-accordion": "^1.2.20",
     "@radix-ui/react-scroll-area": "^1.2.18",
     "@supabase/ssr": "^0.12.4",
@@ -36,22 +30,17 @@
     "@tanstack/react-router-devtools": "latest",
     "@tanstack/react-router-ssr-query": "latest",
     "@tanstack/react-start": "latest",
-    "better-auth": "^1.5.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "drizzle-kit": "^0.31.9",
-    "drizzle-orm": "^0.45.1",
     "fflate": "^0.8.3",
     "lucide-react": "^0.577.0",
     "motion": "^13.1.0",
-    "pg": "^8.16.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "simple-icons": "^16.28.0",
     "tailwind-merge": "^3.0.2",
     "tailwindcss": "^4.1.18",
-    "tw-animate-css": "^1.3.6",
-    "vite-plugin-neon-new": "^0.8.0"
+    "tw-animate-css": "^1.3.6"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.5",
@@ -63,7 +52,6 @@
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.5",
     "@types/node": "^22.10.2",
-    "@types/pg": "^8.15.6",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^6.0.1",

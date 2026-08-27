@@ -53,9 +53,13 @@ export function SkeletonRegion({
 	label: string;
 }) {
 	return (
-		<div aria-busy="true" className={className} role="status">
+		/* \`<output>\` rather than \`<div role="status">\`: it carries the role
+		   natively, which is what Biome's useSemanticElements asks for. It is
+		   inline by default, so \`block\` restores the wrapper behaviour every
+		   caller here already assumes. */
+		<output aria-busy="true" className={cn("block", className)}>
 			<span className="sr-only">{label}</span>
 			{children}
-		</div>
+		</output>
 	);
 }

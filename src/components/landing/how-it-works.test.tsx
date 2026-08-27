@@ -36,7 +36,7 @@ describe("HowItWorks", () => {
 
 		expect(
 			screen.getByRole("heading", {
-				name: `${QUESTION_COUNT_WORD_CAPITALISED} answers and it is in your GitHub`,
+				name: `${QUESTION_COUNT_WORD_CAPITALISED} answers and the repo is on your machine`,
 			}),
 		).toBeInTheDocument();
 		for (const { title } of STEPS) {

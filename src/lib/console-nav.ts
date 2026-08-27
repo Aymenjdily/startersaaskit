@@ -10,7 +10,7 @@
 
 export const CONSOLE_HREF = "/dashboard";
 
-export type NavIcon = "grid" | "spark" | "stack" | "sliders";
+export type NavIcon = "grid" | "spark" | "stack" | "sliders" | "shield" | "bug";
 
 export type NavItem = {
 	href: string;
@@ -18,6 +18,15 @@ export type NavItem = {
 	icon: NavIcon;
 	/** False while the page is a placeholder. The sidebar labels these. */
 	built: boolean;
+	/**
+	 * Hidden from the rail unless the account is an admin.
+	 *
+	 * A convenience, not a lock. The route is in the bundle whether or not the
+	 * link is drawn, so what actually keeps the data private is the row level
+	 * security in `0003_feedback.sql` — this only stops the other 99% of people
+	 * seeing a door they cannot open.
+	 */
+	adminOnly?: boolean;
 };
 
 /**
@@ -30,7 +39,19 @@ export const NAV_ITEMS: readonly NavItem[] = [
 	{ href: CONSOLE_HREF, label: "Overview", icon: "grid", built: true },
 	{ href: "/starters", label: "Starters", icon: "stack", built: false },
 	{ href: "/settings", label: "Settings", icon: "sliders", built: false },
+	{
+		href: "/admin",
+		label: "Admin",
+		icon: "shield",
+		built: true,
+		adminOnly: true,
+	},
 ] as const;
+
+/** The rail's items for a given account. */
+export function navItemsFor(isAdmin: boolean): readonly NavItem[] {
+	return NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin);
+}
 
 /**
  * Which item a path belongs to. Longest match wins, so `/starters/abc` lights

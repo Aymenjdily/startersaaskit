@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { GENERATION_LIMIT, QUOTA_EXHAUSTED_MESSAGE } from "./quota";
 
@@ -16,17 +16,44 @@ const SQL = readFileSync(
 	"utf8",
 );
 
+/**
+ * The migration that actually defines `create_starter` today.
+ *
+ * Not always 0004. A later migration may `create or replace` it — 0005 does,
+ * to fix an ambiguity that made every non-admin call throw — and once one has,
+ * 0004's copy is history rather than the rule in force. Asserting against 0004
+ * alone would have gone on passing while the live function said something else,
+ * which is the exact shape of failure these tests exist to catch.
+ */
+const DIR = "supabase/migrations";
+const DEFINES = /create or replace function public\.create_starter/;
+
+const LIVE = (() => {
+	const defining = readdirSync(DIR)
+		.filter((file) => file.endsWith(".sql"))
+		.sort()
+		.filter((file) => DEFINES.test(readFileSync(`${DIR}/${file}`, "utf8")));
+
+	if (defining.length === 0) throw new Error("nothing defines create_starter");
+
+	return readFileSync(`${DIR}/${defining[defining.length - 1]}`, "utf8");
+})();
+
 describe("the generation quota migration", () => {
 	it("spends tokens at the same limit the console promises", () => {
-		expect(SQL).toContain(`generations_used < ${GENERATION_LIMIT}`);
+		/* Bounded, because `toContain` is a substring test and "< 50" contains
+		   "< 5" — raising the limit tenfold would have passed silently. */
+		expect(LIVE).toMatch(
+			new RegExp(`generations_used < ${GENERATION_LIMIT}\\b`),
+		);
 	});
 
 	it("says what the client says when the tokens run out", () => {
-		expect(SQL).toContain(`raise exception '${QUOTA_EXHAUSTED_MESSAGE}'`);
+		expect(LIVE).toContain(`raise exception '${QUOTA_EXHAUSTED_MESSAGE}'`);
 	});
 
 	it("pins the search path on its security definer function", () => {
-		const definers = [...SQL.matchAll(/security definer([\s\S]*?)\$\$/g)];
+		const definers = [...LIVE.matchAll(/security definer([\s\S]*?)\$\$/g)];
 
 		expect(definers.length).toBeGreaterThan(0);
 		for (const [, body] of definers) {
@@ -35,14 +62,14 @@ describe("the generation quota migration", () => {
 	});
 
 	it("keeps the function away from the anonymous key", () => {
-		expect(SQL).toMatch(
+		expect(LIVE).toMatch(
 			/revoke all on function public\.create_starter\(jsonb, text\) from public, anon/,
 		);
 	});
 
 	/** The one UPDATE both checks and spends — two at once cannot both pass. */
 	it("checks and increments in a single statement", () => {
-		expect(SQL).toMatch(
+		expect(LIVE).toMatch(
 			/update public\.profiles\s+set generations_used = generations_used \+ 1[\s\S]*?and generations_used < \d+/,
 		);
 	});
@@ -59,6 +86,27 @@ describe("the generation quota migration", () => {
 		expect(SQL).not.toMatch(
 			/create policy[\s\S]*?on public\.starters[\s\S]*?for insert/,
 		);
+	});
+
+	/**
+	 * The bug 0005 fixes, kept fixed.
+	 *
+	 * `returns table (id uuid, project text)` declares PL/pgSQL variables named
+	 * after columns. An `on conflict (id)` target is substituted into, so `id`
+	 * matched both and Postgres raised 42702 at runtime — after 0004 had
+	 * applied perfectly cleanly. Every non-admin generation failed.
+	 *
+	 * Either the pragma or a qualified target keeps it unambiguous; what must
+	 * not happen is a bare `on conflict (id)` with neither.
+	 */
+	it("leaves no ambiguous column reference for plpgsql to refuse", () => {
+		const risky = /on conflict \(\s*id\s*\)/.test(LIVE);
+		/* Anchored to a line of its own. The migration explains the pragma in a
+		   comment directly above it, and a plain substring test was satisfied by
+		   that prose after the pragma itself had been deleted. */
+		const guarded = /^#variable_conflict use_column/m.test(LIVE);
+
+		expect(risky && !guarded).toBe(false);
 	});
 
 	it("never counts backwards", () => {

@@ -137,7 +137,37 @@ export const Route = createFileRoute("/api/generate")({
 								"You have used all five generations. Delete nothing — the counter does not reset — and contact us if you need more.",
 							);
 						}
-						return problem(500, "Built it, but could not save the record.");
+
+						/**
+						 * Say what actually went wrong, somewhere.
+						 *
+						 * This returned "could not save the record" and dropped the
+						 * Postgres error on the floor, which is the same 500 whether the
+						 * function is missing, the schema has drifted, or a constraint
+						 * fired. Diagnosing one meant impersonating a user in the SQL
+						 * editor to make the database say it out loud.
+						 *
+						 * The full error goes to the server log, where the operator can
+						 * read it and the visitor cannot. The `code` alone rides back on
+						 * the response — `PGRST202`, `42702` and friends name the fault
+						 * precisely enough to act on while describing nothing about the
+						 * schema that a reader could not already infer.
+						 */
+						console.error("create_starter failed", {
+							code: recordFailed.code,
+							details: recordFailed.details,
+							hint: recordFailed.hint,
+							message: recordFailed.message,
+						});
+
+						return problem(
+							500,
+							`Built it, but could not save the record.${
+								recordFailed.code
+									? ` (database error ${recordFailed.code})`
+									: ""
+							}`,
+						);
 					}
 
 					const row = Array.isArray(created) ? created[0] : created;

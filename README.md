@@ -36,6 +36,7 @@ pnpm dev
    # supabase/migrations/0002_starters.sql
    # supabase/migrations/0003_feedback.sql
    # supabase/migrations/0004_generation_quota.sql
+   # supabase/migrations/0005_create_starter_ambiguity.sql
    ```
 
    `0004` is not optional. Creating a starter goes through `create_starter()`,

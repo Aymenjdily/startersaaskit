@@ -35,13 +35,22 @@ pnpm dev
    # supabase/migrations/0001_profiles.sql
    # supabase/migrations/0002_starters.sql
    # supabase/migrations/0003_feedback.sql
+   # supabase/migrations/0004_generation_quota.sql
    ```
+
+   `0004` is not optional. Creating a starter goes through `create_starter()`,
+   which that migration defines — without it every generation fails with
+   "Built it, but could not save the record", because the same migration drops
+   the direct insert policy that would otherwise let the quota be bypassed.
 
 4. (Optional) Seed an admin account for the feedback board:
 
    ```bash
-   # edit the email in supabase/seed-admin.sql first, then:
-   psql "$DATABASE_URL" -f supabase/seed-admin.sql
+   # edit the email in supabase/seed-admin.sql first, then paste it into the
+   # Supabase SQL editor — or, with a direct connection string to *this*
+   # project (Project Settings → Database), not whatever DATABASE_URL happens
+   # to hold:
+   psql "<supabase-connection-string>" -f supabase/seed-admin.sql
    ```
 
 5. (Optional) Enable Google OAuth: add the provider in Supabase Auth → Providers, and set the redirect URL to `<SITE_URL>/auth/callback`.

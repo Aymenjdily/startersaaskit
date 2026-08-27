@@ -23,6 +23,7 @@ export function Dialog({
 	children,
 	className,
 	description,
+	dismissOnBackdrop = true,
 	onClose,
 	open,
 	title,
@@ -30,6 +31,18 @@ export function Dialog({
 	children: React.ReactNode;
 	className?: string;
 	description?: string;
+	/**
+	 * Whether a click on the backdrop closes this dialog.
+	 *
+	 * True suits a dialog you can only read or a form you can only lose a
+	 * sentence to. Set it false when the panel holds work that a mis-aimed
+	 * click should not be able to end — the backdrop is the easiest thing on
+	 * screen to hit by accident, and it sits directly beside every control.
+	 *
+	 * Escape and the close button stay live either way: both are deliberate,
+	 * and a modal that cannot be dismissed from the keyboard is a trap.
+	 */
+	dismissOnBackdrop?: boolean;
 	onClose: () => void;
 	open: boolean;
 	title: string;
@@ -90,7 +103,7 @@ export function Dialog({
 			<div
 				aria-hidden="true"
 				className="fixed inset-0 bg-black/70 backdrop-blur-sm"
-				onMouseDown={onClose}
+				onMouseDown={dismissOnBackdrop ? onClose : undefined}
 			/>
 
 			<div

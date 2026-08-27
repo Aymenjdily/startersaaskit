@@ -54,11 +54,34 @@ export function CreateStarterDialog({
 		setAnswers(pruneAnswers({ ...answers, [question.id]: chosen }));
 	}
 
+	/**
+	 * Whether there is anything here worth not throwing away.
+	 *
+	 * Before the first answer the dialog holds nothing, so the backdrop can go
+	 * on dismissing it the way any other dialog does.
+	 */
+	const started = step > 0 || Object.keys(answers).length > 0;
+
+	/**
+	 * Closing keeps the answers.
+	 *
+	 * It used to clear them, which meant one mis-aimed click on the backdrop
+	 * ended seven questions with no warning and no way back. Nothing about the
+	 * gesture said it would delete anything, and nothing offered to undo it.
+	 *
+	 * The draft now outlives the dialog: reopening resumes on the same question
+	 * with the same answers, and `reset` runs only once a starter has actually
+	 * been generated, which is the one point where starting again is right.
+	 */
 	function close() {
+		setError(null);
+		onClose();
+	}
+
+	function reset() {
 		setAnswers({});
 		setStep(0);
 		setError(null);
-		onClose();
 	}
 
 	async function next() {
@@ -72,9 +95,11 @@ export function CreateStarterDialog({
 		setBusy(true);
 		try {
 			await onSubmit(answers);
-			/* Only cleared on success. A failed download should leave the answers
-			   exactly where they were so it can be retried. */
-			close();
+			/* The one place the draft is discarded: it has been delivered, so the
+			   next open is a new starter rather than a resumed one. A failure
+			   leaves everything where it was, to be retried. */
+			reset();
+			onClose();
 		} catch (thrown) {
 			setError(
 				thrown instanceof Error
@@ -98,6 +123,7 @@ export function CreateStarterDialog({
 		<Dialog
 			className={showsPreview ? "max-w-[900px]" : undefined}
 			description={`Question ${step + 1} of ${STARTER_QUESTIONS.length}`}
+			dismissOnBackdrop={!started}
 			onClose={close}
 			open={open}
 			title={question.prompt}

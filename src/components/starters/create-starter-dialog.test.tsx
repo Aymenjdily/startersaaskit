@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import {
@@ -334,6 +334,125 @@ describe("CreateStarterDialog", () => {
 		});
 	});
 
+	/**
+	 * Losing the answers to a stray click.
+	 *
+	 * Reported from production: someone answering the wizard clicked slightly
+	 * outside the panel and lost every answer and their place in the sequence.
+	 * Two separate defects made that possible — the backdrop dismissed on a
+	 * single mousedown, and closing wiped the draft — and either one alone
+	 * would have been survivable.
+	 */
+	describe("not losing the draft to a mis-aimed click", () => {
+		const backdrop = () =>
+			document.querySelector('[aria-hidden="true"].fixed') as Element;
+
+		it("ignores the backdrop once an answer has been given", async () => {
+			const user = userEvent.setup();
+			const { onClose } = openDialog();
+
+			await pick(user, "Next.js");
+			fireEvent.mouseDown(backdrop());
+
+			expect(onClose).not.toHaveBeenCalled();
+			expect(screen.getByRole("radio", { name: "Next.js" })).toBeChecked();
+		});
+
+		it("ignores the backdrop once past the first question", async () => {
+			const user = userEvent.setup();
+			const { onClose } = openDialog();
+
+			await pick(user, "Next.js");
+			await user.click(advance());
+			fireEvent.mouseDown(backdrop());
+
+			expect(onClose).not.toHaveBeenCalled();
+		});
+
+		/* Nothing has been entered, so there is nothing to protect and the
+		   dialog should behave like any other. */
+		it("still dismisses on the backdrop before anything is answered", () => {
+			const { onClose } = openDialog();
+
+			fireEvent.mouseDown(backdrop());
+
+			expect(onClose).toHaveBeenCalled();
+		});
+
+		/* Escape and the close button are deliberate, so they keep working —
+		   a modal that cannot be dismissed from the keyboard is a trap. */
+		it("can still be closed on purpose", async () => {
+			const user = userEvent.setup();
+			const { onClose } = openDialog();
+
+			await pick(user, "Next.js");
+			await user.click(screen.getByRole("button", { name: "Close" }));
+
+			expect(onClose).toHaveBeenCalled();
+		});
+
+		it("resumes where it was when reopened", async () => {
+			const user = userEvent.setup();
+			const onSubmit = vi.fn().mockResolvedValue(undefined);
+			const onClose = vi.fn();
+			const view = render(
+				<CreateStarterDialog onClose={onClose} onSubmit={onSubmit} open />,
+			);
+
+			await pick(user, "Next.js");
+			await user.click(advance());
+			await user.click(screen.getByRole("button", { name: "Close" }));
+
+			view.rerender(
+				<CreateStarterDialog
+					onClose={onClose}
+					onSubmit={onSubmit}
+					open={false}
+				/>,
+			);
+			view.rerender(
+				<CreateStarterDialog onClose={onClose} onSubmit={onSubmit} open />,
+			);
+
+			/* Same question, not back at the start. */
+			expect(screen.getByRole("dialog")).toHaveAccessibleDescription(
+				`Question 2 of ${STARTER_QUESTIONS.length}`,
+			);
+			await user.click(screen.getByRole("button", { name: "Back" }));
+			expect(screen.getByRole("radio", { name: "Next.js" })).toBeChecked();
+		});
+
+		/* The one point where starting over is right: it has been delivered. */
+		it("starts fresh after a starter has been generated", async () => {
+			const user = userEvent.setup();
+			const onSubmit = vi.fn().mockResolvedValue(undefined);
+			const onClose = vi.fn();
+			const view = render(
+				<CreateStarterDialog onClose={onClose} onSubmit={onSubmit} open />,
+			);
+
+			await answerAll(user);
+			await user.click(
+				screen.getByRole("button", { name: "Generate starter" }),
+			);
+
+			view.rerender(
+				<CreateStarterDialog
+					onClose={onClose}
+					onSubmit={onSubmit}
+					open={false}
+				/>,
+			);
+			view.rerender(
+				<CreateStarterDialog onClose={onClose} onSubmit={onSubmit} open />,
+			);
+
+			expect(screen.getByRole("dialog")).toHaveAccessibleDescription(
+				`Question 1 of ${STARTER_QUESTIONS.length}`,
+			);
+		});
+	});
+
 	describe("delivering", () => {
 		/**
 		 * Seven answers is a lot to retype. A failed download has to leave every
@@ -441,8 +560,19 @@ describe("CreateStarterDialog", () => {
 		});
 	});
 
-	/** Reopening should not resume someone else's half-finished answers. */
-	it("forgets everything when closed", async () => {
+	/**
+	 * This used to assert the opposite — that closing forgot everything — on the
+	 * grounds that reopening should not resume "someone else's" half-finished
+	 * answers. That risk is not real: the draft is component state in one
+	 * person's browser, not anything shared or persisted, so there is nobody
+	 * else whose answers could be shown.
+	 *
+	 * What the rule cost was real. Discarding on close meant a single mousedown
+	 * on the backdrop destroyed seven answers, and that is what happened to
+	 * somebody. Resuming a draft is recoverable — Back reaches every answer.
+	 * Losing one is not.
+	 */
+	it("keeps the draft when closed rather than discarding it", async () => {
 		const user = userEvent.setup();
 		const { onClose } = openDialog();
 
@@ -451,9 +581,11 @@ describe("CreateStarterDialog", () => {
 		await user.click(screen.getByRole("button", { name: "Close" }));
 
 		expect(onClose).toHaveBeenCalledOnce();
-		expect(
-			screen.getByRole("dialog", { name: STARTER_QUESTIONS[0].prompt }),
-		).toBeVisible();
-		expect(screen.getByRole("radio", { name: "Next.js" })).not.toBeChecked();
+		/* Still on the question it was left on, with the answer intact. */
+		expect(screen.getByRole("dialog")).toHaveAccessibleDescription(
+			`Question 2 of ${STARTER_QUESTIONS.length}`,
+		);
+		await user.click(screen.getByRole("button", { name: "Back" }));
+		expect(screen.getByRole("radio", { name: "TanStack Start" })).toBeChecked();
 	});
 });

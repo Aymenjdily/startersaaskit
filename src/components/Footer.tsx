@@ -24,6 +24,17 @@ export const PRODUCT_LINKS: Link[] = [
 	{ label: "Use cases", href: "#use-cases" },
 ];
 
+/**
+ * The two pages a signed-up visitor is entitled to find, and the two a Google
+ * OAuth review opens. Both are real routes on this site rather than links out
+ * to a document behind somebody else's login, which is a common reason that
+ * review comes back.
+ */
+export const LEGAL_LINKS: Link[] = [
+	{ label: "Privacy", href: "/privacy" },
+	{ label: "Terms", href: "/terms" },
+];
+
 export const REPO_LINKS: Link[] = [
 	{ label: "GitHub", href: REPO_URL },
 	{ label: "README", href: README_URL },
@@ -44,16 +55,10 @@ export const STACK_LINKS: Dependency[] = [
 		pkg: "@tanstack/react-query",
 	},
 	{
-		label: "Better Auth",
-		href: "https://www.better-auth.com",
-		pkg: "better-auth",
+		label: "Supabase",
+		href: "https://supabase.com",
+		pkg: "@supabase/supabase-js",
 	},
-	{
-		label: "Drizzle ORM",
-		href: "https://orm.drizzle.team",
-		pkg: "drizzle-orm",
-	},
-	{ label: "Neon", href: "https://neon.tech", pkg: "@neondatabase/serverless" },
 ];
 
 export const TOOLING_LINKS: Dependency[] = [
@@ -102,11 +107,12 @@ function Column({ links, title }: { links: Link[]; title: string }) {
 export function Footer() {
 	return (
 		<footer className="overflow-hidden border-white/10 border-t bg-base px-gutter pt-10 pb-4 md:px-6 md:pt-15 md:pb-6">
-			<div className="mx-auto grid max-w-content grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
+			<div className="mx-auto grid max-w-content grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-7">
 				<Column links={PRODUCT_LINKS} title="Product" />
 				<Column links={REPO_LINKS} title="Repository" />
 				<Column links={STACK_LINKS} title="Stack" />
 				<Column links={TOOLING_LINKS} title="Tooling" />
+				<Column links={LEGAL_LINKS} title="Legal" />
 
 				<div className="col-span-2 flex flex-col gap-3 sm:col-span-3 lg:col-span-2">
 					<h4 className="mb-1 text-[14px] font-medium text-ink">

@@ -66,6 +66,8 @@ export function Hero() {
 					loop
 					muted
 					playsInline
+					poster="/intro-poster.svg"
+					preload="metadata"
 					src="/intro.mp4"
 				/>
 			</div>

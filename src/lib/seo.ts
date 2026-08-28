@@ -31,7 +31,15 @@ import { BRAND } from "@/lib/brand";
  * than guessing. So this constant is what makes the cards work at all, and it
  * has to match the domain the site is actually served from.
  */
-export const SITE_URL = "https://startersaaskit.com";
+/*
+ * `www`, and it has to stay `www`.
+ *
+ * The apex and the `www` host serve the same pages, which to a crawler is two
+ * copies of every page unless one of them is named as canonical. This constant
+ * is what names it, so it must match the host the site actually redirects to —
+ * if that ever becomes the apex, this line changes with it.
+ */
+export const SITE_URL = "https://www.startersaaskit.com";
 
 /** 1200x630, the size every platform crops from. */
 export const OG_IMAGE_PATH = "/og.png";

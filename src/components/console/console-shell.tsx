@@ -2,21 +2,31 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { SIGN_IN_HREF } from "@/lib/brand";
 import { isAdmin as checkAdmin } from "@/lib/feedback";
 import { getSupabase } from "@/lib/supabase";
+import { FeedbackDialog } from "./feedback-dialog";
 import { IconRail, type RailUser } from "./icon-rail";
-import { ReportDialog, type ReportIntent } from "./report-dialog";
+import { ReportDialog } from "./report-dialog";
 import { ConsoleChromeSkeleton } from "./skeletons";
 
 /**
- * Opens the report dialog from anywhere inside the console.
+ * Which dialog a child is asking the shell to open.
+ *
+ * Two dialogs, not one wearing two titles: a bug report is a defect with a
+ * lifecycle, feedback is a rating and an opinion, and they are written to
+ * different tables.
+ */
+export type ConsoleDialog = "report" | "feedback";
+
+/**
+ * Opens one of the shell's dialogs from anywhere inside the console.
  *
  * The dialog is the shell's, because the rail's report button is the shell's.
  * A page that wants to offer the same thing — the generation balance does —
  * would otherwise have to be handed a callback through every layer between,
  * or own a second dialog that behaves subtly differently from the first.
  */
-const OpenReport = createContext<(intent?: ReportIntent) => void>(() => {});
+const OpenReport = createContext<(which?: ConsoleDialog) => void>(() => {});
 
-export function useOpenReport(): (intent?: ReportIntent) => void {
+export function useOpenReport(): (which?: ConsoleDialog) => void {
 	return useContext(OpenReport);
 }
 
@@ -51,8 +61,8 @@ export function ConsoleShell({
 }) {
 	const [user, setUser] = useState<RailUser | null>(null);
 	const [admin, setAdmin] = useState(false);
-	/* The intent it was opened with, or `null` for closed. */
-	const [reporting, setReporting] = useState<ReportIntent | null>(null);
+	/* Which dialog is open, or `null` for none. */
+	const [dialog, setDialog] = useState<ConsoleDialog | null>(null);
 
 	useEffect(() => {
 		getSupabase()
@@ -81,21 +91,25 @@ export function ConsoleShell({
 	if (!user) return <ConsoleChromeSkeleton title={title} />;
 
 	return (
-		<OpenReport.Provider value={(intent = "bug") => setReporting(intent)}>
+		<OpenReport.Provider value={(which = "report") => setDialog(which)}>
 			<div className="flex min-h-screen bg-surface">
 				<IconRail
 					currentPath={currentPath}
 					isAdmin={admin}
-					onReport={() => setReporting("bug")}
+					onReport={() => setDialog("report")}
 					onSignOut={signOut}
 					user={user}
 				/>
 
 				<ReportDialog
-					intent={reporting ?? "bug"}
-					onClose={() => setReporting(null)}
+					onClose={() => setDialog(null)}
+					open={dialog === "report"}
+				/>
+
+				<FeedbackDialog
+					onClose={() => setDialog(null)}
 					onSent={onReportSent}
-					open={reporting !== null}
+					open={dialog === "feedback"}
 				/>
 
 				<div className="flex min-w-0 flex-1 flex-col">

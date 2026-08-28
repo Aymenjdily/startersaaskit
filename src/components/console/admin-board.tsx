@@ -8,17 +8,28 @@ import {
 	type ReportStatus,
 	setReportStatus,
 } from "@/lib/feedback";
+import {
+	listFeedback,
+	type ProductFeedback,
+	RATING_LABELS,
+} from "@/lib/product-feedback";
 import { cn } from "@/lib/utils";
 
 const TABS = [
 	{ id: "users", label: "Users" },
 	{ id: "bugs", label: "Bugs" },
+	{ id: "feedback", label: "Feedback" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
 
 /**
- * The admin view: accounts on one tab, reports on the other.
+ * The admin view: accounts, bug reports, and feedback.
+ *
+ * Feedback is its own tab rather than rows in the bug list, because it is a
+ * different thing — a rating and an opinion with no lifecycle, against a defect
+ * that gets triaged and closed. Mixed together, neither list says anything
+ * true without filtering first.
  *
  * Both panels load only when their tab is opened. The user list joins three
  * tables and counts starters, and paying for it to sit behind a tab nobody
@@ -66,7 +77,9 @@ export function AdminBoard({ ready }: { ready: boolean }) {
 				// biome-ignore lint/a11y/noNoninteractiveTabindex: a tabpanel whose content is not focusable has to be, or arrowing to a tab leaves nowhere to go
 				tabIndex={0}
 			>
-				{tab === "users" ? <Users ready={ready} /> : <Bugs ready={ready} />}
+				{tab === "users" && <Users ready={ready} />}
+				{tab === "bugs" && <Bugs ready={ready} />}
+				{tab === "feedback" && <Feedback ready={ready} />}
 			</div>
 		</div>
 	);
@@ -274,6 +287,71 @@ function Bugs({ ready }: { ready: boolean }) {
 										))}
 									</select>
 								</td>
+							</tr>
+						))}
+					</tbody>
+				</Table>
+			)}
+		</Panel>
+	);
+}
+
+/**
+ * What people said, newest first.
+ *
+ * The rating leads because it is the only sortable thing here, and "what are
+ * you building" sits under the message rather than in its own column — it is
+ * the answer most worth reading and the one most often empty, and a column of
+ * dashes reads as missing data rather than an optional question.
+ */
+function Feedback({ ready }: { ready: boolean }) {
+	return (
+		<Panel<ProductFeedback>
+			empty="No feedback yet."
+			load={listFeedback}
+			ready={ready}
+		>
+			{(rows) => (
+				<Table>
+					<thead>
+						<tr>
+							<th className={TH} scope="col">
+								Rating
+							</th>
+							<th className={TH} scope="col">
+								What they said
+							</th>
+							<th className={TH} scope="col">
+								Page
+							</th>
+							<th className={TH} scope="col">
+								Left
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						{rows.map((row) => (
+							<tr key={row.id}>
+								<td className={cn(TD, "whitespace-nowrap")}>
+									<span className="font-medium tabular-nums text-ink">
+										{row.rating}
+									</span>
+									<span className="ml-2 text-[12px] text-white/45">
+										{RATING_LABELS[row.rating]}
+									</span>
+								</td>
+								<td className={cn(TD, "max-w-[420px] text-ink")}>
+									<span className="block">{row.message}</span>
+									{row.building && (
+										<span className="mt-1 block text-[12px] text-white/45">
+											Building: {row.building}
+										</span>
+									)}
+								</td>
+								<td className={cn(TD, "font-mono text-[12px]")}>
+									{row.path ?? "—"}
+								</td>
+								<td className={TD}>{when(row.created_at)}</td>
 							</tr>
 						))}
 					</tbody>

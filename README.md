@@ -38,7 +38,12 @@ pnpm dev
    # supabase/migrations/0004_generation_quota.sql
    # supabase/migrations/0005_create_starter_ambiguity.sql
    # supabase/migrations/0006_feedback_reward.sql
+   # supabase/migrations/0007_product_feedback.sql
    ```
+
+   `0007` adds the `product_feedback` table and repoints the reward at it, so
+   the ten generations are paid for the feedback the button asks for rather
+   than for filing a bug.
 
    `0006` moves the allowance onto the account so feedback can raise it, and
    narrows the column privileges on `profiles` — before it, the owner policy

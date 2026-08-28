@@ -54,7 +54,7 @@ describe("the console shell's report dialog", () => {
 
 		await screen.findByRole("button", { name: "Leave feedback" });
 
-		expect(dialog("Leave feedback")).toBeNull();
+		expect(dialog("How is it going?")).toBeNull();
 		expect(dialog("Report a problem")).toBeNull();
 	});
 
@@ -74,10 +74,10 @@ describe("the console shell's report dialog", () => {
 			await screen.findByRole("button", { name: "Leave feedback" }),
 		);
 
-		/* Titled for what was asked for. A dialog headed "Report a problem" is
-		   the wrong question to put to somebody who was offered generations for
-		   an opinion. */
-		await waitFor(() => expect(dialog("Leave feedback")).toBeVisible());
+		/* A different dialog, not the report form retitled: it asks for a rating
+		   and an opinion, and writes to its own table. */
+		await waitFor(() => expect(dialog("How is it going?")).toBeVisible());
+		expect(dialog("Report a problem")).toBeNull();
 	});
 
 	it("still opens from the rail's own button", async () => {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FormError } from "@/components/auth/controls";
 import { buttonVariants } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
@@ -10,7 +10,6 @@ import {
 	SUMMARY_MAX,
 	summaryProblem,
 } from "@/lib/feedback";
-import { FEEDBACK_REWARD } from "@/lib/quota";
 import { cn } from "@/lib/utils";
 
 const KIND_LABELS: Record<ReportKind, string> = {
@@ -34,23 +33,11 @@ const KIND_LABELS: Record<ReportKind, string> = {
  * Someone who has just typed out what went wrong should not lose it to a
  * network error. The dialog clears only after the row is written.
  */
-/**
- * Why the dialog was opened, which decides how it introduces itself.
- *
- * The same form serves both, but "Report a problem" is the wrong thing to show
- * somebody who clicked a button offering ten generations for feedback — it
- * asks for a defect when what was promised was an opinion, and says nothing
- * about the thing they were offered.
- */
-export type ReportIntent = "bug" | "feedback";
-
 export function ReportDialog({
-	intent = "bug",
 	onClose,
 	onSent,
 	open,
 }: {
-	intent?: ReportIntent;
 	onClose: () => void;
 	/**
 	 * Called once a report has actually been written, not merely submitted.
@@ -62,29 +49,19 @@ export function ReportDialog({
 	onSent?: () => void;
 	open: boolean;
 }) {
-	/* "idea" for feedback: the kinds are bug / idea / question, and somebody
-	   invited to say how it went is not usually filing a defect. */
-	const opening: ReportKind = intent === "feedback" ? "idea" : "bug";
-	const [kind, setKind] = useState<ReportKind>(opening);
+	const [kind, setKind] = useState<ReportKind>("bug");
 	const [summary, setSummary] = useState("");
 	const [detail, setDetail] = useState("");
 	const [busy, setBusy] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [sent, setSent] = useState(false);
 
-	/* The dialog stays mounted between openings, so the kind has to be put back
-	   when it opens rather than only when it closes — otherwise the second
-	   opening keeps whatever the first one was for. */
-	useEffect(() => {
-		if (open) setKind(opening);
-	}, [open, opening]);
-
 	/* Only complain once there is something to complain about. */
 	const problem = summary === "" ? null : summaryProblem(summary);
 	const ready = summaryProblem(summary) === null;
 
 	function close() {
-		setKind(opening);
+		setKind("bug");
 		setSummary("");
 		setDetail("");
 		setError(null);
@@ -114,26 +91,17 @@ export function ReportDialog({
 			description={
 				sent
 					? undefined
-					: intent === "feedback"
-						? `Anything at all — what worked, what got in the way. Sending it adds ${FEEDBACK_REWARD} generations to your account.`
-						: "It goes straight to us with the page you are on attached."
+					: "It goes straight to us with the page you are on attached."
 			}
 			onClose={close}
 			open={open}
-			title={
-				sent
-					? "Thank you"
-					: intent === "feedback"
-						? "Leave feedback"
-						: "Report a problem"
-			}
+			title={sent ? "Thank you" : "Report a problem"}
 		>
 			{sent ? (
 				<div className="flex flex-col gap-6">
 					<p className="text-[14px] text-white/70 leading-[1.6]">
-						{intent === "feedback"
-							? `Logged, and ${FEEDBACK_REWARD} generations are on your account. If it needs a reply we will use the address we have.`
-							: "Logged, with the page and browser attached. If it needs a reply we will use the address on your account."}
+						Logged, with the page and browser attached. If it needs a reply we
+						will use the address on your account.
 					</p>
 					<button
 						className={cn(

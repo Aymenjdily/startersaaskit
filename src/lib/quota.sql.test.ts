@@ -23,6 +23,12 @@ const SQL = readFileSync(
 	"utf8",
 );
 
+/** The migration that adds the balance and the column grants. */
+const REWARD = readFileSync(
+	"supabase/migrations/0006_feedback_reward.sql",
+	"utf8",
+);
+
 /**
  * The migration that actually defines `create_starter` today.
  *
@@ -32,14 +38,34 @@ const SQL = readFileSync(
  * alone would have gone on passing while the live function said something else,
  * which is the exact shape of failure these tests exist to catch.
  */
-/** The migration that adds the balance, the reward, and the column grants. */
-const REWARD = readFileSync(
-	"supabase/migrations/0006_feedback_reward.sql",
-	"utf8",
-);
 
 const DIR = "supabase/migrations";
 const DEFINES = /create or replace function public\.create_starter/;
+
+/**
+ * The migration that defines `claim_feedback_reward` today.
+ *
+ * Resolved the same way as `create_starter`, and for the same reason: 0007
+ * replaces it to look in `product_feedback` rather than `bug_reports`, so
+ * asserting against 0006 would go on passing while the live function paid out
+ * for the wrong thing.
+ */
+const CLAIMS = /create or replace function public\.claim_feedback_reward/;
+
+const latestDefining = (pattern: RegExp) => {
+	const defining = readdirSync(DIR)
+		.filter((file) => file.endsWith(".sql"))
+		.sort()
+		.filter((file) => pattern.test(readFileSync(`${DIR}/${file}`, "utf8")));
+
+	if (defining.length === 0) {
+		throw new Error(`nothing defines ${pattern}`);
+	}
+
+	return readFileSync(`${DIR}/${defining[defining.length - 1]}`, "utf8");
+};
+
+const LIVE_REWARD = latestDefining(CLAIMS);
 
 const LIVE = (() => {
 	const defining = readdirSync(DIR)
@@ -149,15 +175,17 @@ describe("the feedback reward", () => {
 
 	/* Without this it is a refund button: file, claim, file, claim. */
 	it("can only be claimed once", () => {
-		expect(REWARD).toContain("feedback_reward_at is null");
-		expect(REWARD).toContain("feedback_reward_at = now()");
-		expect(REWARD).toContain(`raise exception '${REWARD_CLAIMED_MESSAGE}'`);
+		expect(LIVE_REWARD).toContain("feedback_reward_at is null");
+		expect(LIVE_REWARD).toContain("feedback_reward_at = now()");
+		expect(LIVE_REWARD).toContain(
+			`raise exception '${REWARD_CLAIMED_MESSAGE}'`,
+		);
 	});
 
 	/* The claim and the stamp are one UPDATE, so two requests racing cannot
 	   both find it unclaimed. */
 	it("stamps and pays in a single statement", () => {
-		const update = REWARD.match(
+		const update = LIVE_REWARD.match(
 			/update public\.profiles\s+set generation_limit[\s\S]*?;/,
 		);
 
@@ -167,21 +195,25 @@ describe("the feedback reward", () => {
 	});
 
 	it("refuses to pay for feedback nobody sent", () => {
-		expect(REWARD).toContain("from public.bug_reports");
-		expect(REWARD).toContain(`raise exception '${NO_FEEDBACK_MESSAGE}'`);
+		/* The table the button actually writes to. Paying out for a bug report
+		   would let somebody claim without ever answering the question. */
+		expect(LIVE_REWARD).toContain("from public.product_feedback");
+		expect(LIVE_REWARD).toContain(`raise exception '${NO_FEEDBACK_MESSAGE}'`);
 	});
 
 	it("keeps itself away from the anonymous key", () => {
-		expect(REWARD).toMatch(
+		expect(LIVE_REWARD).toMatch(
 			/revoke all on function public\.claim_feedback_reward\(\) from public, anon;/,
 		);
-		expect(REWARD).toMatch(
+		expect(LIVE_REWARD).toMatch(
 			/grant execute on function public\.claim_feedback_reward\(\) to authenticated;/,
 		);
 	});
 
 	it("pins the search path, like every other definer here", () => {
-		const body = REWARD.slice(REWARD.indexOf("claim_feedback_reward()"));
+		const body = LIVE_REWARD.slice(
+			LIVE_REWARD.indexOf("claim_feedback_reward()"),
+		);
 
 		expect(body).toContain("security definer");
 		expect(body).toContain("set search_path = public");

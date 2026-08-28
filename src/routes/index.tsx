@@ -10,33 +10,21 @@ import { TrustStrip } from "@/components/landing/trust-strip";
 import { WiredGrid } from "@/components/landing/wired-grid";
 import { Navbar } from "@/components/Navbar";
 import { pageHead } from "@/lib/seo";
-import { starterPreviews } from "@/lib/starter-preview";
 
-/**
- * The hero's previews are built here rather than in the component.
- *
- * `starterPreviews` runs the real generator, which is 412KB of template
- * strings. A loader keeps that on the server: the result is serialised into the
- * page alongside the HTML, so the browser receives file paths and never the
- * machine that produced them.
- */
 export const Route = createFileRoute("/")({
 	head: () =>
 		pageHead({
 			path: "/",
 		}),
 	component: Home,
-	loader: () => starterPreviews(),
 });
 
 function Home() {
-	const previews = Route.useLoaderData();
-
 	return (
 		<>
 			<Navbar />
 			<main className="min-h-screen bg-base">
-				<Hero previews={previews} />
+				<Hero />
 				<TrustStrip />
 				<Statement />
 				<WiredGrid />

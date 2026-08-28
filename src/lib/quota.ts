@@ -1,4 +1,5 @@
 import { getSupabase } from "@/lib/supabase";
+import { explain } from "@/lib/supabase-errors";
 
 /**
  * The allowance a new account starts with, duplicated from the `default 5` on
@@ -43,19 +44,24 @@ export function remaining(quota: Quota): number {
 }
 
 /**
- * This account's balance, or `null` when it could not be read — the console
- * shows nothing rather than claim a wrong number.
+ * This account's balance.
+ *
+ * Throws rather than returning `null` on failure. It used to swallow the error
+ * and hand back `null`, which the panel reads as "nothing to draw" — so a
+ * database missing `generation_limit` rendered an empty space with no way to
+ * tell it from a slow network or an account with no balance. Whoever is
+ * looking at that space cannot debug it, and neither could I.
  *
  * Read through the owner-only policy on `profiles`, so there is no filter here:
  * the policy is what scopes it.
  */
-export async function generationQuota(): Promise<Quota | null> {
+export async function generationQuota(): Promise<Quota> {
 	const { data, error } = await getSupabase()
 		.from("profiles")
 		.select("generations_used, generation_limit, feedback_reward_at")
 		.maybeSingle();
 
-	if (error) return null;
+	if (error) throw new Error(explain(error));
 
 	/* No row yet means an account that skipped onboarding: nothing spent, and
 	   the column defaults are what it will get when the row is written. */

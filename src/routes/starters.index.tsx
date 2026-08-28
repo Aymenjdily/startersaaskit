@@ -59,7 +59,15 @@ function Starters() {
 
 	/* Read once on arrival, and again whenever the balance could have moved. */
 	useEffect(() => {
-		generationQuota().then(setQuota);
+		generationQuota()
+			.then(setQuota)
+			.catch((thrown: unknown) =>
+				setClaimError(
+					thrown instanceof Error
+						? thrown.message
+						: "Could not read your balance.",
+				),
+			);
 	}, []);
 
 	/**

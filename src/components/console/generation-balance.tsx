@@ -15,6 +15,11 @@ import { cn } from "@/lib/utils";
  * Presentational on purpose. Claiming the reward has to happen after the report
  * is written, which only the dialog knows, so the page owns both and this shows
  * what the page hands it.
+ *
+ * A failed read is drawn, not hidden. The first version returned `null` for
+ * both "still loading" and "that query failed", so a database missing
+ * `generation_limit` produced an empty space that looked like a component
+ * nobody had wired up.
  */
 export function GenerationBalance({
 	claiming = false,
@@ -27,10 +32,21 @@ export function GenerationBalance({
 	error?: string | null;
 	/** Opens the report dialog. */
 	onReport: () => void;
-	/** `null` while loading or unreadable — nothing is drawn either way. */
+	/** `null` while it is still loading, or when `error` says why it is absent. */
 	quota: Quota | null;
 }) {
-	if (!quota) return null;
+	/* An error without a balance is worth a line of its own: it is the only
+	   state where the reader can actually do something about what they see. */
+	if (!quota) {
+		return error ? (
+			<p
+				className="w-full rounded-[12px] border border-white/10 bg-white/[0.03] px-4 py-3.5 text-[12px] text-ink-muted"
+				role="alert"
+			>
+				{error}
+			</p>
+		) : null;
+	}
 
 	const left = remaining(quota);
 	/* Offered once there is something to give feedback about, and only while it

@@ -36,7 +36,11 @@ function Dashboard() {
 		listStarters()
 			.then(setStarters)
 			.catch(() => setStarters([]));
-		generationQuota().then(setQuota);
+		/* The overview has no room to explain a failure, so it keeps the old
+		   behaviour of showing no number rather than a wrong one. */
+		generationQuota()
+			.then(setQuota)
+			.catch(() => setQuota(null));
 	}, []);
 
 	const recent = (starters ?? []).slice(0, RECENT);

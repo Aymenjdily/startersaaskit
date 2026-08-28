@@ -17,13 +17,34 @@ const offer = () =>
 	});
 
 describe("GenerationBalance", () => {
-	it("says nothing at all until the balance is known", () => {
+	it("says nothing at all while the balance is still loading", () => {
 		const { container } = render(
 			<GenerationBalance onReport={vi.fn()} quota={null} />,
 		);
 
 		/* Not "0 of 0 left", which is a wrong number rather than no number. */
 		expect(container).toBeEmptyDOMElement();
+	});
+
+	/**
+	 * The state that sent somebody looking for a missing component.
+	 *
+	 * A database without `generation_limit` fails the read, and the panel used
+	 * to render nothing for that — indistinguishable from still loading, from
+	 * an empty balance, and from a component nobody had wired up.
+	 */
+	it("says why the balance is missing when the read failed", () => {
+		render(
+			<GenerationBalance
+				error="The database is behind the app."
+				onReport={vi.fn()}
+				quota={null}
+			/>,
+		);
+
+		expect(screen.getByRole("alert")).toHaveTextContent(
+			"The database is behind the app.",
+		);
 	});
 
 	it("counts what is left, not what is spent", () => {

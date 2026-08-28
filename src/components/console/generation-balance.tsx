@@ -8,9 +8,11 @@ import { cn } from "@/lib/utils";
  * The balance belongs before the wizard rather than after: finding out you are
  * on your last generation while answering ten questions is the wrong moment.
  *
- * The offer appears only once something has been spent, because "tell us how it
- * went" makes no sense to somebody who has not used the thing yet — there is
- * nothing they could tell us, and asking anyway reads as a toll.
+ * The offer stands from the first visit. It was gated on having spent a
+ * generation, on the reasoning that feedback before you have used the thing is
+ * worth less — but that reasoning was mine, not the product's, and it hid the
+ * button from exactly the people who most need the extra credits: somebody
+ * looking at five and wondering whether it is enough to bother starting.
  *
  * Presentational on purpose. Claiming the reward has to happen after the report
  * is written, which only the dialog knows, so the page owns both and this shows
@@ -49,9 +51,8 @@ export function GenerationBalance({
 	}
 
 	const left = remaining(quota);
-	/* Offered once there is something to give feedback about, and only while it
-	   is still there to take. */
-	const offered = quota.used > 0 && !quota.rewarded;
+	/* Always offered, up until it is taken. */
+	const offered = !quota.rewarded;
 
 	return (
 		<div className="flex w-full flex-col gap-3 rounded-[12px] border border-white/10 bg-white/[0.03] px-4 py-3.5">

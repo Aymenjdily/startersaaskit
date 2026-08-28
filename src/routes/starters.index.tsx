@@ -44,7 +44,6 @@ function Starters() {
 	const [quota, setQuota] = useState<Quota | null>(null);
 	const [claiming, setClaiming] = useState(false);
 	const [claimError, setClaimError] = useState<string | null>(null);
-	const openReport = useOpenReport();
 
 	function refresh() {
 		listStarters()
@@ -159,12 +158,7 @@ function Starters() {
 			title="Starters"
 		>
 			<div className="flex flex-col items-start gap-6">
-				<GenerationBalance
-					claiming={claiming}
-					error={claimError}
-					onReport={openReport}
-					quota={quota}
-				/>
+				<Balance claiming={claiming} error={claimError} quota={quota} />
 
 				{error && (
 					<p className="text-[13px] text-diagram-red" role="alert">
@@ -199,4 +193,21 @@ function Starters() {
 			/>
 		</ConsoleShell>
 	);
+}
+
+/**
+ * The balance, connected to the shell's report dialog.
+ *
+ * A component rather than a hook call in `Starters`, because `Starters`
+ * *renders* `ConsoleShell` and therefore sits above the provider inside it —
+ * `useOpenReport` there returned the default no-op and the button did nothing
+ * when clicked. This renders as a child of the shell, which is where the
+ * context actually is.
+ */
+function Balance(props: {
+	claiming: boolean;
+	error: string | null;
+	quota: Quota | null;
+}) {
+	return <GenerationBalance {...props} onReport={useOpenReport()} />;
 }

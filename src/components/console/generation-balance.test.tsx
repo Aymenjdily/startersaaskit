@@ -75,15 +75,20 @@ describe("GenerationBalance", () => {
 	});
 
 	describe("the offer", () => {
-		/* Nothing has been generated, so there is nothing to report on, and
-		   asking for feedback first reads as a toll rather than a trade. */
-		it("stays hidden until a generation has been spent", () => {
+		/**
+		 * Shown from the first visit.
+		 *
+		 * This used to wait until a generation had been spent. That hid it from
+		 * somebody weighing up whether five was worth starting for, which is the
+		 * person the extra ten is most use to.
+		 */
+		it("is offered before anything has been generated", () => {
 			render(<GenerationBalance onReport={vi.fn()} quota={quota()} />);
 
-			expect(offer()).toBeNull();
+			expect(offer()).toBeVisible();
 		});
 
-		it("appears once something has been generated", () => {
+		it("is still offered once something has been generated", () => {
 			render(
 				<GenerationBalance onReport={vi.fn()} quota={quota({ used: 1 })} />,
 			);
@@ -98,6 +103,18 @@ describe("GenerationBalance", () => {
 				<GenerationBalance
 					onReport={vi.fn()}
 					quota={quota({ rewarded: true, used: 1 })}
+				/>,
+			);
+
+			expect(offer()).toBeNull();
+		});
+
+		/* Taken on a fresh account too — `rewarded`, not `used`, is what ends it. */
+		it("disappears once taken even with nothing generated", () => {
+			render(
+				<GenerationBalance
+					onReport={vi.fn()}
+					quota={quota({ rewarded: true })}
 				/>,
 			);
 

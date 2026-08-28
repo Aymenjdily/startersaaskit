@@ -10,7 +10,7 @@ import {
 import { StackMarks } from "@/components/starters/stack-marks";
 import { CONSOLE_HREF } from "@/lib/console-nav";
 import { listStarters, type StarterRecord } from "@/lib/generate/starters";
-import { GENERATION_LIMIT, generationsUsed } from "@/lib/quota";
+import { generationQuota, type Quota, remaining } from "@/lib/quota";
 import { pageHead } from "@/lib/seo";
 import { QUESTION_COUNT_WORD } from "@/lib/starter-questions";
 
@@ -30,13 +30,13 @@ const RECENT = 4;
 
 function Dashboard() {
 	const [starters, setStarters] = useState<StarterRecord[] | null>(null);
-	const [used, setUsed] = useState<number | null>(null);
+	const [quota, setQuota] = useState<Quota | null>(null);
 
 	useEffect(() => {
 		listStarters()
 			.then(setStarters)
 			.catch(() => setStarters([]));
-		generationsUsed().then(setUsed);
+		generationQuota().then(setQuota);
 	}, []);
 
 	const recent = (starters ?? []).slice(0, RECENT);
@@ -68,11 +68,11 @@ function Dashboard() {
 							title="Settings"
 						/>
 					</div>
-					{used !== null && (
+					{quota !== null && (
 						<p className="text-[13px] text-white/50">
-							{GENERATION_LIMIT - used > 0
-								? `${GENERATION_LIMIT - used} of ${GENERATION_LIMIT} generations left. Re-downloading a starter you already made is always free.`
-								: `All ${GENERATION_LIMIT} generations used. Your starters stay downloadable — the quota only limits new ones.`}
+							{remaining(quota) > 0
+								? `${remaining(quota)} of ${quota.limit} generations left. Re-downloading a starter you already made is always free.`
+								: `All ${quota.limit} generations used. Your starters stay downloadable — the quota only limits new ones.`}
 						</p>
 					)}
 				</Section>

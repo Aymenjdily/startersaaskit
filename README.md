@@ -37,7 +37,12 @@ pnpm dev
    # supabase/migrations/0003_feedback.sql
    # supabase/migrations/0004_generation_quota.sql
    # supabase/migrations/0005_create_starter_ambiguity.sql
+   # supabase/migrations/0006_feedback_reward.sql
    ```
+
+   `0006` moves the allowance onto the account so feedback can raise it, and
+   narrows the column privileges on `profiles` — before it, the owner policy
+   from 0001 let any browser reset its own `generations_used`.
 
    `0004` is not optional. Creating a starter goes through `create_starter()`,
    which that migration defines — without it every generation fails with

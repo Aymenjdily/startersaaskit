@@ -1,6 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ConsoleShell } from "@/components/console/console-shell";
+import {
+	ConsoleShell,
+	useOpenReport,
+} from "@/components/console/console-shell";
+import { GenerationBalance } from "@/components/console/generation-balance";
 import { StarterGridSkeleton } from "@/components/console/skeletons";
 import { CreateStarterDialog } from "@/components/starters/create-starter-dialog";
 import { StarterBrowser } from "@/components/starters/starter-browser";
@@ -11,6 +15,7 @@ import {
 	listStarters,
 	type StarterRecord,
 } from "@/lib/generate/starters";
+import { claimFeedbackReward, generationQuota, type Quota } from "@/lib/quota";
 import { pageHead } from "@/lib/seo";
 import {
 	QUESTION_COUNT_WORD,
@@ -36,6 +41,10 @@ function Starters() {
 	const [starters, setStarters] = useState<StarterRecord[] | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [busyId, setBusyId] = useState<string | null>(null);
+	const [quota, setQuota] = useState<Quota | null>(null);
+	const [claiming, setClaiming] = useState(false);
+	const [claimError, setClaimError] = useState<string | null>(null);
+	const openReport = useOpenReport();
 
 	function refresh() {
 		listStarters()
@@ -47,6 +56,35 @@ function Starters() {
 	}
 
 	useEffect(refresh, []);
+
+	/* Read once on arrival, and again whenever the balance could have moved. */
+	useEffect(() => {
+		generationQuota().then(setQuota);
+	}, []);
+
+	/**
+	 * Takes the reward, once the dialog says a report was actually written.
+	 *
+	 * Failures are shown rather than swallowed: somebody who has just typed out
+	 * feedback in exchange for ten generations should be told if they did not
+	 * arrive, not left counting.
+	 */
+	async function rewardForFeedback() {
+		setClaiming(true);
+		setClaimError(null);
+		try {
+			const limit = await claimFeedbackReward();
+			setQuota((current) =>
+				current ? { ...current, limit, rewarded: true } : current,
+			);
+		} catch (thrown) {
+			setClaimError(
+				thrown instanceof Error ? thrown.message : "Could not claim that.",
+			);
+		} finally {
+			setClaiming(false);
+		}
+	}
 
 	/**
 	 * Generates the starter and goes to its page.
@@ -109,9 +147,17 @@ function Starters() {
 				</button>
 			}
 			currentPath="/starters"
+			onReportSent={rewardForFeedback}
 			title="Starters"
 		>
 			<div className="flex flex-col items-start gap-6">
+				<GenerationBalance
+					claiming={claiming}
+					error={claimError}
+					onReport={openReport}
+					quota={quota}
+				/>
+
 				{error && (
 					<p className="text-[13px] text-diagram-red" role="alert">
 						{error}

@@ -1,10 +1,24 @@
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { SIGN_IN_HREF } from "@/lib/brand";
 import { isAdmin as checkAdmin } from "@/lib/feedback";
 import { getSupabase } from "@/lib/supabase";
 import { IconRail, type RailUser } from "./icon-rail";
 import { ReportDialog } from "./report-dialog";
 import { ConsoleChromeSkeleton } from "./skeletons";
+
+/**
+ * Opens the report dialog from anywhere inside the console.
+ *
+ * The dialog is the shell's, because the rail's report button is the shell's.
+ * A page that wants to offer the same thing — the generation balance does —
+ * would otherwise have to be handed a callback through every layer between,
+ * or own a second dialog that behaves subtly differently from the first.
+ */
+const OpenReport = createContext<() => void>(() => {});
+
+export function useOpenReport(): () => void {
+	return useContext(OpenReport);
+}
 
 /**
  * The frame every signed-in page sits in: an icon rail, a top bar that names
@@ -22,6 +36,7 @@ export function ConsoleShell({
 	back,
 	children,
 	currentPath,
+	onReportSent,
 	title,
 }: {
 	/** Buttons for the top bar's right side, opposite the title. */
@@ -30,6 +45,8 @@ export function ConsoleShell({
 	back?: { href: string; label: string };
 	children: React.ReactNode;
 	currentPath: string;
+	/** Fired once a report has been written, for pages that reward it. */
+	onReportSent?: () => void;
 	title: string;
 }) {
 	const [user, setUser] = useState<RailUser | null>(null);
@@ -63,60 +80,66 @@ export function ConsoleShell({
 	if (!user) return <ConsoleChromeSkeleton title={title} />;
 
 	return (
-		<div className="flex min-h-screen bg-surface">
-			<IconRail
-				currentPath={currentPath}
-				isAdmin={admin}
-				onReport={() => setReporting(true)}
-				onSignOut={signOut}
-				user={user}
-			/>
+		<OpenReport.Provider value={() => setReporting(true)}>
+			<div className="flex min-h-screen bg-surface">
+				<IconRail
+					currentPath={currentPath}
+					isAdmin={admin}
+					onReport={() => setReporting(true)}
+					onSignOut={signOut}
+					user={user}
+				/>
 
-			<ReportDialog onClose={() => setReporting(false)} open={reporting} />
+				<ReportDialog
+					onClose={() => setReporting(false)}
+					onSent={onReportSent}
+					open={reporting}
+				/>
 
-			<div className="flex min-w-0 flex-1 flex-col">
-				<header className="flex h-14 shrink-0 items-center gap-3 border-white/8 border-b px-4 md:px-6">
-					{back && (
-						<a
-							aria-label={back.label}
-							className="-ml-1 flex size-8 items-center justify-center rounded-[8px] text-white/50 transition-colors duration-200 hover:bg-white/6 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-							href={back.href}
-							title={back.label}
-						>
-							<svg
-								aria-hidden="true"
-								className="size-4"
-								fill="none"
-								stroke="currentColor"
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								strokeWidth="1.5"
-								viewBox="0 0 24 24"
+				<div className="flex min-w-0 flex-1 flex-col">
+					<header className="flex h-14 shrink-0 items-center gap-3 border-white/8 border-b px-4 md:px-6">
+						{back && (
+							<a
+								aria-label={back.label}
+								className="-ml-1 flex size-8 items-center justify-center rounded-[8px] text-white/50 transition-colors duration-200 hover:bg-white/6 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+								href={back.href}
+								title={back.label}
 							>
-								<path d="M15 5l-7 7 7 7" />
-							</svg>
-							{/* Real text, not only `aria-label`: an anchor whose whole
+								<svg
+									aria-hidden="true"
+									className="size-4"
+									fill="none"
+									stroke="currentColor"
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									strokeWidth="1.5"
+									viewBox="0 0 24 24"
+								>
+									<path d="M15 5l-7 7 7 7" />
+								</svg>
+								{/* Real text, not only `aria-label`: an anchor whose whole
 							    content is a decorative SVG has no accessible name at all
 							    if the attribute is ever dropped in a refactor. */}
-							<span className="sr-only">{back.label}</span>
-						</a>
-					)}
+								<span className="sr-only">{back.label}</span>
+							</a>
+						)}
 
-					<h1 className="min-w-0 truncate font-medium text-[15px] text-ink tracking-[-0.01em]">
-						{title}
-					</h1>
+						<h1 className="min-w-0 truncate font-medium text-[15px] text-ink tracking-[-0.01em]">
+							{title}
+						</h1>
 
-					{actions && (
-						<div className="ml-auto flex items-center gap-2">{actions}</div>
-					)}
-				</header>
+						{actions && (
+							<div className="ml-auto flex items-center gap-2">{actions}</div>
+						)}
+					</header>
 
-				<main className="flex-1 px-4 py-8 md:px-6 md:py-10">
-					{/* Capped and centred: full-bleed text at 2560px is unreadable, and
+					<main className="flex-1 px-4 py-8 md:px-6 md:py-10">
+						{/* Capped and centred: full-bleed text at 2560px is unreadable, and
 					    every page here is reading rather than canvas work. */}
-					<div className="mx-auto w-full max-w-[1040px]">{children}</div>
-				</main>
+						<div className="mx-auto w-full max-w-[1040px]">{children}</div>
+					</main>
+				</div>
 			</div>
-		</div>
+		</OpenReport.Provider>
 	);
 }

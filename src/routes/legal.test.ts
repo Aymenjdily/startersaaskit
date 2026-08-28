@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { LEGAL_LINKS } from "@/components/Footer";
 import { GOVERNING_LAW, LEGAL_CONTACT, SUBPROCESSORS } from "@/lib/legal";
-import { GENERATION_LIMIT } from "@/lib/quota";
+import { DEFAULT_GENERATION_LIMIT, FEEDBACK_REWARD } from "@/lib/quota";
 import { isServedRoute } from "@/test/served-route";
 
 /**
@@ -44,9 +44,16 @@ describe("the legal pages", () => {
 		 * symptom would be a policy that lies.
 		 */
 		it("take the generation limit from the constant that enforces it", () => {
-			expect(PRIVACY).toContain("GENERATION_LIMIT");
-			expect(TERMS).toContain("GENERATION_LIMIT");
-			expect(GENERATION_LIMIT).toBeGreaterThan(0);
+			expect(PRIVACY).toContain("DEFAULT_GENERATION_LIMIT");
+			expect(TERMS).toContain("DEFAULT_GENERATION_LIMIT");
+			expect(DEFAULT_GENERATION_LIMIT).toBeGreaterThan(0);
+		});
+
+		/* The terms now promise that feedback earns more. If the reward is ever
+		   removed, the clause selling it has to go with it. */
+		it("take the feedback reward from the constant that grants it", () => {
+			expect(TERMS).toContain("FEEDBACK_REWARD");
+			expect(FEEDBACK_REWARD).toBeGreaterThan(0);
 		});
 
 		/** Named from one list, so the two pages cannot come to disagree. */

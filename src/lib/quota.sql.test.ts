@@ -1,6 +1,13 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { GENERATION_LIMIT, QUOTA_EXHAUSTED_MESSAGE } from "./quota";
+import { QUESTIONS as ONBOARDING_QUESTIONS } from "./onboarding";
+import {
+	DEFAULT_GENERATION_LIMIT,
+	FEEDBACK_REWARD,
+	NO_FEEDBACK_MESSAGE,
+	QUOTA_EXHAUSTED_MESSAGE,
+	REWARD_CLAIMED_MESSAGE,
+} from "./quota";
 
 /**
  * The migration and the TypeScript have to agree, and the bypass has to stay
@@ -25,6 +32,12 @@ const SQL = readFileSync(
  * alone would have gone on passing while the live function said something else,
  * which is the exact shape of failure these tests exist to catch.
  */
+/** The migration that adds the balance, the reward, and the column grants. */
+const REWARD = readFileSync(
+	"supabase/migrations/0006_feedback_reward.sql",
+	"utf8",
+);
+
 const DIR = "supabase/migrations";
 const DEFINES = /create or replace function public\.create_starter/;
 
@@ -40,11 +53,17 @@ const LIVE = (() => {
 })();
 
 describe("the generation quota migration", () => {
-	it("spends tokens at the same limit the console promises", () => {
-		/* Bounded, because `toContain` is a substring test and "< 50" contains
-		   "< 5" — raising the limit tenfold would have passed silently. */
-		expect(LIVE).toMatch(
-			new RegExp(`generations_used < ${GENERATION_LIMIT}\\b`),
+	/**
+	 * The ceiling is a column now rather than a literal, so what has to agree
+	 * is the column's default and the constant the copy is written from.
+	 */
+	it("spends against the account's own ceiling", () => {
+		expect(LIVE).toMatch(/generations_used < generation_limit\b/);
+		/* Bounded, because "default 50" contains "default 5". */
+		expect(REWARD).toMatch(
+			new RegExp(
+				`generation_limit integer not null default ${DEFAULT_GENERATION_LIMIT}\\b`,
+			),
 		);
 	});
 
@@ -70,7 +89,7 @@ describe("the generation quota migration", () => {
 	/** The one UPDATE both checks and spends — two at once cannot both pass. */
 	it("checks and increments in a single statement", () => {
 		expect(LIVE).toMatch(
-			/update public\.profiles\s+set generations_used = generations_used \+ 1[\s\S]*?and generations_used < \d+/,
+			/update public\.profiles\s+set generations_used = generations_used \+ 1[\s\S]*?and generations_used < generation_limit/,
 		);
 	});
 
@@ -112,5 +131,110 @@ describe("the generation quota migration", () => {
 	it("never counts backwards", () => {
 		expect(SQL).toContain("check (generations_used >= 0)");
 		expect(SQL).not.toMatch(/generations_used = generations_used -/);
+	});
+});
+
+/**
+ * The feedback reward, which is the only thing that raises an account's
+ * ceiling. Every condition it enforces is one a forged request would otherwise
+ * get for free, so each is pinned here.
+ */
+describe("the feedback reward", () => {
+	it("pays what the console offers", () => {
+		/* Bounded, because "+ 100" contains "+ 10". */
+		expect(REWARD).toMatch(
+			new RegExp(`generation_limit \\+ ${FEEDBACK_REWARD}\\b`),
+		);
+	});
+
+	/* Without this it is a refund button: file, claim, file, claim. */
+	it("can only be claimed once", () => {
+		expect(REWARD).toContain("feedback_reward_at is null");
+		expect(REWARD).toContain("feedback_reward_at = now()");
+		expect(REWARD).toContain(`raise exception '${REWARD_CLAIMED_MESSAGE}'`);
+	});
+
+	/* The claim and the stamp are one UPDATE, so two requests racing cannot
+	   both find it unclaimed. */
+	it("stamps and pays in a single statement", () => {
+		const update = REWARD.match(
+			/update public\.profiles\s+set generation_limit[\s\S]*?;/,
+		);
+
+		expect(update).not.toBeNull();
+		expect(update?.[0]).toContain("feedback_reward_at = now()");
+		expect(update?.[0]).toContain("feedback_reward_at is null");
+	});
+
+	it("refuses to pay for feedback nobody sent", () => {
+		expect(REWARD).toContain("from public.bug_reports");
+		expect(REWARD).toContain(`raise exception '${NO_FEEDBACK_MESSAGE}'`);
+	});
+
+	it("keeps itself away from the anonymous key", () => {
+		expect(REWARD).toMatch(
+			/revoke all on function public\.claim_feedback_reward\(\) from public, anon;/,
+		);
+		expect(REWARD).toMatch(
+			/grant execute on function public\.claim_feedback_reward\(\) to authenticated;/,
+		);
+	});
+
+	it("pins the search path, like every other definer here", () => {
+		const body = REWARD.slice(REWARD.indexOf("claim_feedback_reward()"));
+
+		expect(body).toContain("security definer");
+		expect(body).toContain("set search_path = public");
+	});
+});
+
+/**
+ * The column privileges that make the balance mean anything.
+ *
+ * RLS chooses rows, not columns, and `authenticated` held UPDATE on all of
+ * `profiles` — so the owner policy from 0001 let any browser reset its own
+ * `generations_used`. These assert the grant is narrowed and stays narrow.
+ */
+describe("what a browser may write to its own profile", () => {
+	const GRANTED = (() => {
+		const clause = REWARD.match(
+			/grant update \(([\s\S]*?)\) on public\.profiles/,
+		);
+		return (clause?.[1] ?? "")
+			.split(",")
+			.map((one) => one.trim())
+			.filter(Boolean);
+	})();
+
+	it("takes the blanket grant away first", () => {
+		expect(REWARD).toMatch(
+			/revoke insert, update on public\.profiles from authenticated;/,
+		);
+	});
+
+	it("finds the narrowed grant", () => {
+		expect(GRANTED.length).toBeGreaterThan(3);
+	});
+
+	it.each([
+		"generations_used",
+		"generation_limit",
+		"feedback_reward_at",
+	])("never lets the client write %s", (column) => {
+		expect(GRANTED).not.toContain(column);
+	});
+
+	/**
+	 * The other direction: the onboarding wizard upserts every question's
+	 * column, so a question added without widening this grant would break
+	 * onboarding with a permission error rather than a missing column.
+	 */
+	it("covers every column the onboarding wizard writes", () => {
+		for (const question of ONBOARDING_QUESTIONS) {
+			expect(GRANTED).toContain(question.id);
+		}
+		for (const column of ["id", "display_name", "notes", "onboarded_at"]) {
+			expect(GRANTED).toContain(column);
+		}
 	});
 });

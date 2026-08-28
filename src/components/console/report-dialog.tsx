@@ -35,9 +35,18 @@ const KIND_LABELS: Record<ReportKind, string> = {
  */
 export function ReportDialog({
 	onClose,
+	onSent,
 	open,
 }: {
 	onClose: () => void;
+	/**
+	 * Called once a report has actually been written, not merely submitted.
+	 *
+	 * The distinction is what the feedback reward hangs off: paying out on the
+	 * click would pay for a failed insert, and paying out on close would pay
+	 * for opening the dialog and changing your mind.
+	 */
+	onSent?: () => void;
 	open: boolean;
 }) {
 	const [kind, setKind] = useState<ReportKind>("bug");
@@ -67,6 +76,7 @@ export function ReportDialog({
 		try {
 			await fileReport({ kind, summary, detail });
 			setSent(true);
+			onSent?.();
 		} catch (thrown) {
 			setError(
 				thrown instanceof Error ? thrown.message : "Could not send that.",

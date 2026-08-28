@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Clause, LegalPage, Points } from "@/components/legal/legal-page";
 import { BRAND } from "@/lib/brand";
 import { GOVERNING_LAW, LEGAL_CONTACT, TERMS_UPDATED } from "@/lib/legal";
-import { GENERATION_LIMIT } from "@/lib/quota";
+import { DEFAULT_GENERATION_LIMIT, FEEDBACK_REWARD } from "@/lib/quota";
 import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/terms")({
@@ -44,9 +44,10 @@ function Terms() {
 
 			<Clause id="what-it-costs" title="What it costs">
 				<p>
-					Nothing, while it is in beta. Each account gets {GENERATION_LIMIT}{" "}
-					generations. Downloading a starter you have already generated is
-					always free and does not count against that.
+					Nothing, while it is in beta. Each account starts with{" "}
+					{DEFAULT_GENERATION_LIMIT} generations, and sending us feedback earns{" "}
+					{FEEDBACK_REWARD} more, once. Downloading a starter you have already
+					generated is always free and does not count against either.
 				</p>
 				<p>
 					The limit may change, and paid plans may arrive later. If we ever

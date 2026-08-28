@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Clause, LegalPage, Points } from "@/components/legal/legal-page";
 import { BRAND } from "@/lib/brand";
 import { LEGAL_CONTACT, PRIVACY_UPDATED, SUBPROCESSORS } from "@/lib/legal";
-import { GENERATION_LIMIT } from "@/lib/quota";
+import { DEFAULT_GENERATION_LIMIT } from "@/lib/quota";
 import { pageHead } from "@/lib/seo";
 
 export const Route = createFileRoute("/privacy")({
@@ -67,7 +67,7 @@ function Privacy() {
 				<Points
 					items={[
 						"To run your account and sign you in.",
-						`To generate starters and let you download them again — including counting the ${GENERATION_LIMIT} generations each account gets.`,
+						`To generate starters and let you download them again — including counting the generations each account has spent against its allowance, which starts at ${DEFAULT_GENERATION_LIMIT}.`,
 						"To fix problems you report.",
 						"To understand who the product is for. The onboarding answers exist for this and nothing else.",
 					]}

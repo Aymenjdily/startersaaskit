@@ -1,12 +1,18 @@
+import type { LucideIcon } from "lucide-react";
+import { Check, Eye, ListChecks, Loader2, PackageOpen } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Container } from "@/components/ui/container";
 import { FadeUp } from "@/components/ui/fade-up";
+import { NeutralGlyph } from "@/components/ui/option-cards";
 import { Section, SectionHeading } from "@/components/ui/section";
 import {
 	QUESTION_COUNT_WORD,
 	QUESTION_COUNT_WORD_CAPITALISED,
+	STARTER_QUESTIONS,
 } from "@/lib/starter-questions";
 import { cn } from "@/lib/utils";
+import { BrandGlyph } from "./brand-glyph";
+import type { BrandIcon } from "./brand-icons";
 
 /**
  * Section 09 — `cu-section`: header above one wide visual.
@@ -24,6 +30,7 @@ import { cn } from "@/lib/utils";
 export type Step = {
 	/** Displayed as the card's ordinal. */
 	n: string;
+	icon: LucideIcon;
 	title: string;
 	text: string;
 };
@@ -31,16 +38,19 @@ export type Step = {
 export const STEPS: Step[] = [
 	{
 		n: "01",
+		icon: ListChecks,
 		title: `Answer ${QUESTION_COUNT_WORD} questions`,
 		text: "Framework, components, database, ORM, auth, billing, and a name. Each answer narrows the next, so a combination that does not work is never offered in the first place.",
 	},
 	{
 		n: "02",
+		icon: Eye,
 		title: "See it before it exists",
 		text: "The full file tree and the suite it ships with, laid out before anything is generated. Nothing is built until you approve it.",
 	},
 	{
 		n: "03",
+		icon: PackageOpen,
 		title: "Take delivery",
 		text: "A zip of the whole repo, yours to unpack and push wherever you like. Install, run the suite, and it is green on the first run.",
 	},
@@ -61,6 +71,19 @@ export const ANSWERS: Answer[] = [
 	{ label: "Package manager", value: "pnpm" },
 	{ label: "Project", value: "my-app" },
 ];
+
+/**
+ * The mark each answer would carry in the wizard, looked up from the real
+ * question set rather than listed here — a value this demo prints that the
+ * wizard does not offer resolves to the neutral glyph instead of a wrong logo.
+ * "Project" is free text, so it has no mark to look up.
+ */
+function iconFor({ label, value }: Answer): BrandIcon | null {
+	const question = STARTER_QUESTIONS.find((q) => q.label === label);
+	const option = question?.options?.find((o) => o.label === value);
+
+	return option?.icon ?? null;
+}
 
 type Line = {
 	/** Index into `STEPS` — drives which card is highlighted. */
@@ -123,9 +146,20 @@ const activeStep = (shown: number) =>
 const PROJECT = ANSWERS[ANSWERS.length - 1].value;
 
 function AnswerRow({ label, value }: Answer) {
+	const icon = iconFor({ label, value });
+
 	return (
-		<div className="flex items-baseline justify-between gap-4 border-line/60 border-b py-2.5 last:border-0">
-			<span className="shrink-0 text-ink-muted">{label}</span>
+		<div className="flex items-center justify-between gap-4 border-line/60 border-b py-2.5 last:border-0">
+			<span className="flex min-w-0 items-center gap-2.5">
+				<span className="flex size-7 shrink-0 items-center justify-center rounded-[7px] bg-white/6 text-white/70">
+					{icon ? (
+						<BrandGlyph className="size-3.5" icon={icon} />
+					) : (
+						<NeutralGlyph className="size-3.5" />
+					)}
+				</span>
+				<span className="shrink-0 text-ink-muted">{label}</span>
+			</span>
 			<span className="min-w-0 truncate text-ink">{value}</span>
 		</div>
 	);
@@ -152,14 +186,19 @@ function WizardPanel({ shown }: { shown: number }) {
 				))}
 
 				{shown > RESOLVING_AT && (
-					<p className="pt-4 text-ink-muted">
+					<p className="flex items-center gap-2 pt-4 text-ink-muted">
+						<Loader2
+							aria-hidden="true"
+							className="size-3.5 motion-safe:animate-spin"
+						/>
 						resolving {QUESTION_COUNT_WORD} answers into a template
 					</p>
 				)}
 
 				{shown > RESOLVING_AT + 1 && (
-					<p className="pt-1 text-sage">
-						delivered to github.com/you/{PROJECT}
+					<p className="flex items-center gap-2 pt-2 text-sage">
+						<Check aria-hidden="true" className="size-3.5" />
+						delivered as {PROJECT}.zip
 					</p>
 				)}
 			</div>
@@ -202,14 +241,26 @@ export function HowItWorks() {
 							key={step.n}
 							step={(i % 4) as 0 | 1 | 2 | 3}
 						>
-							<span
-								className={cn(
-									"font-mono text-[12px] transition-colors duration-500",
-									i === active ? "text-brand" : "text-ink-muted",
-								)}
-							>
-								{step.n}
-							</span>
+							<div className="flex items-center justify-between">
+								<span
+									className={cn(
+										"flex size-9 items-center justify-center rounded-[9px] transition-colors duration-500",
+										i === active
+											? "bg-brand/15 text-brand"
+											: "bg-white/6 text-ink-muted",
+									)}
+								>
+									<step.icon aria-hidden="true" className="size-4" />
+								</span>
+								<span
+									className={cn(
+										"font-mono text-[12px] transition-colors duration-500",
+										i === active ? "text-brand" : "text-ink-muted",
+									)}
+								>
+									{step.n}
+								</span>
+							</div>
 							<div>
 								<h3 className="font-medium text-[17px] text-ink tracking-[-0.01em]">
 									{step.title}

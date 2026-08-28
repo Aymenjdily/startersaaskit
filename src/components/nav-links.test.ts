@@ -41,7 +41,7 @@ describe("the navbar and footer links", () => {
 	it("finds links to check", () => {
 		/* Without this the two assertions below pass on an empty list. */
 		for (const file of CHROME) {
-			expect(fragmentLinks(file).length).toBeGreaterThan(1);
+			expect(fragmentLinks(file).length).toBeGreaterThan(0);
 		}
 
 		expect(IDS.size).toBeGreaterThan(1);

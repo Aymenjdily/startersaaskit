@@ -16,7 +16,14 @@ import { absolute } from "@/lib/seo";
  * `heads.test.ts` holds this list to the set of routes without `noIndex`, so
  * adding a public page and forgetting the sitemap fails rather than ships.
  */
-const PATHS = ["/", "/sign-up", "/sign-in", "/privacy", "/terms"] as const;
+const PATHS = [
+	"/",
+	"/docs",
+	"/sign-up",
+	"/sign-in",
+	"/privacy",
+	"/terms",
+] as const;
 
 export const Route = createFileRoute("/sitemap.xml")({
 	server: {

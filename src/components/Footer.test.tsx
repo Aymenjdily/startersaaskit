@@ -3,8 +3,6 @@ import { resolve } from "node:path";
 import { render, screen, within } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { TestedByDefault } from "@/components/landing/tested-by-default";
-import { UseCases } from "@/components/landing/use-cases";
 import { WiredGrid } from "@/components/landing/wired-grid";
 import { BRAND, LOGO_SIZE, LOGO_SRC, README_URL, REPO_URL } from "@/lib/brand";
 import { SUITE_STATS } from "@/test/suite-stats";
@@ -43,11 +41,7 @@ const imageSize = (path: string) => {
 };
 
 /** The sections the in-page anchors promise are down there. */
-const ANCHOR_TARGETS = [
-	{ id: "features", Section: WiredGrid },
-	{ id: "testing", Section: TestedByDefault },
-	{ id: "use-cases", Section: UseCases },
-];
+const ANCHOR_TARGETS = [{ id: "features", Section: WiredGrid }];
 
 /** The sections rendered here to prove their anchors ask jsdom about motion. */
 beforeEach(() => {
@@ -98,8 +92,10 @@ describe("Footer", () => {
 				expect(link(label)).toHaveAttribute("href", href);
 			}
 			/* Rooted at `/`, because the footer is rendered on the legal pages too
-			   and a bare `#features` scrolls nowhere from there. */
-			expect(PRODUCT_LINKS.map(({ href }) => href)).toEqual(
+			   and a bare `#features` scrolls nowhere from there. Page links like
+			   Docs carry no fragment and are their own routes' business. */
+			const anchors = PRODUCT_LINKS.filter(({ href }) => href.includes("#"));
+			expect(anchors.map(({ href }) => href)).toEqual(
 				ANCHOR_TARGETS.map(({ id }) => `/#${id}`),
 			);
 		});

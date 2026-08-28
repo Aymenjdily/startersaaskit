@@ -17,11 +17,10 @@ import { SUITE_STATS } from "@/test/suite-stats";
 
 type Link = { label: string; href: string };
 
-/** In-page anchors. Each one is an `id` some section on this page carries. */
+/** Where the product lives. Anchors are in-page; Docs is its own page. */
 export const PRODUCT_LINKS: Link[] = [
 	{ label: "Features", href: "/#features" },
-	{ label: "Testing", href: "/#testing" },
-	{ label: "Use cases", href: "/#use-cases" },
+	{ label: "Docs", href: "/docs" },
 ];
 
 /**
@@ -159,7 +158,15 @@ export function Footer() {
 
 			<div className="mx-auto grid max-w-content grid-cols-1 items-center gap-3 py-4 text-[12px] text-white/40 sm:grid-cols-2">
 				<p>
-					© {YEAR} {BRAND}
+					© {YEAR} {BRAND} · Built by{" "}
+					<a
+						className="text-white/60 underline underline-offset-4 transition-colors duration-200 hover:text-white/90"
+						href="https://aymenjdily.com"
+						rel="noreferrer"
+						target="_blank"
+					>
+						aymenjdily.com
+					</a>
 				</p>
 				<p className="flex items-center gap-1.5 sm:justify-end">
 					<span

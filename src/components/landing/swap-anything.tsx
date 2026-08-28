@@ -1,8 +1,20 @@
+import type { LucideIcon } from "lucide-react";
+import {
+	Blocks,
+	Database,
+	FileCode2,
+	KeyRound,
+	Mail,
+	Table2,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { Container } from "@/components/ui/container";
 import { FadeUp } from "@/components/ui/fade-up";
+import { NeutralGlyph } from "@/components/ui/option-cards";
 import { Section, SectionHeading } from "@/components/ui/section";
 import { cn } from "@/lib/utils";
+import { BrandGlyph } from "./brand-glyph";
+import type { BrandIcon } from "./brand-icons";
 
 /**
  * Section 07 — modularity.
@@ -23,6 +35,8 @@ import { cn } from "@/lib/utils";
 type Seam = {
 	/** Tab label. Must be a question the wizard actually asks — see `ANSWERS`. */
 	layer: string;
+	/** The mark the tab carries. */
+	icon: LucideIcon;
 	/** What the wizard offers for this layer. Never more than we will ship. */
 	options: string[];
 	/** Where the answer lands in the repo you receive. */
@@ -38,30 +52,35 @@ type Seam = {
 export const SEAMS: Seam[] = [
 	{
 		layer: "Framework",
+		icon: Blocks,
 		options: ["Next.js", "TanStack Start", "React + Vite"],
 		touches: ["app entry", "routing", "server handlers"],
 		note: "The widest choice on the list, and the reason the rest are cheap: routing and rendering live in a framework adapter, so nothing above them has to know which one you picked. React + Vite is the one that changes what else is possible — a browser-only app has nowhere to keep a secret, so the questions after it narrow to what can run without a server.",
 	},
 	{
 		layer: "Database",
+		icon: Database,
 		options: ["Neon", "Supabase", "PlanetScale", "Turso", "MongoDB"],
 		touches: ["db/client", "connection env"],
 		note: "Moving between the SQL hosts is one driver module and a connection string, so call sites never move. MongoDB is the honest exception — a document store is a different shape, and the next question narrows to match.",
 	},
 	{
 		layer: "ORM",
+		icon: Table2,
 		options: ["Drizzle", "Prisma", "Mongoose", "Supabase client"],
 		touches: ["db/schema", "migrations", "db/client"],
 		note: "Drizzle is SQL-only and Mongoose is MongoDB-only; Prisma spans both. You are shown whichever of the three your database can actually work with, not all three and a footnote. All three open a connection with a credential, so a browser-only app is offered the Supabase client instead — the same data, reached over HTTP with row level security doing the work.",
 	},
 	{
 		layer: "Auth",
+		icon: KeyRound,
 		options: ["Better Auth", "Supabase Auth", "Neon Auth", "Clerk", "Auth0"],
 		touches: ["auth config", "auth client", "route handler"],
 		note: "Supabase Auth and Neon Auth are parts of their host, so they appear only when you have chosen it — a pairing that cannot work is never offered in the first place. The rest hold their own users and work with any database.",
 	},
 	{
 		layer: "Email",
+		icon: Mail,
 		options: ["Resend", "Mailgun", "Brevo", "Not yet"],
 		touches: ["lib/email", "provider key"],
 		note: "One module, `src/lib/email.ts`, and one function — `sendEmail`. The rest of the app asks for an email to be sent and never learns which service sent it, so changing provider is one file and one key.",
@@ -100,10 +119,54 @@ function useSeamCycle(count: number) {
 	};
 }
 
-function Chip({ children }: { children: React.ReactNode }) {
+/**
+ * The vendor mark each option carries, keyed by the label the wizard prints.
+ * Options stay plain strings — the spec reads them — so the mark hangs off the
+ * label rather than the data. "Not yet" is not a product and gets the neutral
+ * glyph, the same treatment the wizard gives it.
+ */
+const OPTION_ICONS: Record<string, BrandIcon | null> = {
+	"Next.js": "nextdotjs",
+	"TanStack Start": "tanstack",
+	"React + Vite": "react",
+	Neon: "neon",
+	Supabase: "supabase",
+	PlanetScale: "planetscale",
+	Turso: "turso",
+	MongoDB: "mongodb",
+	Drizzle: "drizzle",
+	Prisma: "prisma",
+	Mongoose: "mongoose",
+	"Supabase client": "supabase",
+	"Better Auth": "betterauth",
+	"Supabase Auth": "supabase",
+	"Neon Auth": "neon",
+	Clerk: "clerk",
+	Auth0: "auth0",
+	Resend: "resend",
+	Mailgun: "mailgun",
+	Brevo: "brevo",
+	"Not yet": null,
+};
+
+/**
+ * An option drawn the way the wizard draws it: the vendor's mark in a tile,
+ * the name beside it. Same choice here as there, so the landing page and the
+ * generator read as one product.
+ */
+function OptionTile({ label }: { label: string }) {
+	const icon = OPTION_ICONS[label];
+
 	return (
-		<span className="inline-flex items-center rounded-[6px] border border-brand/40 bg-brand-dim px-2.5 py-1 font-mono text-[12px] whitespace-nowrap text-brand">
-			{children}
+		<span className="flex items-center gap-2.5 rounded-[10px] border border-white/12 bg-black/25 px-3 py-2.5">
+			<span className="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-white/6 text-white/70">
+				{icon ? (
+					<BrandGlyph className="size-4" icon={icon} />
+				) : (
+					<NeutralGlyph className="size-4" />
+				)}
+			</span>
+			<span className="truncate text-[13px] text-white/80">{label}</span>
 		</span>
 	);
 }
@@ -111,9 +174,9 @@ function Chip({ children }: { children: React.ReactNode }) {
 function SeamPanel({ seam }: { seam: Seam }) {
 	return (
 		<div className="flex flex-col gap-5">
-			<div className="flex flex-wrap items-center gap-2">
+			<div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
 				{seam.options.map((option) => (
-					<Chip key={option}>{option}</Chip>
+					<OptionTile key={option} label={option} />
 				))}
 			</div>
 
@@ -123,7 +186,13 @@ function SeamPanel({ seam }: { seam: Seam }) {
 						key={path}
 						className="flex items-center justify-between gap-4 bg-elevated px-3.5 py-2.5 font-mono text-[12px] sm:text-[13px]"
 					>
-						<span className="truncate text-ink-soft">{path}</span>
+						<span className="flex min-w-0 items-center gap-2.5">
+							<FileCode2
+								aria-hidden="true"
+								className="size-3.5 shrink-0 text-ink-muted"
+							/>
+							<span className="truncate text-ink-soft">{path}</span>
+						</span>
 						<span className="shrink-0 text-sage">generated</span>
 					</li>
 				))}
@@ -182,7 +251,7 @@ export function SwapAnything() {
 									aria-controls="seam-panel"
 									aria-selected={i === index}
 									className={cn(
-										"rounded-[6px] px-3 py-1.5 text-[13px] transition-colors",
+										"flex items-center gap-1.5 rounded-[6px] px-3 py-1.5 text-[13px] transition-colors",
 										i === index
 											? "bg-card-deep text-ink"
 											: "text-ink-muted hover:bg-white/5 hover:text-ink-soft",
@@ -193,6 +262,7 @@ export function SwapAnything() {
 									role="tab"
 									type="button"
 								>
+									<s.icon aria-hidden="true" className="size-3.5 shrink-0" />
 									{s.layer}
 								</button>
 							))}

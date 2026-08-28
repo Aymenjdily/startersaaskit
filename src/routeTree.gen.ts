@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as DocsRouteImport } from './routes/docs'
 import { Route as GenerateRouteImport } from './routes/generate'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -39,6 +40,11 @@ const AdminRoute = AdminRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocsRoute = DocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GenerateRoute = GenerateRouteImport.update({
@@ -111,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/dashboard': typeof DashboardRoute
+  '/docs': typeof DocsRoute
   '/generate': typeof GenerateRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
@@ -129,6 +136,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/dashboard': typeof DashboardRoute
+  '/docs': typeof DocsRoute
   '/generate': typeof GenerateRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
@@ -148,6 +156,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/dashboard': typeof DashboardRoute
+  '/docs': typeof DocsRoute
   '/generate': typeof GenerateRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
@@ -168,6 +177,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/dashboard'
+    | '/docs'
     | '/generate'
     | '/onboarding'
     | '/privacy'
@@ -186,6 +196,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/dashboard'
+    | '/docs'
     | '/generate'
     | '/onboarding'
     | '/privacy'
@@ -204,6 +215,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/dashboard'
+    | '/docs'
     | '/generate'
     | '/onboarding'
     | '/privacy'
@@ -223,6 +235,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   DashboardRoute: typeof DashboardRoute
+  DocsRoute: typeof DocsRoute
   GenerateRoute: typeof GenerateRoute
   OnboardingRoute: typeof OnboardingRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -259,6 +272,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/docs': {
+      id: '/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof DocsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/generate': {
@@ -359,6 +379,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   DashboardRoute: DashboardRoute,
+  DocsRoute: DocsRoute,
   GenerateRoute: GenerateRoute,
   OnboardingRoute: OnboardingRoute,
   PrivacyRoute: PrivacyRoute,

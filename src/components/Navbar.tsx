@@ -1,9 +1,7 @@
-import { ChevronDown } from "lucide-react";
 import { useState } from "react";
-import { USE_CASES } from "@/components/landing/use-cases";
 import {
 	BRAND,
-	README_URL as DOCS_HREF,
+	DOCS_HREF,
 	LOGO_SRC,
 	SIGN_IN_HREF,
 	SIGN_UP_HREF,
@@ -18,23 +16,10 @@ import { cn } from "@/lib/utils";
  * them costs nothing where they already worked: a link to the current path with
  * a different fragment is still a same-document scroll, not a reload.
  */
-const navLinks = [
-	{ label: "Features", href: "/#features" },
-	{ label: "Testing", href: "/#testing" },
-];
-
-/**
- * Read off the section itself. Kept as its own copy, the menu named a use case
- * the page had stopped making a case for.
- */
-const useCases = USE_CASES.map(({ title }) => ({
-	label: title,
-	href: "/#use-cases",
-}));
+const navLinks = [{ label: "Features", href: "/#features" }];
 
 export function Navbar() {
 	const [menuOpen, setMenuOpen] = useState(false);
-	const [useCasesOpen, setUseCasesOpen] = useState(false);
 
 	return (
 		<>
@@ -55,36 +40,12 @@ export function Navbar() {
 							</a>
 						))}
 
-						<div className="group relative">
-							<span className="flex cursor-pointer items-center gap-1 text-[14px] text-white/70 transition-colors duration-300 group-hover:text-ink">
-								Use cases
-								<ChevronDown className="size-2.5 opacity-40 transition-[transform,opacity] duration-200 group-hover:rotate-180 group-hover:opacity-70" />
-							</span>
-							<div className="pointer-events-none absolute left-1/2 top-full z-[1001] -translate-x-1/2 translate-y-1 pt-3 opacity-0 transition-[opacity,transform] duration-150 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100">
-								<div className="min-w-[180px] rounded-[10px] border border-white/8 bg-[rgba(20,20,20,0.95)] p-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.4)] backdrop-blur-[20px]">
-									{useCases.map((item) => (
-										<a
-											key={item.label}
-											href={item.href}
-											className="block whitespace-nowrap rounded-md px-3 py-2 text-[13px] text-white/70 transition-colors duration-150 hover:bg-white/8 hover:text-ink"
-										>
-											{item.label}
-										</a>
-									))}
-								</div>
-							</div>
-						</div>
-
+						{/* On-site, so it stays in the tab like every other product link. */}
 						<a
 							href={DOCS_HREF}
-							target="_blank"
-							rel="noreferrer"
-							className="group text-[14px] text-white/70 transition-colors duration-300 hover:text-ink"
+							className="text-[14px] text-white/70 transition-colors duration-300 hover:text-ink"
 						>
 							Docs
-							<span className="ml-0.5 opacity-0 transition-opacity duration-200 group-hover:opacity-60">
-								↗
-							</span>
 						</a>
 
 						<span className="h-4 w-px bg-white/20" />
@@ -148,41 +109,9 @@ export function Navbar() {
 						</a>
 					))}
 
-					<div className="flex flex-col">
-						<button
-							type="button"
-							aria-expanded={useCasesOpen}
-							onClick={() => setUseCasesOpen((open) => !open)}
-							className="flex w-full items-center gap-1.5 border-b border-white/6 py-3.5 text-left text-[18px] text-white/70 transition-colors hover:text-ink"
-						>
-							Use cases
-							<ChevronDown
-								className={cn(
-									"size-4 opacity-40 transition-transform duration-250",
-									useCasesOpen && "rotate-180",
-								)}
-							/>
-						</button>
-						{useCasesOpen && (
-							<div className="flex flex-col pb-2 pl-3">
-								{useCases.map((item) => (
-									<a
-										key={item.label}
-										href={item.href}
-										onClick={() => setMenuOpen(false)}
-										className="py-2.5 text-[16px] text-white/70 transition-colors hover:text-ink"
-									>
-										{item.label}
-									</a>
-								))}
-							</div>
-						)}
-					</div>
-
 					<a
 						href={DOCS_HREF}
-						target="_blank"
-						rel="noreferrer"
+						onClick={() => setMenuOpen(false)}
 						className="border-b border-white/6 py-3.5 text-[18px] text-white/70 transition-colors hover:text-ink"
 					>
 						Docs

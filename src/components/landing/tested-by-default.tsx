@@ -373,7 +373,7 @@ export function TestedByDefault() {
 	const step = useTestCycle();
 
 	return (
-		<Section id="testing" tone="forest">
+		<Section id="testing" tone="elevated">
 			<Container>
 				<FadeUp className="mb-12 grid items-end gap-6 md:mb-14 md:grid-cols-2 md:gap-10">
 					<h2 className="heading-tight text-h2 text-ink">Tested by default</h2>

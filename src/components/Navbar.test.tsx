@@ -1,16 +1,8 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import { BRAND, LOGO_SRC } from "@/lib/brand";
 import { Navbar } from "./Navbar";
-
-const USE_CASES = [
-	"B2B SaaS",
-	"Internal tools",
-	"Side projects",
-	"Client work",
-	"AI apps",
-];
 
 describe("Navbar", () => {
 	describe("branding", () => {
@@ -28,34 +20,20 @@ describe("Navbar", () => {
 			expect(
 				screen.getByRole("link", { name: "Features" }),
 			).toBeInTheDocument();
-			expect(screen.getByRole("link", { name: "Testing" })).toBeInTheDocument();
-		});
-
-		it("lists every use case in the dropdown", () => {
-			render(<Navbar />);
-			for (const label of USE_CASES) {
-				/* Rooted, so the dropdown still works from `/privacy`. */
-				expect(screen.getByRole("link", { name: label })).toHaveAttribute(
-					"href",
-					"/#use-cases",
-				);
-			}
 		});
 
 		/**
-		 * `target="_blank"` without `rel="noreferrer"` leaks the referrer and hands
-		 * the opened page a live `window.opener` handle. Docs carries a decorative
-		 * ↗ inside a nested span, so match its name loosely.
+		 * Every destination in the bar is part of the product now, Docs included.
+		 * An external link here once leaked the referrer for want of
+		 * `rel="noreferrer"`; nothing leaves the site, so nothing opens a new tab.
 		 */
-		it("opens external destinations safely", () => {
+		it("keeps every link in the same tab", () => {
 			render(<Navbar />);
 
-			const docs = screen.getByRole("link", { name: /^Docs/ });
-			expect(docs).toHaveAttribute("target", "_blank");
-			expect(docs).toHaveAttribute(
-				"rel",
-				expect.stringContaining("noreferrer"),
-			);
+			for (const anchor of screen.getAllByRole("link")) {
+				expect(anchor).not.toHaveAttribute("target");
+				expect(anchor.getAttribute("href")).toMatch(/^\//);
+			}
 		});
 
 		/**
@@ -84,9 +62,9 @@ describe("Navbar", () => {
 			render(<Navbar />);
 			const toggle = screen.getByRole("button", { name: "Toggle menu" });
 			expect(toggle).toHaveAttribute("aria-expanded", "false");
-			expect(
-				screen.queryByRole("button", { name: /Use cases/ }),
-			).not.toBeInTheDocument();
+			/* The desktop bar hides below `md` with CSS but stays in the tree, so
+			   "closed" means no second copy of the section links. */
+			expect(screen.getAllByRole("link", { name: "Features" })).toHaveLength(1);
 		});
 
 		it("opens and closes on the toggle", async () => {
@@ -96,29 +74,11 @@ describe("Navbar", () => {
 
 			await user.click(toggle);
 			expect(toggle).toHaveAttribute("aria-expanded", "true");
-			expect(
-				screen.getByRole("button", { name: /Use cases/ }),
-			).toBeInTheDocument();
+			expect(screen.getAllByRole("link", { name: "Features" })).toHaveLength(2);
 
 			await user.click(toggle);
 			expect(toggle).toHaveAttribute("aria-expanded", "false");
-			expect(
-				screen.queryByRole("button", { name: /Use cases/ }),
-			).not.toBeInTheDocument();
-		});
-
-		it("expands the nested use-cases accordion independently", async () => {
-			const user = userEvent.setup();
-			render(<Navbar />);
-
-			await user.click(screen.getByRole("button", { name: "Toggle menu" }));
-			const accordion = screen.getByRole("button", { name: /Use cases/ });
-			expect(accordion).toHaveAttribute("aria-expanded", "false");
-
-			await user.click(accordion);
-			expect(accordion).toHaveAttribute("aria-expanded", "true");
-			// One desktop copy plus one mobile copy of each entry.
-			expect(screen.getAllByRole("link", { name: "B2B SaaS" })).toHaveLength(2);
+			expect(screen.getAllByRole("link", { name: "Features" })).toHaveLength(1);
 		});
 
 		/**
@@ -131,26 +91,9 @@ describe("Navbar", () => {
 			render(<Navbar />);
 			await user.click(screen.getByRole("button", { name: "Toggle menu" }));
 
-			const panel = screen.getByRole("button", {
-				name: /Use cases/,
-			}).parentElement?.parentElement as HTMLElement;
-
-			await user.click(
-				within(panel).getAllByRole("link", { name: "Features" })[0],
-			);
-
-			expect(
-				screen.getByRole("button", { name: "Toggle menu" }),
-			).toHaveAttribute("aria-expanded", "false");
-		});
-
-		it("closes when a use-case link is tapped", async () => {
-			const user = userEvent.setup();
-			render(<Navbar />);
-			await user.click(screen.getByRole("button", { name: "Toggle menu" }));
-			await user.click(screen.getByRole("button", { name: /Use cases/ }));
-
-			await user.click(screen.getAllByRole("link", { name: "AI apps" })[1]);
+			/* Two copies exist once the panel is open: [0] is the desktop bar,
+			   [1] the mobile panel. Tapping the panel's copy must close it. */
+			await user.click(screen.getAllByRole("link", { name: "Features" })[1]);
 
 			expect(
 				screen.getByRole("button", { name: "Toggle menu" }),

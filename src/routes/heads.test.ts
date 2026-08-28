@@ -46,7 +46,7 @@ describe("every route's head", () => {
 	 * that cannot be indexed is one a Google OAuth reviewer has to be handed a
 	 * link to, and one nobody can find when they go looking for it.
 	 */
-	const PUBLIC = ["index.tsx", "privacy.tsx", "terms.tsx"];
+	const PUBLIC = ["index.tsx", "docs.tsx", "privacy.tsx", "terms.tsx"];
 
 	/**
 	 * Everything else is either an empty shell to a crawler or somebody's

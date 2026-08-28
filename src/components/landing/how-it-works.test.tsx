@@ -134,21 +134,21 @@ describe("HowItWorks", () => {
 					`resolving ${QUESTION_COUNT_WORD} answers into a template`,
 				),
 			).toBeInTheDocument();
-			expect(panel().queryByText(/delivered to/)).toBeNull();
+			expect(panel().queryByText(/delivered as/)).toBeNull();
 
 			act(() => void vi.advanceTimersByTime(DELIVERED_AT - RESOLVING_AT));
-			expect(panel().getByText(/delivered to/)).toBeInTheDocument();
+			expect(panel().getByText(/delivered as/)).toBeInTheDocument();
 		});
 
-		/** The repo it claims to deliver is the name the wizard was given. */
-		it("delivers to the project the answers named", () => {
+		/** The zip it claims to deliver is named for the wizard's project answer. */
+		it("delivers the project the answers named", () => {
 			render(<HowItWorks />);
 
 			act(() => void vi.advanceTimersByTime(DELIVERED_AT));
 
 			const project = ANSWERS[ANSWERS.length - 1].value;
 			expect(
-				panel().getByText(`delivered to github.com/you/${project}`),
+				panel().getByText(`delivered as ${project}.zip`),
 			).toBeInTheDocument();
 		});
 
@@ -178,7 +178,7 @@ describe("HowItWorks", () => {
 			for (const { label } of ANSWERS) {
 				expect(answered(label)).not.toBeNull();
 			}
-			expect(panel().getByText(/delivered to/)).toBeInTheDocument();
+			expect(panel().getByText(/delivered as/)).toBeInTheDocument();
 			expect(vi.getTimerCount()).toBe(0);
 		});
 	});

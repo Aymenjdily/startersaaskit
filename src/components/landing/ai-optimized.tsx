@@ -1,3 +1,12 @@
+import type { LucideIcon } from "lucide-react";
+import {
+	Boxes,
+	FileCode2,
+	Folder,
+	Sparkles,
+	SquareTerminal,
+	TriangleAlert,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { Container } from "@/components/ui/container";
 import { FadeUp } from "@/components/ui/fade-up";
@@ -111,17 +120,37 @@ function FileTree({ activePath }: { activePath: string }) {
 		<ul className="font-mono text-[12px] leading-[1.9] sm:text-[13px]">
 			{TREE.map((node) => {
 				const active = node.path === activePath;
+				const folder = node.label.endsWith("/");
+				const Icon = folder ? Folder : FileCode2;
 
 				return (
 					<li
 						className={cn(
-							"rounded-[5px] pr-2 transition-colors duration-300",
-							active ? "bg-brand-dim text-brand" : "text-ink-muted",
+							"flex items-center gap-2 rounded-[5px] pr-2 transition-colors duration-300",
+							active && "bg-brand-dim",
 						)}
 						key={node.label + node.depth}
 						style={{ paddingLeft: `${node.depth * 14 + 8}px` }}
 					>
-						{node.label}
+						<Icon
+							aria-hidden="true"
+							className={cn(
+								"size-3.5 shrink-0 transition-colors duration-300",
+								active ? "text-brand" : "text-ink-muted/50",
+							)}
+						/>
+						<span
+							className={cn(
+								"transition-colors duration-300",
+								active
+									? "text-brand"
+									: folder
+										? "text-ink-soft"
+										: "text-ink-muted",
+							)}
+						>
+							{node.label}
+						</span>
 					</li>
 				);
 			})}
@@ -129,43 +158,90 @@ function FileTree({ activePath }: { activePath: string }) {
 	);
 }
 
+/**
+ * The three claims on the right, each with a mark. `flags` renders the real
+ * tsconfig list in place of a sentence — the spec holds those against the
+ * actual file, so the card cannot advertise a flag we do not run under.
+ */
+const PILLARS: {
+	icon: LucideIcon;
+	title: string;
+	text?: string;
+	flags?: boolean;
+}[] = [
+	{
+		icon: Boxes,
+		title: "One module per concern",
+		text: "Every integration gets a file named after it, in the same place in every repo we generate. There is no registry to keep in sync and no indirection to trace before making a change.",
+	},
+	{
+		icon: TriangleAlert,
+		title: "Wrong guesses fail loudly",
+		flags: true,
+	},
+	{
+		icon: SquareTerminal,
+		title: "Intent is executable",
+		text: "Each module's test file states what it must do. That is context an assistant can run, not prose it has to trust.",
+	},
+];
+
 export function AiOptimized() {
 	const index = useLookupCycle(LOOKUPS.length);
 	const lookup = LOOKUPS[index];
 
 	return (
-		<Section tone="forest">
+		<Section className="overflow-hidden border-white/6 border-y" tone="base">
 			<Container>
 				<div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
 					{/* Visual sits left on desktop, but text leads on mobile. */}
 					<FadeUp
-						className="order-2 rounded-[20px] border border-white/6 bg-base p-4 sm:p-6 lg:order-1"
+						className="order-2 overflow-hidden rounded-[20px] border border-white/10 bg-elevated lg:order-1"
 						step={1}
 					>
-						<div
-							aria-live="polite"
-							className="mb-4 flex min-h-[44px] items-start gap-2.5"
-						>
-							<span
-								aria-hidden="true"
-								className="mt-px shrink-0 font-mono text-[13px] text-sage"
+						{/* Window chrome, plus a dot per question so the loop has a face. */}
+						<div className="flex items-center justify-between border-white/6 border-b px-4 py-3 sm:px-5">
+							<div aria-hidden="true" className="flex items-center gap-1.5">
+								<span className="size-2.5 rounded-full bg-white/15" />
+								<span className="size-2.5 rounded-full bg-white/15" />
+								<span className="size-2.5 rounded-full bg-white/15" />
+							</div>
+							<div aria-hidden="true" className="flex items-center gap-1.5">
+								{LOOKUPS.map((l, i) => (
+									<span
+										className={cn(
+											"size-1.5 rounded-full transition-colors duration-300",
+											i === index ? "bg-brand" : "bg-white/15",
+										)}
+										key={l.path}
+									/>
+								))}
+							</div>
+						</div>
+
+						<div className="p-4 sm:p-6">
+							<div
+								aria-live="polite"
+								className="mb-4 flex min-h-[44px] items-start gap-2.5"
 							>
-								&gt;
-							</span>
-							<p className="text-[14px] leading-[1.5] text-ink-soft sm:text-[15px]">
-								{lookup.ask}
+								<span className="mt-px flex size-7 shrink-0 items-center justify-center rounded-[8px] bg-brand/15 text-brand">
+									<Sparkles aria-hidden="true" className="size-3.5" />
+								</span>
+								<p className="pt-1 text-[14px] leading-[1.5] text-ink-soft sm:text-[15px]">
+									{lookup.ask}
+								</p>
+							</div>
+
+							<div className="rounded-[12px] border border-line bg-black/25 p-4">
+								<FileTree activePath={lookup.path} />
+							</div>
+
+							<p className="mt-4 border-line border-t pt-4 text-[13px] leading-[1.6] text-ink-muted">
+								<span className="font-mono text-sage">{lookup.path}</span>
+								<br />
+								{lookup.because}
 							</p>
 						</div>
-
-						<div className="rounded-[12px] border border-line bg-elevated p-4">
-							<FileTree activePath={lookup.path} />
-						</div>
-
-						<p className="mt-4 border-line border-t pt-4 text-[13px] leading-[1.6] text-ink-muted">
-							<span className="font-mono text-sage">{lookup.path}</span>
-							<br />
-							{lookup.because}
-						</p>
 					</FadeUp>
 
 					<FadeUp className="order-1 lg:order-2">
@@ -175,42 +251,40 @@ export function AiOptimized() {
 							description="Every repo we generate has the same shape: predictable layout, typed boundaries, and a spec beside every module. An assistant can guess where something lives — and when it guesses wrong, the compiler says so before you run anything."
 						/>
 
-						<dl className="mt-8 flex flex-col gap-5">
-							<div>
-								<dt className="text-[15px] font-medium text-ink">
-									One module per concern
-								</dt>
-								<dd className="mt-1 text-[14px] leading-[1.6] text-ink-muted">
-									Every integration gets a file named after it, in the same
-									place in every repo we generate. There is no registry to keep
-									in sync and no indirection to trace before making a change.
-								</dd>
-							</div>
-							<div>
-								<dt className="text-[15px] font-medium text-ink">
-									Wrong guesses fail loudly
-								</dt>
-								<dd className="mt-2 flex flex-wrap gap-1.5">
-									{TS_FLAGS.map((flag) => (
-										<span
-											className="rounded-[5px] border border-line-bright bg-white/3 px-2 py-0.5 font-mono text-[11px] text-ink-muted"
-											key={flag}
-										>
-											{flag}
-										</span>
-									))}
-								</dd>
-							</div>
-							<div>
-								<dt className="text-[15px] font-medium text-ink">
-									Intent is executable
-								</dt>
-								<dd className="mt-1 text-[14px] leading-[1.6] text-ink-muted">
-									Each module's test file states what it must do. That is
-									context an assistant can run, not prose it has to trust.
-								</dd>
-							</div>
-						</dl>
+						<ul className="mt-8 flex flex-col gap-2.5">
+							{PILLARS.map((pillar) => (
+								<li
+									className="flex gap-4 rounded-[12px] border border-white/10 bg-elevated p-4"
+									key={pillar.title}
+								>
+									<span className="flex size-9 shrink-0 items-center justify-center rounded-[9px] bg-brand-dim text-brand">
+										<pillar.icon aria-hidden="true" className="size-4" />
+									</span>
+									<div>
+										<h3 className="text-[15px] font-medium text-ink">
+											{pillar.title}
+										</h3>
+										{pillar.text && (
+											<p className="mt-1 text-[14px] leading-[1.6] text-ink-muted">
+												{pillar.text}
+											</p>
+										)}
+										{pillar.flags && (
+											<p className="mt-2 flex flex-wrap gap-1.5">
+												{TS_FLAGS.map((flag) => (
+													<span
+														className="rounded-[5px] border border-brand/30 bg-brand-dim px-2 py-0.5 font-mono text-[11px] text-brand"
+														key={flag}
+													>
+														{flag}
+													</span>
+												))}
+											</p>
+										)}
+									</div>
+								</li>
+							))}
+						</ul>
 					</FadeUp>
 				</div>
 			</Container>

@@ -16,11 +16,11 @@ import { cn } from "@/lib/utils";
  */
 
 /** For choices that are not a product, so have no logo to show. */
-function NeutralGlyph() {
+export function NeutralGlyph({ className }: { className?: string }) {
 	return (
 		<svg
 			aria-hidden="true"
-			className="size-6"
+			className={cn("size-6", className)}
 			fill="none"
 			stroke="currentColor"
 			strokeLinecap="round"

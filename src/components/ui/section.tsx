@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 type SectionProps = ComponentProps<"section"> & {
 	/** Alternate down the page so the eye gets a band change between blocks. */
-	tone?: "base" | "forest";
+	tone?: "base" | "forest" | "elevated";
 };
 
 export function Section({ tone = "base", className, ...props }: SectionProps) {
@@ -11,7 +11,11 @@ export function Section({ tone = "base", className, ...props }: SectionProps) {
 		<section
 			className={cn(
 				"relative pt-14 pb-12 md:pt-20 md:pb-15",
-				tone === "forest" ? "bg-forest" : "bg-base",
+				tone === "forest"
+					? "bg-forest"
+					: tone === "elevated"
+						? "bg-elevated"
+						: "bg-base",
 				className,
 			)}
 			{...props}

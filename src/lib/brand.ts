@@ -28,6 +28,9 @@ export const SIGN_UP_HREF = "/sign-up";
 
 export const SIGN_IN_HREF = "/sign-in";
 
+/** The docs page — on-site, so the navbar keeps the reader in the product. */
+export const DOCS_HREF = "/docs";
+
 /**
  * The wordmark: the name set as artwork. The navbar prints it at 40px and the
  * footer prints the same file across the full width of the page, so a swap has

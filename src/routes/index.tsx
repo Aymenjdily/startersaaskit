@@ -6,9 +6,7 @@ import { Hero } from "@/components/landing/hero";
 import { HowItWorks } from "@/components/landing/how-it-works";
 import { Statement } from "@/components/landing/statement";
 import { SwapAnything } from "@/components/landing/swap-anything";
-import { TestedByDefault } from "@/components/landing/tested-by-default";
 import { TrustStrip } from "@/components/landing/trust-strip";
-import { UseCases } from "@/components/landing/use-cases";
 import { WiredGrid } from "@/components/landing/wired-grid";
 import { Navbar } from "@/components/Navbar";
 import { pageHead } from "@/lib/seo";
@@ -42,11 +40,9 @@ function Home() {
 				<TrustStrip />
 				<Statement />
 				<WiredGrid />
-				<TestedByDefault />
 				<SwapAnything />
 				<AiOptimized />
 				<HowItWorks />
-				<UseCases />
 				<FinalCta />
 			</main>
 			<Footer />

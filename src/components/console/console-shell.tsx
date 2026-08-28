@@ -3,7 +3,7 @@ import { SIGN_IN_HREF } from "@/lib/brand";
 import { isAdmin as checkAdmin } from "@/lib/feedback";
 import { getSupabase } from "@/lib/supabase";
 import { IconRail, type RailUser } from "./icon-rail";
-import { ReportDialog } from "./report-dialog";
+import { ReportDialog, type ReportIntent } from "./report-dialog";
 import { ConsoleChromeSkeleton } from "./skeletons";
 
 /**
@@ -14,9 +14,9 @@ import { ConsoleChromeSkeleton } from "./skeletons";
  * would otherwise have to be handed a callback through every layer between,
  * or own a second dialog that behaves subtly differently from the first.
  */
-const OpenReport = createContext<() => void>(() => {});
+const OpenReport = createContext<(intent?: ReportIntent) => void>(() => {});
 
-export function useOpenReport(): () => void {
+export function useOpenReport(): (intent?: ReportIntent) => void {
 	return useContext(OpenReport);
 }
 
@@ -51,7 +51,8 @@ export function ConsoleShell({
 }) {
 	const [user, setUser] = useState<RailUser | null>(null);
 	const [admin, setAdmin] = useState(false);
-	const [reporting, setReporting] = useState(false);
+	/* The intent it was opened with, or `null` for closed. */
+	const [reporting, setReporting] = useState<ReportIntent | null>(null);
 
 	useEffect(() => {
 		getSupabase()
@@ -80,20 +81,21 @@ export function ConsoleShell({
 	if (!user) return <ConsoleChromeSkeleton title={title} />;
 
 	return (
-		<OpenReport.Provider value={() => setReporting(true)}>
+		<OpenReport.Provider value={(intent = "bug") => setReporting(intent)}>
 			<div className="flex min-h-screen bg-surface">
 				<IconRail
 					currentPath={currentPath}
 					isAdmin={admin}
-					onReport={() => setReporting(true)}
+					onReport={() => setReporting("bug")}
 					onSignOut={signOut}
 					user={user}
 				/>
 
 				<ReportDialog
-					onClose={() => setReporting(false)}
+					intent={reporting ?? "bug"}
+					onClose={() => setReporting(null)}
 					onSent={onReportSent}
-					open={reporting}
+					open={reporting !== null}
 				/>
 
 				<div className="flex min-w-0 flex-1 flex-col">

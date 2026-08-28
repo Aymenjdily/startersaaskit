@@ -3,10 +3,10 @@
 
 export const SUITE_STATS = {
 	files: 55,
-	total: 1130,
+	total: 1135,
 	byDir: {
 		src: 4,
-		"src/components": 559,
+		"src/components": 564,
 		"src/lib": 465,
 		"src/routes": 92,
 		"src/test": 10,

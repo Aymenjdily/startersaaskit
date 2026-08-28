@@ -36,13 +36,13 @@ function ChildWithButton() {
 	const openReport = useOpenReport();
 
 	return (
-		<button onClick={openReport} type="button">
+		<button onClick={() => openReport("feedback")} type="button">
 			Leave feedback
 		</button>
 	);
 }
 
-const dialog = () => screen.queryByRole("dialog", { name: "Report a problem" });
+const dialog = (name: string) => screen.queryByRole("dialog", { name });
 
 describe("the console shell's report dialog", () => {
 	it("starts closed", async () => {
@@ -54,7 +54,8 @@ describe("the console shell's report dialog", () => {
 
 		await screen.findByRole("button", { name: "Leave feedback" });
 
-		expect(dialog()).toBeNull();
+		expect(dialog("Leave feedback")).toBeNull();
+		expect(dialog("Report a problem")).toBeNull();
 	});
 
 	/**
@@ -73,7 +74,10 @@ describe("the console shell's report dialog", () => {
 			await screen.findByRole("button", { name: "Leave feedback" }),
 		);
 
-		await waitFor(() => expect(dialog()).toBeVisible());
+		/* Titled for what was asked for. A dialog headed "Report a problem" is
+		   the wrong question to put to somebody who was offered generations for
+		   an opinion. */
+		await waitFor(() => expect(dialog("Leave feedback")).toBeVisible());
 	});
 
 	it("still opens from the rail's own button", async () => {
@@ -86,6 +90,6 @@ describe("the console shell's report dialog", () => {
 
 		await user.click(await screen.findByRole("button", { name: /report/i }));
 
-		await waitFor(() => expect(dialog()).toBeVisible());
+		await waitFor(() => expect(dialog("Report a problem")).toBeVisible());
 	});
 });

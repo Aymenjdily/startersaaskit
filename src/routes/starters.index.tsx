@@ -209,5 +209,11 @@ function Balance(props: {
 	error: string | null;
 	quota: Quota | null;
 }) {
-	return <GenerationBalance {...props} onReport={useOpenReport()} />;
+	const openReport = useOpenReport();
+
+	/* Opened as feedback, not as a bug: the button offered generations for an
+	   opinion, and the dialog has to ask for the thing that was offered for. */
+	return (
+		<GenerationBalance {...props} onReport={() => openReport("feedback")} />
+	);
 }

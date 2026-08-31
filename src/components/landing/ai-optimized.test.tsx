@@ -97,6 +97,21 @@ describe("AiOptimized", () => {
 	});
 
 	/**
+	 * The card reserves exactly three lines for `path` + `because` combined
+	 * (`line-clamp-3` / `min-h-[3lh]` on the desktop breakpoint) so the card
+	 * cannot grow or shrink as the lookups cycle. A `because` much past this
+	 * length wraps onto a fourth line at that width and gets clipped.
+	 */
+	it("keeps every lookup short enough to fit the card's reserved three lines", () => {
+		for (const { path, because } of LOOKUPS) {
+			expect(
+				because.length,
+				`${path}'s because is ${because.length} chars`,
+			).toBeLessThanOrEqual(120);
+		}
+	});
+
+	/**
 	 * There is no CLAUDE.md or meaningful rules file in this repo. If one is ever
 	 * added, this test should be deleted and the section can say so — until then
 	 * it guards against the copy drifting into a claim we cannot back.

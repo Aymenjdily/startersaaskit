@@ -126,12 +126,18 @@ function FileTree({ activePath }: { activePath: string }) {
 				return (
 					<li
 						className={cn(
-							"flex items-center gap-2 rounded-[5px] pr-2 transition-colors duration-300",
-							active && "bg-brand-dim",
+							"relative flex items-center gap-2 rounded-[5px] pr-2 transition-colors duration-300",
+							active && "bg-brand/10",
 						)}
 						key={node.label + node.depth}
 						style={{ paddingLeft: `${node.depth * 14 + 8}px` }}
 					>
+						{active && (
+							<span
+								aria-hidden="true"
+								className="-translate-y-1/2 absolute top-1/2 left-0 h-[60%] w-[2px] rounded-full bg-brand"
+							/>
+						)}
 						<Icon
 							aria-hidden="true"
 							className={cn(
@@ -196,22 +202,22 @@ export function AiOptimized() {
 				<div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
 					{/* Visual sits left on desktop, but text leads on mobile. */}
 					<FadeUp
-						className="order-2 overflow-hidden rounded-[20px] border border-white/10 bg-elevated lg:order-1"
+						className="order-2 overflow-hidden rounded-[20px] border border-white/10 bg-gradient-to-b from-elevated to-elevated/70 shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset] lg:order-1"
 						step={1}
 					>
 						{/* Window chrome, plus a dot per question so the loop has a face. */}
 						<div className="flex items-center justify-between border-white/6 border-b px-4 py-3 sm:px-5">
 							<div aria-hidden="true" className="flex items-center gap-1.5">
-								<span className="size-2.5 rounded-full bg-white/15" />
-								<span className="size-2.5 rounded-full bg-white/15" />
-								<span className="size-2.5 rounded-full bg-white/15" />
+								<span className="size-2.5 rounded-full bg-[#ff5f57]/70" />
+								<span className="size-2.5 rounded-full bg-[#febc2e]/70" />
+								<span className="size-2.5 rounded-full bg-[#28c840]/70" />
 							</div>
 							<div aria-hidden="true" className="flex items-center gap-1.5">
 								{LOOKUPS.map((l, i) => (
 									<span
 										className={cn(
-											"size-1.5 rounded-full transition-colors duration-300",
-											i === index ? "bg-brand" : "bg-white/15",
+											"h-1.5 rounded-full transition-all duration-300",
+											i === index ? "w-4 bg-brand" : "w-1.5 bg-white/15",
 										)}
 										key={l.path}
 									/>
@@ -222,12 +228,12 @@ export function AiOptimized() {
 						<div className="p-4 sm:p-6">
 							<div
 								aria-live="polite"
-								className="mb-4 flex min-h-[44px] items-start gap-2.5"
+								className="mb-4 flex min-h-[52px] items-start gap-2.5 rounded-[10px] border border-white/8 bg-black/20 px-3.5 py-3"
 							>
 								<span className="mt-px flex size-7 shrink-0 items-center justify-center rounded-[8px] bg-brand/15 text-brand">
 									<Sparkles aria-hidden="true" className="size-3.5" />
 								</span>
-								<p className="pt-1 text-[14px] leading-[1.5] text-ink-soft sm:text-[15px]">
+								<p className="pt-0.5 text-[14px] leading-[1.5] text-ink-soft sm:text-[15px]">
 									{lookup.ask}
 								</p>
 							</div>
@@ -236,11 +242,22 @@ export function AiOptimized() {
 								<FileTree activePath={lookup.path} />
 							</div>
 
-							<p className="mt-4 border-line border-t pt-4 text-[13px] leading-[1.6] text-ink-muted">
-								<span className="font-mono text-sage">{lookup.path}</span>
-								<br />
-								{lookup.because}
-							</p>
+							{/* The border and padding live on this wrapper, constant for
+							    every lookup, so they cannot eat into the `lh` budget below —
+							    a `min-h-[3lh]` that shared a box with them would reserve
+							    three lines with border-and-padding sized right out of the
+							    space, and grow anyway. Clamped and floored the same way as
+							    the note in the swap-anything panel: three lines at the
+							    desktop width this card renders at, more below `sm` where the
+							    same text wraps across more lines. Neither a longer nor a
+							    shorter lookup can move the card's height. */}
+							<div className="mt-4 border-line border-t pt-4">
+								<p className="line-clamp-5 min-h-[5lh] text-[13px] leading-[1.6] text-ink-muted sm:line-clamp-3 sm:min-h-[3lh]">
+									<span className="font-mono text-sage">{lookup.path}</span>
+									<br />
+									{lookup.because}
+								</p>
+							</div>
 						</div>
 					</FadeUp>
 
@@ -254,10 +271,10 @@ export function AiOptimized() {
 						<ul className="mt-8 flex flex-col gap-2.5">
 							{PILLARS.map((pillar) => (
 								<li
-									className="flex gap-4 rounded-[12px] border border-white/10 bg-elevated p-4"
+									className="flex gap-4 rounded-[12px] border border-white/10 bg-elevated p-4 transition-colors duration-300 hover:border-brand/25 hover:bg-elevated/80"
 									key={pillar.title}
 								>
-									<span className="flex size-9 shrink-0 items-center justify-center rounded-[9px] bg-brand-dim text-brand">
+									<span className="flex size-9 shrink-0 items-center justify-center rounded-[9px] border border-brand/20 bg-brand-dim text-brand">
 										<pillar.icon aria-hidden="true" className="size-4" />
 									</span>
 									<div>

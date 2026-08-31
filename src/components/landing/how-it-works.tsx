@@ -145,48 +145,81 @@ const activeStep = (shown: number) =>
 
 const PROJECT = ANSWERS[ANSWERS.length - 1].value;
 
-function AnswerRow({ label, value }: Answer) {
-	const icon = iconFor({ label, value });
+/**
+ * Every row exists from the first paint — only `revealed` changes as the
+ * wizard runs. A panel that instead grew one `<div>` per answer had nothing
+ * to reserve space for, so it either sat empty (state gone the moment the
+ * loop resets) or was floored to the fully-grown height, leaving a slab of
+ * dead space through most of the cycle. Ten stable rows, each filling in
+ * place, means the panel is never taller or shorter than it was a moment ago.
+ */
+function AnswerRow({ label, value, revealed }: Answer & { revealed: boolean }) {
+	const icon = revealed ? iconFor({ label, value }) : null;
 
 	return (
 		<div className="flex items-center justify-between gap-4 border-line/60 border-b py-2.5 last:border-0">
 			<span className="flex min-w-0 items-center gap-2.5">
 				<span className="flex size-7 shrink-0 items-center justify-center rounded-[7px] bg-white/6 text-white/70">
-					{icon ? (
-						<BrandGlyph className="size-3.5" icon={icon} />
+					{revealed ? (
+						icon ? (
+							<BrandGlyph className="tile-in size-3.5" icon={icon} />
+						) : (
+							<NeutralGlyph className="tile-in size-3.5" />
+						)
 					) : (
-						<NeutralGlyph className="size-3.5" />
+						<span
+							aria-hidden="true"
+							className="size-1.5 rounded-full bg-white/15"
+						/>
 					)}
 				</span>
-				<span className="shrink-0 text-ink-muted">{label}</span>
+				<span
+					className={cn(
+						"shrink-0 transition-colors duration-500",
+						revealed ? "text-ink-muted" : "text-ink-muted/30",
+					)}
+				>
+					{label}
+				</span>
 			</span>
-			<span className="min-w-0 truncate text-ink">{value}</span>
+			{revealed ? (
+				<span className="tile-in min-w-0 truncate text-ink" key={value}>
+					{value}
+				</span>
+			) : (
+				<span aria-hidden="true" className="skeleton h-3 w-14 rounded-[3px]" />
+			)}
 		</div>
 	);
 }
 
 function WizardPanel({ shown }: { shown: number }) {
+	const resolving = shown > RESOLVING_AT && shown <= RESOLVING_AT + 1;
+	const done = shown > RESOLVING_AT + 1;
+
 	return (
 		<div
 			aria-hidden="true"
-			className="rounded-[12px] border border-line bg-elevated p-4 font-mono text-[12px] sm:p-6 sm:text-[13px]"
+			className="rounded-[12px] border border-line bg-gradient-to-b from-elevated to-elevated/70 p-4 font-mono text-[12px] sm:p-6 sm:text-[13px]"
 			data-wizard
 		>
 			<div className="mb-4 flex items-center gap-1.5">
-				<span className="size-2 rounded-full bg-white/10" />
-				<span className="size-2 rounded-full bg-white/10" />
-				<span className="size-2 rounded-full bg-white/10" />
+				<span className="size-2 rounded-full bg-[#ff5f57]/70" />
+				<span className="size-2 rounded-full bg-[#febc2e]/70" />
+				<span className="size-2 rounded-full bg-[#28c840]/70" />
 				<span className="ml-2 text-[11px] text-ink-muted">New starter</span>
 			</div>
 
-			{/* Fixed height so answers fill in without shoving the page around. */}
-			<div className="min-h-[280px] sm:min-h-[300px]">
-				{ANSWERS.slice(0, shown).map((answer) => (
-					<AnswerRow key={answer.label} {...answer} />
-				))}
+			{ANSWERS.map((answer, i) => (
+				<AnswerRow key={answer.label} revealed={i < shown} {...answer} />
+			))}
 
-				{shown > RESOLVING_AT && (
-					<p className="flex items-center gap-2 pt-4 text-ink-muted">
+			{/* Reserved for one status line, so resolving-then-delivered — the only
+			    two states left that do not already have a row of their own — cannot
+			    move the panel either. */}
+			<div className="min-h-[38px] pt-4">
+				{resolving && (
+					<p className="tile-in flex items-center gap-2 text-ink-muted">
 						<Loader2
 							aria-hidden="true"
 							className="size-3.5 motion-safe:animate-spin"
@@ -195,8 +228,8 @@ function WizardPanel({ shown }: { shown: number }) {
 					</p>
 				)}
 
-				{shown > RESOLVING_AT + 1 && (
-					<p className="flex items-center gap-2 pt-2 text-sage">
+				{done && (
+					<p className="tile-in flex items-center gap-2 text-sage">
 						<Check aria-hidden="true" className="size-3.5" />
 						delivered as {PROJECT}.zip
 					</p>

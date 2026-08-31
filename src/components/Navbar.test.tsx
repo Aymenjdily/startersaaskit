@@ -1,10 +1,28 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { BRAND, LOGO_SRC } from "@/lib/brand";
+import { CONSOLE_HREF } from "@/lib/console-nav";
 import { Navbar } from "./Navbar";
 
+/**
+ * Signed-out is the default in every test below unless a test overrides the
+ * mock: `getSupabase()` throws for want of env vars in this environment, and
+ * the navbar treats that exactly like "no session" rather than crashing. A
+ * shared `vi.fn()` lets one test ask for a signed-in response without every
+ * other test having to know the mock exists.
+ */
+const { mockGetUser } = vi.hoisted(() => ({ mockGetUser: vi.fn() }));
+
+vi.mock("@/lib/supabase", () => ({
+	getSupabase: () => ({ auth: { getUser: mockGetUser } }),
+}));
+
 describe("Navbar", () => {
+	beforeEach(() => {
+		mockGetUser.mockResolvedValue({ data: { user: null } });
+	});
+
 	describe("branding", () => {
 		it("links the logo home and names the product for screen readers", () => {
 			render(<Navbar />);
@@ -98,6 +116,45 @@ describe("Navbar", () => {
 			expect(
 				screen.getByRole("button", { name: "Toggle menu" }),
 			).toHaveAttribute("aria-expanded", "false");
+		});
+	});
+
+	describe("signed in", () => {
+		beforeEach(() => {
+			mockGetUser.mockResolvedValue({
+				data: { user: { email: "reader@example.com", id: "u1" } },
+			});
+		});
+
+		it("replaces sign in / get started with a link to the workspace", async () => {
+			render(<Navbar />);
+
+			const workspace = await screen.findByRole("link", {
+				name: /Workspace/,
+			});
+			expect(workspace).toHaveAttribute("href", CONSOLE_HREF);
+
+			expect(
+				screen.queryByRole("link", { name: /^Sign in$/ }),
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByRole("link", { name: /^Get started$/ }),
+			).not.toBeInTheDocument();
+		});
+
+		it("offers the same destination from the mobile menu", async () => {
+			const user = userEvent.setup();
+			render(<Navbar />);
+			await screen.findByRole("link", { name: /Workspace/ });
+
+			await user.click(screen.getByRole("button", { name: "Toggle menu" }));
+
+			const links = screen.getAllByRole("link", { name: /workspace/i });
+			expect(links).toHaveLength(2);
+			for (const link of links) {
+				expect(link).toHaveAttribute("href", CONSOLE_HREF);
+				expect(link).not.toHaveAttribute("target");
+			}
 		});
 	});
 });

@@ -20,7 +20,14 @@ const RESET_AT = DELIVERED_AT + 2600;
 const panel = () =>
 	within(document.querySelector("[data-wizard]") as HTMLElement);
 
-const answered = (label: string) => panel().queryByText(label);
+/**
+ * Every row's label is on screen from the first paint now — only the value
+ * fills in, so that is what "answered" has to mean here. See the comment
+ * above `AnswerRow` in `how-it-works.tsx` for why: a panel that grew one row
+ * per answer had nothing to reserve space for, so it was either empty or
+ * floored to its tallest state.
+ */
+const answered = (value: string) => panel().queryByText(value);
 
 describe("HowItWorks", () => {
 	beforeEach(() => {
@@ -93,11 +100,12 @@ describe("HowItWorks", () => {
 			);
 		});
 
-		it("starts with an empty panel", () => {
+		it("starts with every label shown and no answer resolved yet", () => {
 			render(<HowItWorks />);
 
-			for (const { label } of ANSWERS) {
-				expect(answered(label)).toBeNull();
+			for (const { label, value } of ANSWERS) {
+				expect(panel().getByText(label)).toBeInTheDocument();
+				expect(answered(value)).toBeNull();
 			}
 		});
 	});
@@ -107,11 +115,11 @@ describe("HowItWorks", () => {
 			render(<HowItWorks />);
 
 			act(() => void vi.advanceTimersByTime(ANSWER_AT(1)));
-			expect(answered(ANSWERS[0].label)).not.toBeNull();
-			expect(answered(ANSWERS[1].label)).toBeNull();
+			expect(answered(ANSWERS[0].value)).not.toBeNull();
+			expect(answered(ANSWERS[1].value)).toBeNull();
 
 			act(() => void vi.advanceTimersByTime(ANSWER_AT(2) - ANSWER_AT(1)));
-			expect(answered(ANSWERS[1].label)).not.toBeNull();
+			expect(answered(ANSWERS[1].value)).not.toBeNull();
 		});
 
 		it("shows every answer with the value it resolved to", () => {
@@ -119,9 +127,8 @@ describe("HowItWorks", () => {
 
 			act(() => void vi.advanceTimersByTime(ALL_ANSWERS_AT));
 
-			for (const { label, value } of ANSWERS) {
-				expect(answered(label)).not.toBeNull();
-				expect(panel().getByText(value)).toBeInTheDocument();
+			for (const { value } of ANSWERS) {
+				expect(answered(value)).not.toBeNull();
 			}
 		});
 
@@ -157,7 +164,7 @@ describe("HowItWorks", () => {
 
 			act(() => void vi.advanceTimersByTime(RESET_AT + 100));
 
-			expect(answered(ANSWERS[0].label)).toBeNull();
+			expect(answered(ANSWERS[0].value)).toBeNull();
 		});
 
 		it("clears its timer on unmount", () => {
@@ -175,8 +182,8 @@ describe("HowItWorks", () => {
 			setReducedMotion(true);
 			render(<HowItWorks />);
 
-			for (const { label } of ANSWERS) {
-				expect(answered(label)).not.toBeNull();
+			for (const { value } of ANSWERS) {
+				expect(answered(value)).not.toBeNull();
 			}
 			expect(panel().getByText(/delivered as/)).toBeInTheDocument();
 			expect(vi.getTimerCount()).toBe(0);

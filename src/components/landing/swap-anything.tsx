@@ -55,7 +55,7 @@ export const SEAMS: Seam[] = [
 		icon: Blocks,
 		options: ["Next.js", "TanStack Start", "React + Vite"],
 		touches: ["app entry", "routing", "server handlers"],
-		note: "The widest choice on the list, and the reason the rest are cheap: routing and rendering live in a framework adapter, so nothing above them has to know which one you picked. React + Vite is the one that changes what else is possible — a browser-only app has nowhere to keep a secret, so the questions after it narrow to what can run without a server.",
+		note: "The widest choice, and why the rest are cheap: routing and rendering sit in a framework adapter, invisible above it. React + Vite is the exception — with no server to keep a secret, later questions narrow to match.",
 	},
 	{
 		layer: "Database",
@@ -69,7 +69,7 @@ export const SEAMS: Seam[] = [
 		icon: Table2,
 		options: ["Drizzle", "Prisma", "Mongoose", "Supabase client"],
 		touches: ["db/schema", "migrations", "db/client"],
-		note: "Drizzle is SQL-only and Mongoose is MongoDB-only; Prisma spans both. You are shown whichever of the three your database can actually work with, not all three and a footnote. All three open a connection with a credential, so a browser-only app is offered the Supabase client instead — the same data, reached over HTTP with row level security doing the work.",
+		note: "Drizzle is SQL-only, Mongoose is MongoDB-only, Prisma spans both — you're shown whichever fits your database. A browser-only app has no credential to hold, so it gets the Supabase client instead: the same data over HTTP, secured by row level security.",
 	},
 	{
 		layer: "Auth",
@@ -86,6 +86,15 @@ export const SEAMS: Seam[] = [
 		note: "One module, `src/lib/email.ts`, and one function — `sendEmail`. The rest of the app asks for an email to be sent and never learns which service sent it, so changing provider is one file and one key.",
 	},
 ];
+
+/**
+ * The panel's height must not jump as the seams cycle, so every variable-count
+ * list is padded out to the widest seam's count rather than left to its own
+ * length. Derived from `SEAMS` so a new seam with more options never falls out
+ * of sync with the padding again.
+ */
+const MAX_OPTIONS = Math.max(...SEAMS.map((s) => s.options.length));
+const MAX_TOUCHES = Math.max(...SEAMS.map((s) => s.touches.length));
 
 /** How long each seam is shown before the panel advances. */
 const CYCLE_MS = 4200;
@@ -171,6 +180,35 @@ function OptionTile({ label }: { label: string }) {
 	);
 }
 
+/** An `OptionTile`-shaped slot with nothing in it — holds the grid's row count steady for a seam with fewer options than the widest one. */
+function OptionTileSlot() {
+	return (
+		<span
+			aria-hidden="true"
+			className="invisible flex items-center gap-2.5 rounded-[10px] border border-white/12 bg-black/25 px-3 py-2.5"
+		>
+			<span className="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-white/6" />
+			<span className="truncate text-[13px]">&nbsp;</span>
+		</span>
+	);
+}
+
+/** A touches-row-shaped slot with nothing in it, for the same reason as `OptionTileSlot`. */
+function TouchRowSlot() {
+	return (
+		<li
+			aria-hidden="true"
+			className="invisible flex items-center justify-between gap-4 bg-elevated px-3.5 py-2.5 font-mono text-[12px] sm:text-[13px]"
+		>
+			<span className="flex min-w-0 items-center gap-2.5">
+				<FileCode2 aria-hidden="true" className="size-3.5 shrink-0" />
+				<span>&nbsp;</span>
+			</span>
+			<span>&nbsp;</span>
+		</li>
+	);
+}
+
 function SeamPanel({ seam }: { seam: Seam }) {
 	return (
 		<div className="flex flex-col gap-5">
@@ -178,6 +216,12 @@ function SeamPanel({ seam }: { seam: Seam }) {
 				{seam.options.map((option) => (
 					<OptionTile key={option} label={option} />
 				))}
+				{Array.from({ length: MAX_OPTIONS - seam.options.length }).map(
+					(_, i) => (
+						// biome-ignore lint/suspicious/noArrayIndexKey: fixed-count padding, never reordered
+						<OptionTileSlot key={i} />
+					),
+				)}
 			</div>
 
 			<ul className="flex flex-col gap-px overflow-hidden rounded-[10px] border border-line bg-line">
@@ -196,9 +240,24 @@ function SeamPanel({ seam }: { seam: Seam }) {
 						<span className="shrink-0 text-sage">generated</span>
 					</li>
 				))}
+				{Array.from({ length: MAX_TOUCHES - seam.touches.length }).map(
+					(_, i) => (
+						// biome-ignore lint/suspicious/noArrayIndexKey: fixed-count padding, never reordered
+						<TouchRowSlot key={i} />
+					),
+				)}
 			</ul>
 
-			<p className="text-[14px] leading-[1.6] text-ink-muted">{seam.note}</p>
+			{/* Every note is written to fit three lines at the desktop width this
+			    panel renders at — checked by the length assertion in the spec, not
+			    just eyeballed. Below `sm` the same text wraps across roughly twice
+			    as many lines, so the clamp and the reserved floor both widen there;
+			    at every width the two together mean the panel can neither grow nor
+			    shrink as the seams cycle. `lh` rather than a measured pixel figure,
+			    so the box stays true if the type scale ever changes. */}
+			<p className="line-clamp-6 min-h-[6lh] text-[14px] leading-[1.6] text-ink-muted sm:line-clamp-3 sm:min-h-[3lh]">
+				{seam.note}
+			</p>
 
 			<p className="border-line border-t pt-4 font-mono text-[12px] text-ink-muted">
 				<span className="text-ink-soft">

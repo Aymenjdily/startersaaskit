@@ -43,6 +43,22 @@ describe("SwapAnything", () => {
 			}
 		});
 
+		/**
+		 * The panel reserves exactly three lines for this text (`line-clamp-3` /
+		 * `min-h-[3lh]` on the desktop breakpoint, in `SeamPanel`) so the card
+		 * cannot grow or shrink as the seams cycle. A note past this length wraps
+		 * onto a fourth line at that width and gets clipped with an ellipsis —
+		 * measured against the real render, not guessed.
+		 */
+		it("keeps every note short enough to fit the panel's reserved three lines", () => {
+			for (const { layer, note } of SEAMS) {
+				expect(
+					note.length,
+					`${layer}'s note is ${note.length} chars`,
+				).toBeLessThanOrEqual(260);
+			}
+		});
+
 		it("names every option of the active layer", () => {
 			render(<SwapAnything />);
 

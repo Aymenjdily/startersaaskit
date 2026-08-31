@@ -23,7 +23,10 @@ import { cn } from "@/lib/utils";
  * them costs nothing where they already worked: a link to the current path with
  * a different fragment is still a same-document scroll, not a reload.
  */
-const navLinks = [{ label: "Features", href: "/#features" }];
+const navLinks = [
+	{ label: "Features", href: "/#features" },
+	{ label: "Pricing", href: "/#pricing" },
+];
 
 type NavUser = { name: string; avatar: string | null };
 

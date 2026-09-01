@@ -4,8 +4,9 @@
  * ## Read this before you launch
  *
  * These pages were written against what the code actually does — the tables in
- * `supabase/migrations/`, the providers in `auth/controls.tsx`, the absence of
- * any analytics — and every claim in them was checked against it. That makes
+ * `supabase/migrations/`, the providers in `auth/controls.tsx`, what
+ * `src/lib/analytics.ts` does and does not capture — and every claim in them
+ * was checked against it. That makes
  * them accurate. It does not make them *sufficient*: whether you need a DPA, a
  * cookie banner, a specific GDPR representative, or different wording for your
  * jurisdiction is a question for a lawyer, and this file has never met one.
@@ -33,7 +34,7 @@ export const GOVERNING_LAW = "[jurisdiction — set before launch]";
  * Bump the page you edited, in the same commit. A reader has no other way to
  * tell whether a policy describes the product they are using today.
  */
-export const PRIVACY_UPDATED = "2026-08-27";
+export const PRIVACY_UPDATED = "2026-09-01";
 export const TERMS_UPDATED = "2026-08-27";
 
 /**
@@ -53,5 +54,11 @@ export const SUBPROCESSORS = [
 		name: "Google",
 		does: "Signs you in, only if you choose the Google button.",
 		holds: "Confirms your email address, name and profile picture to us.",
+	},
+	{
+		name: "PostHog",
+		does: "Product analytics and masked session recording, on by default and switchable off in Settings.",
+		holds:
+			"Page views, in-app events, and a masked session recording. Your email address too, once you are signed in.",
 	},
 ] as const;

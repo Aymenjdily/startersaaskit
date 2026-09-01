@@ -7,7 +7,9 @@ import { Panel, Section } from "@/components/console/panel";
 import { SettingsSkeleton } from "@/components/console/skeletons";
 import { buttonVariants } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
 import { deleteOwnAccount, updateDisplayName } from "@/lib/account";
+import { isAnalyticsOptedOut, setAnalyticsOptedOut } from "@/lib/analytics";
 import { avatarFor, displayNameFor, SETTINGS_HREF } from "@/lib/console-nav";
 import { answerLabels, QUESTIONS } from "@/lib/onboarding";
 import { pageHead } from "@/lib/seo";
@@ -55,6 +57,19 @@ function SettingsPage() {
 	const [confirmingDelete, setConfirmingDelete] = useState(false);
 	const [deleting, setDeleting] = useState(false);
 	const [deleteError, setDeleteError] = useState<string | null>(null);
+
+	/* PostHog's own opt-out state, not this page's — read once the browser
+	   can answer, same reasoning as every other "not known until the client
+	   mounts" value on this page. */
+	const [analyticsEnabled, setAnalyticsEnabled] = useState(true);
+	useEffect(() => {
+		setAnalyticsEnabled(!isAnalyticsOptedOut());
+	}, []);
+
+	function toggleAnalytics(next: boolean) {
+		setAnalyticsEnabled(next);
+		setAnalyticsOptedOut(!next);
+	}
 
 	useEffect(() => {
 		const supabase = getSupabase();
@@ -251,6 +266,31 @@ function SettingsPage() {
 									);
 								})}
 							</dl>
+						</Panel>
+					</Section>
+
+					<Section
+						description="What PostHog is allowed to see."
+						title="Privacy"
+					>
+						<Panel className="flex items-center justify-between gap-4 p-5">
+							<div>
+								<p className="text-[14px] text-ink">
+									Analytics and session recording
+								</p>
+								<p className="mt-1 max-w-[48ch] text-[13px] text-ink-muted">
+									Lets us see how the console is actually used — including a
+									masked recording of the session, never the values you type —
+									so we can find what is confusing instead of guessing. On by
+									default once you are signed in; turning it off takes effect
+									immediately and does not delete anything already recorded.
+								</p>
+							</div>
+							<Switch
+								checked={analyticsEnabled}
+								label="Analytics and session recording"
+								onChange={toggleAnalytics}
+							/>
 						</Panel>
 					</Section>
 

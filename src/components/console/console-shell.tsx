@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { identifyAccount, resetAnalytics } from "@/lib/analytics";
 import { SIGN_IN_HREF } from "@/lib/brand";
 import { isAdmin as checkAdmin } from "@/lib/feedback";
 import { getSupabase } from "@/lib/supabase";
@@ -73,6 +74,7 @@ export function ConsoleShell({
 					return;
 				}
 				setUser(data.user);
+				identifyAccount(data.user.id, data.user.email ?? null);
 
 				/* Whether to draw the admin row. Deliberately not awaited with the
 				   session: the console should not wait on a permission check that
@@ -85,6 +87,9 @@ export function ConsoleShell({
 
 	async function signOut() {
 		await getSupabase().auth.signOut();
+		/* Ends the tie to this account before leaving — anything captured on
+		   the signed-out pages after this must not still read as this person. */
+		resetAnalytics();
 		window.location.assign("/");
 	}
 

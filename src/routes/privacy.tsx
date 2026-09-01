@@ -18,7 +18,7 @@ export const Route = createFileRoute("/privacy")({
 function Privacy() {
 	return (
 		<LegalPage
-			intro={`${BRAND} collects the little it needs to run your account and generate your starters. There is no analytics, no advertising, and nothing is sold or shared beyond the two companies named below.`}
+			intro={`${BRAND} collects the little it needs to run your account and generate your starters, and uses PostHog to see how the site is actually used. There is no advertising, and nothing is sold or shared beyond the companies named below.`}
 			title="Privacy"
 			updated={PRIVACY_UPDATED}
 		>
@@ -55,10 +55,10 @@ function Privacy() {
 			<Clause id="what-we-do-not" title="What we do not do">
 				<Points
 					items={[
-						"No analytics, no tracking pixels, no session recording. The site loads no third-party scripts at all.",
 						"No advertising, and no sharing or selling your data to anyone.",
 						"No payment details. Nothing is charged, so nothing is collected.",
 						"No email marketing. We only email you about your account.",
+						"No tracking pixels or third-party scripts beyond the one analytics tool described below.",
 					]}
 				/>
 			</Clause>
@@ -75,7 +75,7 @@ function Privacy() {
 			</Clause>
 
 			<Clause id="who-else" title="Who else handles it">
-				<p>Two companies, both as processors acting on our instructions:</p>
+				<p>Three companies, all as processors acting on our instructions:</p>
 				<Points
 					items={SUBPROCESSORS.map((one) => (
 						<>
@@ -86,12 +86,34 @@ function Privacy() {
 				/>
 			</Clause>
 
+			<Clause id="analytics" title="Analytics and session recording">
+				<p>
+					We use PostHog to see how the site is actually used — page views, and
+					a recording of the session with every input value masked, so we can
+					find what is confusing without ever seeing what you typed. It runs on
+					every page, including before you sign in, but visits stay anonymous:
+					PostHog is configured to keep a lasting profile only once someone
+					signs in, not for every anonymous visit. Once you do sign in, that
+					browser&rsquo;s activity is tied to your account, so we can tell what
+					one person did rather than counting the same visitor twice.
+				</p>
+				<p>
+					PostHog respects your browser&rsquo;s Do Not Track signal — send it,
+					and nothing is captured. You can also turn it off yourself, any time,
+					from Settings → Privacy, whether or not you send that signal. Turning
+					it off takes effect immediately and does not delete anything already
+					recorded.
+				</p>
+			</Clause>
+
 			<Clause id="cookies" title="Cookies">
 				<p>
-					One, and it is the sign-in session. It exists so you stay signed in
-					between visits, it is set only after you sign in, and clearing it
-					signs you out. There are no analytics or advertising cookies, which is
-					why you are not being asked to consent to any.
+					Two kinds. One is the sign-in session — it exists so you stay signed
+					in between visits, it is set only after you sign in, and clearing it
+					signs you out. The other belongs to PostHog: a device identifier so it
+					can tell returning visits apart, and a short-lived session id while
+					you are active. Neither carries advertising, and both stop being set
+					the moment you opt out in Settings → Privacy.
 				</p>
 			</Clause>
 

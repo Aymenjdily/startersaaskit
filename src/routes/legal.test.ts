@@ -69,13 +69,25 @@ describe("the legal pages", () => {
 		});
 
 		/**
-		 * The policy says the site loads no third-party scripts, and claims no
-		 * cookie beyond the sign-in session. Both are true today. Both are
-		 * exactly what a later "let's just add Plausible" commit makes false
-		 * without anyone thinking to reopen this page — and an inaccurate
-		 * no-tracking claim is worse than never having made one.
+		 * The policy names PostHog as the one third-party script the site
+		 * loads, and says where it loads from. If a later commit adds a
+		 * second analytics tool, or a different provider takes over pageview
+		 * capture, the policy is describing a product that no longer exists
+		 * — so this checks the claim points at the real, single source.
 		 */
-		it("are still telling the truth about third-party scripts", () => {
+		it("names the one third-party script it actually loads", () => {
+			const root = readFileSync("src/routes/__root.tsx", "utf8");
+			const analytics = readFileSync("src/lib/analytics.ts", "utf8");
+
+			expect(root).toMatch(/<Analytics/);
+			expect(analytics).toMatch(/posthog/i);
+			expect(PRIVACY).toMatch(/PostHog/);
+		});
+
+		/* A second analytics provider shipping without anyone reopening this
+		   page is exactly the failure the test above exists to catch — so it
+		   also has to fail if one shows up somewhere else in the shell. */
+		it("does not pick up an undisclosed second tracker", () => {
 			const shell = [
 				"src/routes/__root.tsx",
 				"src/components/Navbar.tsx",
@@ -84,7 +96,7 @@ describe("the legal pages", () => {
 
 			for (const path of shell) {
 				expect(readFileSync(path, "utf8")).not.toMatch(
-					/googletagmanager|google-analytics|gtag\(|posthog|plausible|mixpanel|segment\.com|hotjar|fbq\(/i,
+					/googletagmanager|google-analytics|gtag\(|plausible|mixpanel|segment\.com|hotjar|fbq\(/i,
 				);
 			}
 		});

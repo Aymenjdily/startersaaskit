@@ -51,6 +51,7 @@ first run" is a tested claim, not a slogan.
 | **Framework** | TanStack Start + TanStack Router + TanStack Query (React 19) |
 | **Styling** | Tailwind CSS 4, shadcn-style components |
 | **Auth & database** | Supabase (email/password + Google OAuth, Postgres with RLS) |
+| **Analytics** | PostHog (optional — off entirely with no `VITE_POSTHOG_KEY` set) |
 | **Tests** | Vitest + Testing Library |
 | **Lint/format** | Biome |
 | **Zips** | fflate |
@@ -140,6 +141,27 @@ pnpm dev
    `https://<project-ref>.supabase.co/auth/v1/callback`) — not this app's
    `/auth/callback`, which is already covered by step 5 and does not change
    per provider.
+
+### PostHog setup (optional)
+
+Analytics and session recording, via `src/lib/analytics.ts`. The app runs
+fine with none of this set — every call in that file is a no-op without a
+key.
+
+1. Create a project at [posthog.com](https://posthog.com) and copy its
+   project API key (Project Settings → Project API Key) into
+   `VITE_POSTHOG_KEY`.
+2. Set `VITE_POSTHOG_HOST` to match the project's region —
+   `https://us.i.posthog.com` (the default here) or
+   `https://eu.i.posthog.com` — or your own instance's URL if self-hosted.
+3. Session recording also has to be turned on for the project itself, in
+   PostHog's own dashboard (Project Settings → Recordings) — the SDK config
+   in `analytics.ts` is only half of what decides whether a session is
+   actually recorded.
+4. Read `src/routes/privacy.tsx` before you point this at a real audience.
+   It names PostHog, explains what session recording does and does not
+   capture, and describes the opt-out in Settings — if what you configure
+   here stops matching what that page says, the page is now wrong.
 
 ## Scripts
 

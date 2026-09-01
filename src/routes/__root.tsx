@@ -6,6 +6,7 @@ import {
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { Analytics } from "@/components/analytics";
 import { NotFound } from "@/components/not-found";
 import { RouteError } from "@/components/route-error";
 import {
@@ -105,6 +106,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			</head>
 			<body>
 				{children}
+				<Analytics />
 				<TanStackDevtools
 					config={{
 						position: "bottom-right",

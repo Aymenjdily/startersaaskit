@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { BrandGlyph } from "@/components/landing/brand-glyph";
 import type { BrandIcon } from "@/components/landing/brand-icons";
 import { cn } from "@/lib/utils";
@@ -33,16 +34,48 @@ export function NeutralGlyph({ className }: { className?: string }) {
 	);
 }
 
+/**
+ * For a choice that is a page rather than a product — "Editorial" has no
+ * vendor to borrow a mark from, and {@link NeutralGlyph}'s crossed-out circle
+ * reads as "none of these", which is backwards for the one option that is a
+ * real, positive choice.
+ */
+export function PageGlyph({ className }: { className?: string }) {
+	return (
+		<svg
+			aria-hidden="true"
+			className={cn("size-6", className)}
+			fill="none"
+			stroke="currentColor"
+			strokeLinecap="round"
+			strokeWidth="1.5"
+			viewBox="0 0 24 24"
+		>
+			<rect height="17" rx="2" width="16" x="4" y="3.5" />
+			<path d="M7.5 8h9" />
+			<path d="M7.5 12h9" />
+			<path d="M7.5 16h5" />
+		</svg>
+	);
+}
+
 export function OptionCards({
 	name,
 	onChange,
 	options,
+	renderIcon,
 	value,
 }: {
 	/** Groups the radios, so only one card in this set can be chosen. */
 	name: string;
 	onChange: (value: string) => void;
 	options: readonly { id: string; label: string; icon: BrandIcon | null }[];
+	/**
+	 * Override the icon for one or more options, falling back to the vendor
+	 * mark (or {@link NeutralGlyph}) for anything it returns nothing for.
+	 * For the rare choice that is not a product but also is not "none".
+	 */
+	renderIcon?: (option: { id: string; icon: BrandIcon | null }) => ReactNode;
 	value: string | undefined;
 }) {
 	return (
@@ -75,11 +108,12 @@ export function OptionCards({
 								checked ? "bg-brand/15 text-ink" : "bg-white/6 text-ink-soft",
 							)}
 						>
-							{option.icon ? (
-								<BrandGlyph className="size-6" icon={option.icon} />
-							) : (
-								<NeutralGlyph />
-							)}
+							{renderIcon?.(option) ??
+								(option.icon ? (
+									<BrandGlyph className="size-6" icon={option.icon} />
+								) : (
+									<NeutralGlyph />
+								))}
 						</span>
 
 						<span

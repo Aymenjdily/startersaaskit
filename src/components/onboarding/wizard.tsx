@@ -91,7 +91,7 @@ export function OnboardingWizard({
 				{onNotes ? (
 					<textarea
 						aria-label="Anything we should know?"
-						className="min-h-[120px] w-full rounded-[8px] border border-white/12 bg-black/25 px-3 py-2.5 text-[14px] text-ink transition-colors duration-200 placeholder:text-ink-muted focus:border-white/25 focus:outline-2 focus:outline-offset-2 focus:outline-brand"
+						className="min-h-[120px] w-full rounded-[8px] border border-white/8 bg-black/25 px-3 py-2.5 text-[14px] text-ink transition-colors duration-200 placeholder:text-ink-muted focus:border-white/25 focus:outline-2 focus:outline-offset-2 focus:outline-brand"
 						onChange={(event) => setNotes(event.target.value)}
 						placeholder="What would make this obviously worth using for you?"
 						value={notes}

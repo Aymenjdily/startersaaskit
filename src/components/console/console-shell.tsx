@@ -92,10 +92,16 @@ export function ConsoleShell({
 
 	return (
 		<OpenReport.Provider value={(which = "report") => setDialog(which)}>
-			<div className="flex min-h-screen bg-surface">
+			{/* `h-screen` and `overflow-hidden` rather than `min-h-screen`: a page
+			    long enough to scroll used to scroll the rail away with it, because
+			    nothing here was actually pinned — it just happened to start at the
+			    top. The shell is now exactly the viewport, and only `<main>` below
+			    scrolls inside it. */}
+			<div className="flex h-screen overflow-hidden bg-surface">
 				<IconRail
 					currentPath={currentPath}
 					isAdmin={admin}
+					onFeedback={() => setDialog("feedback")}
 					onReport={() => setDialog("report")}
 					onSignOut={signOut}
 					user={user}
@@ -112,12 +118,12 @@ export function ConsoleShell({
 					open={dialog === "feedback"}
 				/>
 
-				<div className="flex min-w-0 flex-1 flex-col">
+				<div className="flex min-w-0 flex-1 flex-col overflow-hidden">
 					<header className="flex h-14 shrink-0 items-center gap-3 border-white/8 border-b px-4 md:px-6">
 						{back && (
 							<a
 								aria-label={back.label}
-								className="-ml-1 flex size-8 items-center justify-center rounded-[8px] text-white/50 transition-colors duration-200 hover:bg-white/6 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+								className="-ml-1 flex size-8 items-center justify-center rounded-[8px] text-ink-muted transition-colors duration-200 hover:bg-white/6 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
 								href={back.href}
 								title={back.label}
 							>
@@ -149,7 +155,7 @@ export function ConsoleShell({
 						)}
 					</header>
 
-					<main className="flex-1 px-4 py-8 md:px-6 md:py-10">
+					<main className="flex-1 overflow-y-auto px-4 py-8 md:px-6 md:py-10">
 						{/* Capped and centred: full-bleed text at 2560px is unreadable, and
 					    every page here is reading rather than canvas work. */}
 						<div className="mx-auto w-full max-w-[1040px]">{children}</div>

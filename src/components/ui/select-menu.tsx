@@ -156,7 +156,7 @@ export function SelectMenu({
 					"flex h-9 w-full items-center gap-2 rounded-[8px] border px-3 text-[13px] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand",
 					chosen
 						? "border-brand/50 bg-brand-dim text-ink hover:border-brand/70"
-						: "border-white/10 bg-black/25 text-ink hover:border-white/25",
+						: "border-white/8 bg-black/25 text-ink hover:border-white/25",
 				)}
 				onClick={() => (open ? setOpen(false) : openWith(selectedIndex))}
 				onKeyDown={onKeyDown}
@@ -180,7 +180,7 @@ export function SelectMenu({
 				<ul
 					aria-activedescendant={`${id}-option-${active}`}
 					aria-label={label}
-					className="absolute top-[calc(100%+4px)] left-0 z-50 max-h-[280px] w-full min-w-[180px] overflow-auto rounded-[10px] border border-white/12 bg-surface-raised p-1 shadow-[0_16px_40px_rgba(0,0,0,0.55)]"
+					className="absolute top-[calc(100%+4px)] left-0 z-50 max-h-[280px] w-full min-w-[180px] overflow-auto rounded-[10px] border border-white/8 bg-surface-raised p-1 shadow-[0_16px_40px_rgba(0,0,0,0.55)]"
 					id={`${id}-list`}
 					ref={list}
 					// biome-ignore lint/a11y/noNoninteractiveElementToInteractiveRole: a listbox is a <ul> of role="option" children; that is the pattern, not a workaround
@@ -209,7 +209,7 @@ export function SelectMenu({
 									"flex cursor-pointer items-center gap-2 rounded-[7px] px-2.5 py-2 text-[13px]",
 									index === active
 										? "bg-white/10 text-ink"
-										: "text-white/75 hover:bg-white/6",
+										: "text-ink-soft hover:bg-white/6",
 									isSelected && "text-ink",
 								)}
 								id={`${id}-option-${index}`}

@@ -45,7 +45,7 @@ export const DISABLED_OAUTH_PROVIDERS = [
  * column of stacked 44px controls needs the softer radius to hold together.
  */
 export const CONTROL =
-	"h-11 w-full rounded-[8px] border border-white/12 bg-black/25 px-3 text-[14px] text-ink transition-colors duration-200";
+	"h-11 w-full rounded-[8px] border border-white/8 bg-black/25 px-3 text-[14px] text-ink transition-colors duration-200";
 
 export function Field({
 	autoComplete,

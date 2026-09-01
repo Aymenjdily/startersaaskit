@@ -38,7 +38,7 @@ export function Pricing() {
 				/>
 
 				<FadeUp className="mx-auto mt-10 max-w-[420px]" step={1}>
-					<div className="rounded-[20px] border border-white/10 bg-elevated p-8">
+					<div className="rounded-[20px] border border-white/8 bg-elevated p-8">
 						<p className="font-mono text-[13px] text-sage uppercase tracking-[0.12em]">
 							Free
 						</p>

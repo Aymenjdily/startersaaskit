@@ -8,6 +8,7 @@ import {
 	initialsFor,
 	NAV_ITEMS,
 	navItemsFor,
+	SETTINGS_HREF,
 } from "./console-nav";
 
 describe("the console navigation", () => {
@@ -49,14 +50,16 @@ describe("the console navigation", () => {
 	/**
 	 * `built: false` is an admission, so the list of what is finished is worth
 	 * pinning: it should only ever grow in the commit that finishes a page.
-	 * Overview was alone here until Admin arrived.
+	 * Overview was alone here until Admin arrived, and this test still passed
+	 * the day `/starters` shipped a full create/download/delete flow — a
+	 * pinned list only catches drift once someone remembers to update the pin.
 	 */
 	it("names the pages that are actually finished", () => {
 		expect(
 			NAV_ITEMS.filter((item) => item.built)
 				.map((item) => item.href)
 				.sort(),
-		).toEqual([CONSOLE_HREF, "/admin"].sort());
+		).toEqual([CONSOLE_HREF, "/admin", "/starters", SETTINGS_HREF].sort());
 	});
 
 	/**

@@ -109,7 +109,7 @@ function SwapLabel({
 			<span
 				className={cn(
 					"[grid-area:1/1] transition-opacity duration-300",
-					showSecond ? "opacity-0" : "text-white/30",
+					showSecond ? "opacity-0" : "text-ink-muted/70",
 				)}
 			>
 				{hidden}
@@ -227,7 +227,7 @@ function QualityGatesMock({ step }: { step: number }) {
 							<span className="grid size-4 shrink-0 place-items-center">
 								<span
 									className={cn(
-										"size-3 rounded-full border border-white/15 transition-opacity duration-300 [grid-area:1/1]",
+										"size-3 rounded-full border border-white/20 transition-opacity duration-300 [grid-area:1/1]",
 										gatePassed(step, i) && "opacity-0",
 									)}
 								/>
@@ -386,7 +386,7 @@ export function TestedByDefault() {
 
 				<FadeUp
 					step={1}
-					className="rounded-[20px] border border-white/6 bg-base p-4 sm:p-6 md:p-8"
+					className="rounded-[20px] border border-white/8 bg-base p-4 sm:p-6 md:p-8"
 				>
 					<div className="grid gap-6 lg:grid-cols-2 lg:gap-8">
 						<TestRunnerMock step={step} />
@@ -399,7 +399,7 @@ export function TestedByDefault() {
 						<FadeUp
 							key={pillar.title}
 							step={(i % 4) as 0 | 1 | 2 | 3}
-							className="flex flex-col gap-5 rounded-[14px] border border-white/6 bg-white/3 p-5 sm:p-6"
+							className="flex flex-col gap-5 rounded-[14px] border border-white/8 bg-white/3 p-5 sm:p-6"
 						>
 							<div
 								aria-hidden="true"

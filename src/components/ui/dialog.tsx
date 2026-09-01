@@ -111,7 +111,7 @@ export function Dialog({
 				aria-labelledby={titleId}
 				aria-modal="true"
 				className={cn(
-					"relative my-auto w-full max-w-[520px] rounded-[16px] border border-white/12 bg-base/95 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-2xl",
+					"relative my-auto w-full max-w-[520px] rounded-[16px] border border-white/8 bg-base/95 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-2xl",
 					className,
 				)}
 				onKeyDown={onKeyDown}
@@ -127,7 +127,7 @@ export function Dialog({
 						{title}
 					</h2>
 					{description && (
-						<p className="mt-1 text-[13px] text-white/55" id={descriptionId}>
+						<p className="mt-1 text-[13px] text-ink-muted" id={descriptionId}>
 							{description}
 						</p>
 					)}
@@ -140,7 +140,7 @@ export function Dialog({
 				    question someone came here to answer into second place. */}
 				<button
 					aria-label="Close"
-					className="absolute top-5 right-5 rounded-[8px] p-1.5 text-white/55 transition-colors duration-200 hover:bg-white/8 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+					className="absolute top-5 right-5 rounded-[8px] p-1.5 text-ink-muted transition-colors duration-200 hover:bg-white/8 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
 					onClick={onClose}
 					type="button"
 				>

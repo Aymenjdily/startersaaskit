@@ -11,13 +11,13 @@ import { buttonVariants } from "@/components/ui/button";
 export function NotFound() {
 	return (
 		<main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-base px-6 text-center">
-			<p className="font-mono text-[13px] text-white/40 tracking-[0.2em] uppercase">
+			<p className="font-mono text-[13px] text-ink-muted tracking-[0.2em] uppercase">
 				404
 			</p>
 			<h1 className="font-semibold text-3xl text-white tracking-tight">
 				That page does not exist.
 			</h1>
-			<p className="max-w-sm text-[15px] text-white/50 leading-relaxed">
+			<p className="max-w-sm text-[15px] text-ink-muted leading-relaxed">
 				The link may be old, or the address mistyped. The front door still
 				works.
 			</p>

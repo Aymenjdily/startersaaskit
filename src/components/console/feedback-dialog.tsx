@@ -96,7 +96,7 @@ export function FeedbackDialog({
 		>
 			{sent ? (
 				<div className="flex flex-col gap-6">
-					<p className="text-[14px] text-white/70 leading-[1.6]">
+					<p className="text-[14px] text-ink-soft leading-[1.6]">
 						{FEEDBACK_REWARD} generations are on your account. We read every one
 						of these — it is the whole reason the button exists.
 					</p>
@@ -125,7 +125,7 @@ export function FeedbackDialog({
 										"rounded-[8px] border px-3 py-2 text-[13px] transition-colors duration-200",
 										option === rating
 											? "border-brand/40 bg-brand/15 text-ink"
-											: "border-white/12 text-white/70 hover:border-white/25 hover:text-ink",
+											: "border-white/8 text-ink-soft hover:border-white/25 hover:text-ink",
 									)}
 									key={option}
 									onClick={() => setRating(option)}
@@ -147,7 +147,7 @@ export function FeedbackDialog({
 						<textarea
 							aria-describedby={countId}
 							aria-invalid={problem !== null}
-							className="min-h-[104px] w-full resize-y rounded-[8px] border border-white/12 bg-black/25 px-3 py-2.5 text-[14px] text-ink transition-colors duration-200 placeholder:text-ink-muted focus:border-white/25 focus:outline-2 focus:outline-offset-2 focus:outline-brand"
+							className="min-h-[104px] w-full resize-y rounded-[8px] border border-white/8 bg-black/25 px-3 py-2.5 text-[14px] text-ink transition-colors duration-200 placeholder:text-ink-muted focus:border-white/25 focus:outline-2 focus:outline-offset-2 focus:outline-brand"
 							id={messageId}
 							maxLength={MESSAGE_MAX}
 							onChange={(event) => setMessage(event.target.value)}
@@ -175,7 +175,7 @@ export function FeedbackDialog({
 						</label>
 						<input
 							autoComplete="off"
-							className="h-11 w-full rounded-[8px] border border-white/12 bg-black/25 px-3 text-[14px] text-ink transition-colors duration-200 placeholder:text-ink-muted focus:border-white/25 focus:outline-2 focus:outline-offset-2 focus:outline-brand"
+							className="h-11 w-full rounded-[8px] border border-white/8 bg-black/25 px-3 text-[14px] text-ink transition-colors duration-200 placeholder:text-ink-muted focus:border-white/25 focus:outline-2 focus:outline-offset-2 focus:outline-brand"
 							id={buildingId}
 							maxLength={BUILDING_MAX}
 							onChange={(event) => setBuilding(event.target.value)}

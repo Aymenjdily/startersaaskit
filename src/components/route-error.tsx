@@ -14,7 +14,7 @@ export function RouteError() {
 			<h1 className="font-semibold text-3xl text-white tracking-tight">
 				Something went wrong.
 			</h1>
-			<p className="max-w-sm text-[15px] text-white/50 leading-relaxed">
+			<p className="max-w-sm text-[15px] text-ink-muted leading-relaxed">
 				The page failed to load. Reloading usually fixes it; if it keeps
 				happening, the report dialog in the console is the fastest way to reach
 				us.

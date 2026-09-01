@@ -37,7 +37,7 @@ function ActionIcon({ path }: { path: string }) {
 }
 
 const ACTION =
-	"flex size-8 items-center justify-center rounded-[7px] border border-white/10 text-white/55 transition-colors duration-200 hover:border-white/25 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-40";
+	"flex size-8 items-center justify-center rounded-[7px] border border-white/8 text-ink-muted transition-colors duration-200 hover:border-white/25 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:opacity-40";
 
 export function StarterCard({
 	busy = false,
@@ -60,13 +60,13 @@ export function StarterCard({
 			    doubling into a 2px seam. */}
 			<span
 				aria-hidden="true"
-				className="-mb-px ml-0 h-3 w-20 rounded-t-[8px] border border-white/10 border-b-0 bg-surface-raised transition-colors duration-200 group-hover:border-white/25 group-hover:bg-white/[0.05]"
+				className="-mb-px ml-0 h-3 w-20 rounded-t-[8px] border border-white/8 border-b-0 bg-surface-raised transition-colors duration-200 group-hover:border-white/25 group-hover:bg-white/5"
 			/>
 
 			<div
 				className={cn(
-					"flex flex-1 flex-col gap-4 rounded-[12px] rounded-tl-none border border-white/10 bg-surface-raised p-5",
-					"transition-colors duration-200 group-hover:border-white/25 group-hover:bg-white/[0.05]",
+					"flex flex-1 flex-col gap-4 rounded-[12px] rounded-tl-none border border-white/8 bg-surface-raised p-5",
+					"transition-colors duration-200 group-hover:border-white/25 group-hover:bg-white/5",
 				)}
 			>
 				<div className="min-w-0">
@@ -99,6 +99,7 @@ export function StarterCard({
 						className={ACTION}
 						disabled={busy}
 						onClick={onDownload}
+						title="Download"
 						type="button"
 					>
 						<ActionIcon path={ICONS.download} />
@@ -112,6 +113,7 @@ export function StarterCard({
 						)}
 						disabled={busy}
 						onClick={onDelete}
+						title="Delete"
 						type="button"
 					>
 						<ActionIcon path={ICONS.trash} />

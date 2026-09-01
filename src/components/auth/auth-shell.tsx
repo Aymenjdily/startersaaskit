@@ -47,13 +47,15 @@ export function AuthShell({
 					size === "wide" ? "max-w-[560px]" : "max-w-[440px]",
 				)}
 			>
-				<div className="rounded-[16px] border border-white/12 bg-black/45 p-8 shadow-[0_24px_80px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
+				<div className="rounded-[16px] border border-white/8 bg-black/45 p-8 shadow-[0_24px_80px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
 					<header className="mb-8">
 						{eyebrow}
 						<h1 className="text-[20px] font-medium leading-[1.3] text-ink">
 							{title}
 						</h1>
-						<p className="text-[20px] leading-[1.3] text-white/60">{tagline}</p>
+						<p className="text-[20px] leading-[1.3] text-ink-muted">
+							{tagline}
+						</p>
 					</header>
 
 					{children}

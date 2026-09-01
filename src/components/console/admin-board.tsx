@@ -45,7 +45,7 @@ export function AdminBoard({ ready }: { ready: boolean }) {
 			    unusable without a mouse. */}
 			<div
 				aria-label="Admin sections"
-				className="flex w-fit gap-1 rounded-[10px] border border-white/10 bg-black/20 p-1"
+				className="flex w-fit gap-1 rounded-[10px] border border-white/8 bg-black/20 p-1"
 				role="tablist"
 			>
 				{TABS.map((one) => (
@@ -56,7 +56,7 @@ export function AdminBoard({ ready }: { ready: boolean }) {
 							"rounded-[7px] px-3.5 py-1.5 text-[13px] transition-colors duration-200",
 							one.id === tab
 								? "bg-white/10 text-ink"
-								: "text-white/60 hover:text-ink",
+								: "text-ink-muted hover:text-ink",
 						)}
 						id={`admin-tab-${one.id}`}
 						key={one.id}
@@ -148,7 +148,7 @@ function Table({ children }: { children: React.ReactNode }) {
 	/* Scrolls inside its own frame rather than widening the page: an admin table
 	   has more columns than a console pane has room for. */
 	return (
-		<div className="overflow-x-auto rounded-[10px] border border-white/10">
+		<div className="overflow-x-auto rounded-[10px] border border-white/8">
 			<table className="w-full min-w-[720px] border-collapse text-left">
 				{children}
 			</table>
@@ -157,8 +157,8 @@ function Table({ children }: { children: React.ReactNode }) {
 }
 
 const TH =
-	"border-white/10 border-b px-4 py-2.5 font-medium text-[12px] text-white/50";
-const TD = "border-white/6 border-b px-4 py-3 text-[13px] text-white/80";
+	"border-white/8 border-b px-4 py-2.5 font-medium text-[12px] text-ink-muted";
+const TD = "border-white/8 border-b px-4 py-3 text-[13px] text-ink-soft";
 
 function Users({ ready }: { ready: boolean }) {
 	return (
@@ -209,7 +209,7 @@ const STATUS_TONE: Record<ReportStatus, string> = {
 	open: "border-diagram-red/30 bg-diagram-red/10 text-diagram-red",
 	triaged: "border-white/20 bg-white/8 text-ink",
 	fixed: "border-sage/30 bg-sage/10 text-sage",
-	wontfix: "border-white/10 bg-white/4 text-white/45",
+	wontfix: "border-white/8 bg-white/5 text-ink-muted",
 };
 
 function Bugs({ ready }: { ready: boolean }) {
@@ -251,7 +251,7 @@ function Bugs({ ready }: { ready: boolean }) {
 								<td className={cn(TD, "max-w-[320px] text-ink")}>
 									<span className="block">{row.summary}</span>
 									{row.detail && (
-										<span className="mt-1 block text-[12px] text-white/45">
+										<span className="mt-1 block text-[12px] text-ink-muted">
 											{row.detail}
 										</span>
 									)}
@@ -336,14 +336,14 @@ function Feedback({ ready }: { ready: boolean }) {
 									<span className="font-medium tabular-nums text-ink">
 										{row.rating}
 									</span>
-									<span className="ml-2 text-[12px] text-white/45">
+									<span className="ml-2 text-[12px] text-ink-muted">
 										{RATING_LABELS[row.rating]}
 									</span>
 								</td>
 								<td className={cn(TD, "max-w-[420px] text-ink")}>
 									<span className="block">{row.message}</span>
 									{row.building && (
-										<span className="mt-1 block text-[12px] text-white/45">
+										<span className="mt-1 block text-[12px] text-ink-muted">
 											Building: {row.building}
 										</span>
 									)}

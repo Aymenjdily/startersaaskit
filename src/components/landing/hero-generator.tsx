@@ -165,7 +165,7 @@ export function HeroGenerator({ previews }: { previews: StarterPreview[] }) {
 						{/* `tabSize` because the generator writes tabs, and a browser's
 						    default of 8 turns nested JSX into a horizontal scroll. */}
 						<code
-							className="font-mono text-[11px] text-white/75 leading-[1.6]"
+							className="font-mono text-[11px] text-ink-soft leading-[1.6]"
 							style={{ tabSize: 2 }}
 						>
 							{shown?.source ?? ""}
@@ -216,13 +216,13 @@ function Row({
 							"rounded-[6px] border px-2.5 py-1 text-[12px] transition-colors duration-200",
 							active
 								? "border-brand/40 bg-brand/15 text-ink"
-								: "border-line text-white/70 hover:border-white/25 hover:text-ink",
+								: "border-line text-ink-soft hover:border-white/25 hover:text-ink",
 							/* Dimmed rather than hidden: the point is that the visitor
 							   sees the option disappear from reach, not that it was never
 							   there. `title` says why, since a dead chip explains nothing
 							   on its own. */
 							!allowed &&
-								"cursor-not-allowed border-line/60 text-white/25 hover:border-line/60 hover:text-white/25",
+								"cursor-not-allowed border-line/60 text-ink-muted/60 hover:border-line/60 hover:text-ink-muted/60",
 						)}
 						disabled={!allowed}
 						key={option.id}
@@ -263,10 +263,10 @@ function Branch({
 					<li key={node.id}>
 						{folder ? (
 							<span
-								className="block truncate text-white/80"
+								className="block truncate text-ink-soft"
 								style={{ paddingLeft: depth * 14 }}
 							>
-								<span className="text-white/25">▸ </span>
+								<span className="text-ink-muted/60">▸ </span>
 								{node.name}/
 							</span>
 						) : (
@@ -278,13 +278,13 @@ function Branch({
 									"block w-full truncate text-left transition-colors",
 									node.id === openPath
 										? "text-ink"
-										: "text-ink-muted hover:text-white/80",
+										: "text-ink-muted hover:text-ink-soft",
 								)}
 								onClick={() => onOpen(node.id)}
 								style={{ paddingLeft: depth * 14 }}
 								type="button"
 							>
-								<span className="text-white/25">{"  "}</span>
+								<span className="text-ink-muted/60">{"  "}</span>
 								{node.name}
 							</button>
 						)}

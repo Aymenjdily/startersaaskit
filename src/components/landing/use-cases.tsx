@@ -55,7 +55,7 @@ function useRotation(count: number) {
 function Screen({ label, children }: { label: string; children: ReactNode }) {
 	return (
 		<div className="flex h-full flex-col">
-			<div className="flex items-center gap-1.5 border-b border-white/6 px-4 py-3">
+			<div className="flex items-center gap-1.5 border-b border-white/8 px-4 py-3">
 				<span className="size-[7px] rounded-full bg-white/12" />
 				<span className="size-[7px] rounded-full bg-white/12" />
 				<span className="size-[7px] rounded-full bg-white/12" />
@@ -303,7 +303,7 @@ export function UseCases() {
 										<span
 											className={cn(
 												"text-[17px] font-medium tracking-[-0.02em] transition-colors duration-200 group-hover:text-ink md:text-[24px]",
-												active ? "text-ink" : "text-white/35",
+												active ? "text-ink" : "text-ink-muted/70",
 											)}
 										>
 											{useCase.title}
@@ -322,7 +322,7 @@ export function UseCases() {
 					</FadeUp>
 
 					<FadeUp className="order-1 md:order-2" step={2}>
-						<div className="relative aspect-[4/3] overflow-hidden rounded-[16px] border border-white/6 bg-[#0a0a0a] md:sticky md:top-[100px] md:aspect-square">
+						<div className="relative aspect-[4/3] overflow-hidden rounded-[16px] border border-white/8 bg-[#0a0a0a] md:sticky md:top-[100px] md:aspect-square">
 							<div
 								aria-hidden="true"
 								className="-translate-x-1/2 pointer-events-none absolute left-1/2 top-0 size-[420px] rounded-full bg-brand/8 blur-[100px]"

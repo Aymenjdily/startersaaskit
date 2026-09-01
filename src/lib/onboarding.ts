@@ -172,3 +172,20 @@ export function firstUnansweredStep(answers: Answers): number {
 
 	return index === -1 ? QUESTIONS.length - 1 : index;
 }
+
+/**
+ * The label(s) an answer resolves to, for anywhere that reads an answer back
+ * rather than rendering the picker that collected it — Settings' "your
+ * answers" summary is the one caller today. An id the question no longer
+ * offers (a menu that has since narrowed) is dropped rather than shown raw,
+ * since a stored value like `"b2b_saas"` means nothing to the person reading
+ * it back.
+ */
+export function answerLabels(question: Question, answer: unknown): string[] {
+	const given = Array.isArray(answer) ? answer : answer ? [answer] : [];
+
+	return given
+		.map((value) => question.options.find((option) => option.id === value))
+		.filter((option): option is Question["options"][number] => Boolean(option))
+		.map((option) => option.label);
+}

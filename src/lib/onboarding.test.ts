@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
 	type Answers,
+	answerLabels,
 	firstUnansweredStep,
 	isAnswered,
 	isComplete,
@@ -128,5 +129,40 @@ describe("firstUnansweredStep", () => {
 		delete answers[QUESTIONS[2].id];
 
 		expect(firstUnansweredStep(answers)).toBe(2);
+	});
+});
+
+describe("answerLabels", () => {
+	const single = QUESTIONS.find(
+		(q) => !q.multiple,
+	) as (typeof QUESTIONS)[number];
+	const multi = QUESTIONS.find((q) => q.multiple) as (typeof QUESTIONS)[number];
+
+	it("resolves a single answer to its one label", () => {
+		expect(answerLabels(single, single.options[0].id)).toEqual([
+			single.options[0].label,
+		]);
+	});
+
+	it("resolves a multi answer to every chosen label, in order", () => {
+		const chosen = [multi.options[2].id, multi.options[0].id];
+
+		expect(answerLabels(multi, chosen)).toEqual([
+			multi.options[2].label,
+			multi.options[0].label,
+		]);
+	});
+
+	it("has nothing to say about an answer that was never given", () => {
+		expect(answerLabels(single, undefined)).toEqual([]);
+		expect(answerLabels(multi, [])).toEqual([]);
+	});
+
+	/** An id the menu no longer offers is dropped, not shown as raw text. */
+	it("drops an id the question does not recognise", () => {
+		expect(answerLabels(single, "not-a-real-option")).toEqual([]);
+		expect(
+			answerLabels(multi, [multi.options[0].id, "not-a-real-option"]),
+		).toEqual([multi.options[0].label]);
 	});
 });

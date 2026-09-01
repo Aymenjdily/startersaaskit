@@ -10,6 +10,8 @@
 
 export const CONSOLE_HREF = "/dashboard";
 
+export const SETTINGS_HREF = "/settings";
+
 export type NavIcon = "grid" | "spark" | "stack" | "sliders" | "shield" | "bug";
 
 export type NavItem = {
@@ -37,8 +39,8 @@ export type NavItem = {
  */
 export const NAV_ITEMS: readonly NavItem[] = [
 	{ href: CONSOLE_HREF, label: "Overview", icon: "grid", built: true },
-	{ href: "/starters", label: "Starters", icon: "stack", built: false },
-	{ href: "/settings", label: "Settings", icon: "sliders", built: false },
+	{ href: "/starters", label: "Starters", icon: "stack", built: true },
+	{ href: SETTINGS_HREF, label: "Settings", icon: "sliders", built: true },
 	{
 		href: "/admin",
 		label: "Admin",

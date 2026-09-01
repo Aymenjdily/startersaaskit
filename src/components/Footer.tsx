@@ -105,7 +105,7 @@ function Column({ links, title }: { links: Link[]; title: string }) {
 
 export function Footer() {
 	return (
-		<footer className="overflow-hidden border-white/10 border-t bg-base px-gutter pt-10 pb-4 md:px-6 md:pt-15 md:pb-6">
+		<footer className="overflow-hidden border-white/8 border-t bg-base px-gutter pt-10 pb-4 md:px-6 md:pt-15 md:pb-6">
 			<div className="mx-auto grid max-w-content grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-7">
 				<Column links={PRODUCT_LINKS} title="Product" />
 				<Column links={REPO_LINKS} title="Repository" />
@@ -120,7 +120,7 @@ export function Footer() {
 					<div className="flex flex-wrap gap-2">
 						{AGENT_FILES.map((file) => (
 							<a
-								className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 px-4 py-2 font-mono text-[13px] text-white/60 transition-colors duration-200 hover:border-white/30 hover:bg-white/4 hover:text-white/90"
+								className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 px-4 py-2 font-mono text-[13px] text-ink-muted transition-colors duration-200 hover:border-white/25 hover:bg-white/4 hover:text-ink"
 								href={`${REPO_URL}/blob/main/${file}`}
 								key={file}
 								rel="noreferrer"
@@ -156,11 +156,11 @@ export function Footer() {
 				/>
 			</div>
 
-			<div className="mx-auto grid max-w-content grid-cols-1 items-center gap-3 py-4 text-[12px] text-white/40 sm:grid-cols-2">
+			<div className="mx-auto grid max-w-content grid-cols-1 items-center gap-3 py-4 text-[12px] text-ink-muted sm:grid-cols-2">
 				<p>
 					© {YEAR} {BRAND} · Built by{" "}
 					<a
-						className="text-white/60 underline underline-offset-4 transition-colors duration-200 hover:text-white/90"
+						className="text-ink-muted underline underline-offset-4 transition-colors duration-200 hover:text-ink"
 						href="https://aymenjdily.com"
 						rel="noreferrer"
 						target="_blank"

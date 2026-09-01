@@ -99,7 +99,7 @@ export function ReportDialog({
 		>
 			{sent ? (
 				<div className="flex flex-col gap-6">
-					<p className="text-[14px] text-white/70 leading-[1.6]">
+					<p className="text-[14px] text-ink-soft leading-[1.6]">
 						Logged, with the page and browser attached. If it needs a reply we
 						will use the address on your account.
 					</p>
@@ -128,7 +128,7 @@ export function ReportDialog({
 										"rounded-[8px] border px-3 py-2 text-[13px] transition-colors duration-200",
 										option === kind
 											? "border-brand/40 bg-brand/15 text-ink"
-											: "border-white/12 text-white/70 hover:border-white/25 hover:text-ink",
+											: "border-white/8 text-ink-soft hover:border-white/25 hover:text-ink",
 									)}
 									key={option}
 									onClick={() => setKind(option)}
@@ -151,7 +151,7 @@ export function ReportDialog({
 							aria-describedby="report-summary-hint"
 							aria-invalid={problem !== null}
 							autoComplete="off"
-							className="h-11 w-full rounded-[8px] border border-white/12 bg-black/25 px-3 text-[14px] text-ink transition-colors duration-200 placeholder:text-ink-muted focus:border-white/25 focus:outline-2 focus:outline-offset-2 focus:outline-brand"
+							className="h-11 w-full rounded-[8px] border border-white/8 bg-black/25 px-3 text-[14px] text-ink transition-colors duration-200 placeholder:text-ink-muted focus:border-white/25 focus:outline-2 focus:outline-offset-2 focus:outline-brand"
 							id="report-summary"
 							maxLength={SUMMARY_MAX}
 							onChange={(event) => setSummary(event.target.value)}
@@ -177,7 +177,7 @@ export function ReportDialog({
 							Anything else <span className="text-ink-muted">(optional)</span>
 						</label>
 						<textarea
-							className="min-h-[110px] w-full resize-y rounded-[8px] border border-white/12 bg-black/25 px-3 py-2.5 text-[14px] text-ink transition-colors duration-200 placeholder:text-ink-muted focus:border-white/25 focus:outline-2 focus:outline-offset-2 focus:outline-brand"
+							className="min-h-[110px] w-full resize-y rounded-[8px] border border-white/8 bg-black/25 px-3 py-2.5 text-[14px] text-ink transition-colors duration-200 placeholder:text-ink-muted focus:border-white/25 focus:outline-2 focus:outline-offset-2 focus:outline-brand"
 							id="report-detail"
 							maxLength={DETAIL_MAX}
 							onChange={(event) => setDetail(event.target.value)}

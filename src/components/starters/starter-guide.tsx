@@ -24,7 +24,7 @@ function CopyButton({ value }: { value: string }) {
 				"shrink-0 rounded-[6px] border px-2 py-1 text-[11px] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand",
 				copied
 					? "border-brand/50 bg-brand-dim text-brand"
-					: "border-white/10 text-white/50 hover:border-white/25 hover:text-ink",
+					: "border-white/8 text-ink-muted hover:border-white/25 hover:text-ink",
 			)}
 			onClick={() => {
 				/* `?.` because the clipboard API is absent on an insecure origin,
@@ -80,13 +80,13 @@ function CommandRow({ command, note }: { command: string; note?: string }) {
 	return (
 		<div className="flex items-center gap-3 rounded-[8px] border border-white/8 bg-black/30 px-3 py-2">
 			<code className="min-w-0 flex-1 truncate font-mono text-[12.5px] text-ink">
-				<span aria-hidden="true" className="mr-2 select-none text-white/30">
+				<span aria-hidden="true" className="mr-2 select-none text-ink-muted/70">
 					$
 				</span>
 				{command}
 			</code>
 			{note && (
-				<span className="hidden shrink-0 text-[11px] text-white/35 sm:block">
+				<span className="hidden shrink-0 text-[11px] text-ink-muted/70 sm:block">
 					{note}
 				</span>
 			)}
@@ -115,7 +115,7 @@ export function StarterGuide({
 								<div className="flex gap-4">
 									<span
 										aria-hidden="true"
-										className="flex size-6 shrink-0 items-center justify-center rounded-full bg-white/6 font-medium text-[12px] text-white/60"
+										className="flex size-6 shrink-0 items-center justify-center rounded-full bg-white/6 font-medium text-[12px] text-ink-muted"
 									>
 										{index + 1}
 									</span>
@@ -125,7 +125,7 @@ export function StarterGuide({
 											<h3 className="font-medium text-[14px] text-ink">
 												{step.title}
 											</h3>
-											<p className="mt-1 text-[13px] text-white/55 leading-[1.6]">
+											<p className="mt-1 text-[13px] text-ink-muted leading-[1.6]">
 												<Prose text={step.body} />
 											</p>
 										</div>
@@ -156,11 +156,11 @@ export function StarterGuide({
 														    thing standing between a secret and every
 														    visitor's browser. */}
 														{variable.isPublic && (
-															<span className="rounded-[4px] bg-white/8 px-1.5 py-0.5 text-[10px] text-white/55 uppercase tracking-[0.05em]">
+															<span className="rounded-[4px] bg-white/8 px-1.5 py-0.5 text-[10px] text-ink-muted uppercase tracking-[0.05em]">
 																public
 															</span>
 														)}
-														<dd className="w-full text-[12px] text-white/45">
+														<dd className="w-full text-[12px] text-ink-muted">
 															{variable.comment}
 														</dd>
 													</div>
@@ -190,7 +190,7 @@ export function StarterGuide({
 									<dt className="font-mono text-[12.5px] text-ink">
 										{entry.path}
 									</dt>
-									<dd className="text-[12.5px] text-white/50">{entry.what}</dd>
+									<dd className="text-[12.5px] text-ink-muted">{entry.what}</dd>
 								</div>
 							))}
 						</dl>

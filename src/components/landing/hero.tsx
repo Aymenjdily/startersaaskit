@@ -6,7 +6,7 @@ export function Hero() {
 		<section className="relative flex flex-col items-center overflow-hidden px-gutter pt-[180px] pb-[30px] sm:pt-[200px] sm:pb-10 md:px-6 md:pt-[240px] md:pb-8">
 			<div className="relative z-10 mb-8 w-full max-w-content text-left md:mb-15">
 				<p
-					className="hero-in mb-4 text-[14px] font-medium text-white/70"
+					className="hero-in mb-4 text-[14px] font-medium text-ink-soft"
 					style={{ animationDelay: "0s" }}
 				>
 					Free while in beta
@@ -21,7 +21,7 @@ export function Hero() {
 
 				<div className="grid items-start gap-6 md:grid-cols-[2fr_1fr] md:gap-10">
 					<p
-						className="hero-in max-w-[600px] text-body-lg leading-[1.5] tracking-[-0.01em] text-white/80"
+						className="hero-in max-w-[600px] text-body-lg leading-[1.5] tracking-[-0.01em] text-ink-soft"
 						data-subtitle
 						style={{ animationDelay: "0.2s" }}
 					>

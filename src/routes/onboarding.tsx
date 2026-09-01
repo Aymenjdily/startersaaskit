@@ -5,6 +5,7 @@ import { AFTER_SIGN_IN_HREF } from "@/components/auth/controls";
 import { OnboardingSkeleton } from "@/components/console/skeletons";
 import { OnboardingWizard } from "@/components/onboarding/wizard";
 import { SIGN_IN_HREF } from "@/lib/brand";
+import { SETTINGS_HREF } from "@/lib/console-nav";
 import { type Answers, firstUnansweredStep, QUESTIONS } from "@/lib/onboarding";
 import { pageHead } from "@/lib/seo";
 import { getSupabase } from "@/lib/supabase";
@@ -27,6 +28,8 @@ type Loaded = {
 	step: number;
 	userId: string;
 	displayName: string | null;
+	/** Revisiting finished answers from Settings, rather than onboarding for the first time. */
+	editing: boolean;
 };
 
 /**
@@ -37,6 +40,11 @@ type Loaded = {
  * client that holds it is the browser client — a loader would run before the
  * cookie is readable on a fresh OAuth return and bounce people back to sign-in
  * a moment after they signed in.
+ *
+ * `?edit=1` is the one thing that changes: it is what lets a *finished*
+ * profile open this page at all — ordinarily `onboarded_at` being set bounces
+ * straight to the console — and it is where Settings sends someone who asked
+ * to revisit what they answered.
  */
 function Onboarding() {
 	const [loaded, setLoaded] = useState<Loaded | null>(null);
@@ -44,6 +52,7 @@ function Onboarding() {
 
 	useEffect(() => {
 		const supabase = getSupabase();
+		const editing = new URLSearchParams(window.location.search).has("edit");
 
 		(async () => {
 			const { data: session } = await supabase.auth.getUser();
@@ -66,7 +75,7 @@ function Onboarding() {
 				return;
 			}
 
-			if (profile?.onboarded_at) {
+			if (profile?.onboarded_at && !editing) {
 				window.location.replace(AFTER_SIGN_IN_HREF);
 				return;
 			}
@@ -79,11 +88,16 @@ function Onboarding() {
 
 			setLoaded({
 				answers,
-				step: firstUnansweredStep(answers),
+				/* Editing starts from the top rather than wherever the answers run
+				   out — a finished profile has nowhere left to be "first
+				   unanswered", so that function would land on the last question
+				   instead of the first. */
+				step: editing ? 0 : firstUnansweredStep(answers),
 				userId: user.id,
 				/* Whatever the provider already told us. No reason to ask again. */
 				displayName:
 					user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
+				editing,
 			});
 		})().catch((thrown: unknown) =>
 			setError(
@@ -110,7 +124,7 @@ function Onboarding() {
 		/* Thrown, not swallowed: the wizard shows what the save said. */
 		if (failure) throw new Error(explain(failure));
 
-		window.location.assign(AFTER_SIGN_IN_HREF);
+		window.location.assign(loaded.editing ? SETTINGS_HREF : AFTER_SIGN_IN_HREF);
 	}
 
 	if (error) {
@@ -119,7 +133,7 @@ function Onboarding() {
 				tagline="We could not load your account."
 				title="Something broke"
 			>
-				<p className="text-[14px] text-white/60" role="alert">
+				<p className="text-[14px] text-ink-muted" role="alert">
 					{error}
 				</p>
 			</AuthShell>

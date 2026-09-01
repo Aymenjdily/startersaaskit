@@ -56,7 +56,7 @@ export function OptionList({
 							"flex cursor-pointer items-center gap-3 rounded-[8px] border px-4 py-3 text-[14px] transition-colors duration-200",
 							checked
 								? "border-brand/60 bg-brand/10 text-ink"
-								: "border-white/12 bg-black/25 text-white/75 hover:border-white/25 hover:bg-black/40",
+								: "border-white/8 bg-black/25 text-ink-soft hover:border-white/25 hover:bg-black/40",
 						)}
 						key={option.id}
 					>

@@ -3,10 +3,10 @@ import { resolve } from "node:path";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderToString } from "react-dom/server";
-import { describe, expect, it, vi } from "vitest";
-import { BRAND, LOGO_MARK_SIZE, LOGO_MARK_SRC } from "@/lib/brand";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { BRAND, LOGO_MARK_SIZE, LOGO_MARK_SRC, LOGO_SRC } from "@/lib/brand";
 import { CONSOLE_HREF, navItemsFor } from "@/lib/console-nav";
-import { IconRail } from "./icon-rail";
+import { IconRail, MOBILE_QUERY } from "./icon-rail";
 
 const ada = {
 	email: "ada@example.com",
@@ -17,6 +17,7 @@ function renderIconRail(props: Partial<Parameters<typeof IconRail>[0]> = {}) {
 	return render(
 		<IconRail
 			currentPath={CONSOLE_HREF}
+			onFeedback={vi.fn()}
 			onReport={vi.fn()}
 			onSignOut={vi.fn()}
 			user={ada}
@@ -25,11 +26,39 @@ function renderIconRail(props: Partial<Parameters<typeof IconRail>[0]> = {}) {
 	);
 }
 
+/** Stubs `matchMedia` so the rail's own viewport check sees a phone or not. */
+function stubViewport(mobile: boolean) {
+	vi.stubGlobal(
+		"matchMedia",
+		vi.fn((query: string) => ({
+			matches: mobile && query === MOBILE_QUERY,
+			media: query,
+			onchange: null,
+			addListener: vi.fn(),
+			removeListener: vi.fn(),
+			addEventListener: vi.fn(),
+			removeEventListener: vi.fn(),
+			dispatchEvent: vi.fn(),
+		})),
+	);
+}
+
 describe("IconRail", () => {
+	/* The expanded/collapsed choice is remembered in localStorage — cleared so
+	   one test's toggle cannot leave the next one starting pre-expanded. The
+	   viewport is stubbed to "not a phone" by default, matching every existing
+	   test's assumption of starting expanded; the mobile describe block below
+	   opts back in per test. */
+	beforeEach(() => {
+		localStorage.clear();
+		stubViewport(false);
+	});
+
 	it("renders identical markup across separate server renders", () => {
 		const rail = (
 			<IconRail
 				currentPath={CONSOLE_HREF}
+				onFeedback={vi.fn()}
 				onReport={vi.fn()}
 				onSignOut={vi.fn()}
 				user={ada}
@@ -126,9 +155,11 @@ describe("IconRail", () => {
 
 	describe("whoever is signed in", () => {
 		/**
-		 * The rail is one button wide, so the name cannot be printed beside the
-		 * avatar. It is on the tooltip instead, which is the only place left to
-		 * answer "whose account is this?" without leaving the page.
+		 * The tooltip names the account regardless of width — collapsed, it is
+		 * the only place that answers "whose account is this?" without leaving
+		 * the page; expanded, it is redundant with the name printed beside the
+		 * avatar (covered by "starts expanded, with every label already on
+		 * screen"), but still correct rather than removed.
 		 */
 		it("names the account on the avatar", () => {
 			const { container } = renderIconRail();
@@ -207,11 +238,45 @@ describe("IconRail", () => {
 	});
 
 	/**
-	 * The rail is the same width at every breakpoint, so there is no drawer to
-	 * close and no navigation callback. It replaced an off-canvas panel that
-	 * needed a focus trap, an overlay and a scroll lock to hide 56px.
+	 * Feedback carries a reward, and used to be reachable only through the
+	 * balance card on pages that render one — nowhere on a page without it,
+	 * including the console's own overview until this shipped. The rail is
+	 * on every page, so this is where "always reachable" actually lives.
 	 */
-	it("is always on screen, with nothing to open or close", () => {
+	describe("leaving feedback", () => {
+		it("opens feedback when asked, from the rail", async () => {
+			const user = userEvent.setup();
+			const onFeedback = vi.fn();
+			renderIconRail({ onFeedback });
+
+			await user.click(screen.getByRole("button", { name: "Leave feedback" }));
+
+			expect(onFeedback).toHaveBeenCalledOnce();
+		});
+
+		it("sits above the bug report, not after it", () => {
+			renderIconRail();
+
+			const buttons = screen
+				.getAllByRole("button")
+				.map((button) => button.getAttribute("aria-label"));
+			const feedbackAt = buttons.indexOf("Leave feedback");
+			const reportAt = buttons.indexOf("Report a problem");
+
+			expect(feedbackAt).toBeGreaterThan(-1);
+			expect(feedbackAt).toBeLessThan(reportAt);
+		});
+	});
+
+	/**
+	 * Widening the rail is not the same feature this guards against: it never
+	 * leaves the screen, at any width, on any breakpoint. It replaced an
+	 * off-canvas panel that needed a focus trap, an overlay and a scroll lock
+	 * to hide 56px, and none of that came back — there is still no drawer, no
+	 * backdrop and no navigation callback, only a wider version of the same
+	 * always-visible nav.
+	 */
+	it("is always on screen, with no drawer to open or close", () => {
 		renderIconRail();
 
 		expect(
@@ -222,12 +287,19 @@ describe("IconRail", () => {
 
 	describe("the brand mark", () => {
 		/**
-		 * The square mark, not the wordmark. Scaled into 56px of rail the
-		 * 2086×607 wordmark renders the name about three pixels tall — present,
-		 * unreadable, and worse than no logo.
+		 * The square mark, not the wordmark, once the rail is narrow. Scaled
+		 * into 56px the 2086×607 wordmark renders the name about three pixels
+		 * tall — present, unreadable, and worse than no logo. The rail starts
+		 * expanded now, so this collapses it first rather than testing the
+		 * default.
 		 */
-		it("uses the mark rather than the wordmark", () => {
+		it("uses the mark rather than the wordmark once collapsed", async () => {
+			const user = userEvent.setup();
 			renderIconRail();
+
+			await user.click(
+				screen.getByRole("button", { name: "Collapse sidebar" }),
+			);
 
 			expect(screen.getByAltText(BRAND)).toHaveAttribute("src", LOGO_MARK_SRC);
 		});
@@ -252,5 +324,159 @@ describe("IconRail", () => {
 			"href",
 			"/",
 		);
+	});
+
+	/**
+	 * The rail used to be the same width always, with every label living only
+	 * in a tooltip. Expanded — labels on screen — is the default now; these
+	 * guard both that default and the collapse it can still be asked for.
+	 */
+	describe("expanding the rail", () => {
+		it("starts expanded, with every label already on screen", () => {
+			renderIconRail({ isAdmin: true });
+
+			for (const { built, label } of navItemsFor(true)) {
+				expect(
+					screen.getByText(built ? label : `${label} (soon)`),
+				).toBeVisible();
+			}
+			expect(screen.getByText("Leave feedback")).toBeVisible();
+			expect(screen.getByText("Report a problem")).toBeVisible();
+			expect(screen.getByText("Sign out")).toBeVisible();
+			expect(screen.getByText("Ada Lovelace")).toBeVisible();
+			expect(
+				screen.getByRole("button", { name: "Collapse sidebar" }),
+			).toBeInTheDocument();
+		});
+
+		it("hides every label once collapsed, leaving only the tooltip", async () => {
+			const user = userEvent.setup();
+			renderIconRail();
+
+			await user.click(
+				screen.getByRole("button", { name: "Collapse sidebar" }),
+			);
+
+			expect(screen.queryByText("Overview")).toBeNull();
+			expect(
+				screen.getByRole("link", { name: "Overview" }),
+			).toBeInTheDocument();
+		});
+
+		it("swaps the button's own name each time it is pressed", async () => {
+			const user = userEvent.setup();
+			renderIconRail();
+
+			await user.click(
+				screen.getByRole("button", { name: "Collapse sidebar" }),
+			);
+			expect(
+				screen.queryByRole("button", { name: "Collapse sidebar" }),
+			).toBeNull();
+
+			await user.click(screen.getByRole("button", { name: "Expand sidebar" }));
+			expect(
+				screen.getByRole("button", { name: "Collapse sidebar" }),
+			).toBeInTheDocument();
+		});
+
+		it("shows the wordmark by default, and the mark once collapsed", async () => {
+			const user = userEvent.setup();
+			renderIconRail();
+
+			expect(screen.getByAltText(BRAND)).toHaveAttribute("src", LOGO_SRC);
+
+			await user.click(
+				screen.getByRole("button", { name: "Collapse sidebar" }),
+			);
+
+			expect(screen.getByAltText(BRAND)).toHaveAttribute("src", LOGO_MARK_SRC);
+		});
+
+		it("remembers a collapse the next time the rail mounts", async () => {
+			const user = userEvent.setup();
+			const first = renderIconRail();
+			await user.click(
+				screen.getByRole("button", { name: "Collapse sidebar" }),
+			);
+			first.unmount();
+
+			renderIconRail();
+
+			expect(
+				await screen.findByRole("button", { name: "Expand sidebar" }),
+			).toBeInTheDocument();
+			expect(screen.queryByText("Overview")).toBeNull();
+		});
+	});
+
+	/**
+	 * A phone has nowhere to push 220px of content aside to, so expanded there
+	 * means covering the page instead — a backdrop, `position: fixed`, and a
+	 * default that does not open a drawer on someone's very first visit.
+	 */
+	describe("on a narrow screen", () => {
+		it("starts collapsed rather than opening a drawer unasked", () => {
+			stubViewport(true);
+			renderIconRail();
+
+			expect(
+				screen.getByRole("button", { name: "Expand sidebar" }),
+			).toBeInTheDocument();
+			expect(screen.queryByText("Overview")).toBeNull();
+		});
+
+		it("still starts expanded once there is room to push instead of cover", () => {
+			stubViewport(false);
+			renderIconRail();
+
+			expect(
+				screen.getByRole("button", { name: "Collapse sidebar" }),
+			).toBeInTheDocument();
+		});
+
+		/* A stored choice is a person's own decision and outranks the screen
+		   they happen to be looking at it on. */
+		it("still remembers an explicit choice over the screen size", () => {
+			localStorage.setItem("console-rail-expanded", "true");
+			stubViewport(true);
+			renderIconRail();
+
+			expect(
+				screen.getByRole("button", { name: "Collapse sidebar" }),
+			).toBeInTheDocument();
+		});
+
+		it("shows a backdrop only while expanded, and closes on a click", async () => {
+			const user = userEvent.setup();
+			const { container } = renderIconRail();
+
+			const backdrop = () => container.querySelector("[data-rail-backdrop]");
+			expect(backdrop()).not.toBeNull();
+
+			await user.click(backdrop() as HTMLElement);
+
+			expect(
+				screen.getByRole("button", { name: "Expand sidebar" }),
+			).toBeInTheDocument();
+			expect(backdrop()).toBeNull();
+		});
+
+		it("lifts the rail out of the page's flow only while expanded", async () => {
+			const user = userEvent.setup();
+			renderIconRail();
+
+			expect(screen.getByRole("navigation", { name: "Console" })).toHaveClass(
+				"max-md:fixed",
+			);
+
+			await user.click(
+				screen.getByRole("button", { name: "Collapse sidebar" }),
+			);
+
+			expect(
+				screen.getByRole("navigation", { name: "Console" }),
+			).not.toHaveClass("max-md:fixed");
+		});
 	});
 });

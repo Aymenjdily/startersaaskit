@@ -31,13 +31,18 @@ vi.mock("@/lib/feedback", async (importOriginal) => ({
 	isAdmin: async () => false,
 }));
 
-/** A child that asks the shell to open the dialog, exactly as the page does. */
+/**
+ * A child that asks the shell to open the dialog, exactly as `GenerationBalance`
+ * does. Named differently from the rail's own "Leave feedback" button — the
+ * rail now offers the same dialog directly, and this exists to prove the
+ * *context* reaches an arbitrary child, not to re-test the rail's button.
+ */
 function ChildWithButton() {
 	const openReport = useOpenReport();
 
 	return (
 		<button onClick={() => openReport("feedback")} type="button">
-			Leave feedback
+			Open feedback from a child
 		</button>
 	);
 }
@@ -52,7 +57,7 @@ describe("the console shell's report dialog", () => {
 			</ConsoleShell>,
 		);
 
-		await screen.findByRole("button", { name: "Leave feedback" });
+		await screen.findByRole("button", { name: "Open feedback from a child" });
 
 		expect(dialog("How is it going?")).toBeNull();
 		expect(dialog("Report a problem")).toBeNull();
@@ -71,7 +76,9 @@ describe("the console shell's report dialog", () => {
 		);
 
 		await user.click(
-			await screen.findByRole("button", { name: "Leave feedback" }),
+			await screen.findByRole("button", {
+				name: "Open feedback from a child",
+			}),
 		);
 
 		/* A different dialog, not the report form retitled: it asks for a rating
@@ -80,7 +87,7 @@ describe("the console shell's report dialog", () => {
 		expect(dialog("Report a problem")).toBeNull();
 	});
 
-	it("still opens from the rail's own button", async () => {
+	it("still opens from the rail's own report button", async () => {
 		const user = userEvent.setup();
 		render(
 			<ConsoleShell currentPath="/starters" title="Starters">
@@ -88,8 +95,27 @@ describe("the console shell's report dialog", () => {
 			</ConsoleShell>,
 		);
 
-		await user.click(await screen.findByRole("button", { name: /report/i }));
+		await user.click(
+			await screen.findByRole("button", { name: "Report a problem" }),
+		);
 
 		await waitFor(() => expect(dialog("Report a problem")).toBeVisible());
+	});
+
+	/** The rail's own feedback entry, not routed through a page's balance card. */
+	it("also opens feedback from the rail's own button", async () => {
+		const user = userEvent.setup();
+		render(
+			<ConsoleShell currentPath="/starters" title="Starters">
+				<ChildWithButton />
+			</ConsoleShell>,
+		);
+
+		await user.click(
+			await screen.findByRole("button", { name: "Leave feedback" }),
+		);
+
+		await waitFor(() => expect(dialog("How is it going?")).toBeVisible());
+		expect(dialog("Report a problem")).toBeNull();
 	});
 });

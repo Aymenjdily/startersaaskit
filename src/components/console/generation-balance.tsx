@@ -1,3 +1,4 @@
+import { NavGlyph } from "@/components/console/nav-icon";
 import { buttonVariants } from "@/components/ui/button";
 import { FEEDBACK_REWARD, type Quota, remaining } from "@/lib/quota";
 import { cn } from "@/lib/utils";
@@ -42,7 +43,7 @@ export function GenerationBalance({
 	if (!quota) {
 		return error ? (
 			<p
-				className="w-full rounded-[12px] border border-white/10 bg-white/[0.03] px-4 py-3.5 text-[12px] text-ink-muted"
+				className="w-full rounded-[12px] border border-white/8 bg-white/5 px-4 py-3.5 text-[12px] text-ink-muted"
 				role="alert"
 			>
 				{error}
@@ -53,23 +54,51 @@ export function GenerationBalance({
 	const left = remaining(quota);
 	/* Always offered, up until it is taken. */
 	const offered = !quota.rewarded;
+	const pct = quota.limit > 0 ? Math.round((left / quota.limit) * 100) : 0;
 
 	return (
-		<div className="flex w-full flex-col gap-3 rounded-[12px] border border-white/10 bg-white/[0.03] px-4 py-3.5">
-			<div className="flex flex-wrap items-center justify-between gap-3">
-				<p className="text-[13px] text-ink">
-					<span className="font-medium tabular-nums">{left}</span>
-					<span className="text-ink-muted">
-						{" "}
-						of {quota.limit} generation{quota.limit === 1 ? "" : "s"} left
+		<div className="relative w-full overflow-hidden rounded-[16px] border border-white/8 bg-gradient-to-br from-elevated to-elevated/60 p-5 sm:p-6">
+			{/* A glow rather than a flat fill — the same treatment the landing
+			    page's own cards use, so the console does not read as a plainer
+			    product than the site that sold it. */}
+			<div
+				aria-hidden="true"
+				className="pointer-events-none absolute -top-12 -right-12 size-44 rounded-full bg-brand/10 blur-[70px]"
+			/>
+
+			<div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+				<div className="flex min-w-0 items-center gap-4">
+					<span className="flex size-11 shrink-0 items-center justify-center rounded-[12px] border border-brand/20 bg-brand-dim text-brand">
+						<NavGlyph className="size-5" icon="spark" />
 					</span>
-				</p>
+
+					<div className="min-w-0">
+						<p className="flex items-baseline gap-1.5">
+							<span className="font-medium text-[32px] text-ink leading-none tabular-nums">
+								{left}
+							</span>
+							<span className="text-[13px] text-ink-muted">
+								of {quota.limit} generation{quota.limit === 1 ? "" : "s"} left
+							</span>
+						</p>
+
+						<div
+							aria-hidden="true"
+							className="mt-2.5 h-1.5 w-40 max-w-full overflow-hidden rounded-full bg-white/10"
+						>
+							<div
+								className="h-full rounded-full bg-brand transition-[width] duration-500 ease-out"
+								style={{ width: `${pct}%` }}
+							/>
+						</div>
+					</div>
+				</div>
 
 				{offered && (
 					<button
 						className={cn(
-							buttonVariants({ variant: "secondary", size: "sm" }),
-							"rounded-[8px]",
+							buttonVariants({ variant: "primary", size: "md" }),
+							"shrink-0 rounded-[8px]",
 						)}
 						disabled={claiming}
 						onClick={onReport}
@@ -82,14 +111,14 @@ export function GenerationBalance({
 				)}
 			</div>
 
-			<p className="text-[12px] text-ink-muted">
+			<p className="relative mt-4 text-[12px] text-ink-muted">
 				{left > 0
 					? "Re-downloading a starter you already made is always free."
 					: "Your starters stay downloadable — the balance only limits new ones."}
 			</p>
 
 			{error && (
-				<p className="text-[12px] text-diagram-red" role="alert">
+				<p className="relative mt-2 text-[12px] text-diagram-red" role="alert">
 					{error}
 				</p>
 			)}

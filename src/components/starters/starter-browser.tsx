@@ -23,10 +23,12 @@ import { StarterCard } from "./starter-card";
  * change it is when someone wants to share one, not before.
  */
 
+export const CREATE_LABEL = "Create your starter";
+
 /* The search field. The dropdown beside it wears the same shape from
    `SelectMenu`, which owns its own because it is used elsewhere too. */
 const SEARCH_FIELD =
-	"h-9 w-full rounded-[8px] border border-white/10 bg-black/25 pr-3 pl-8 text-[13px] text-ink transition-colors duration-200 placeholder:text-ink-muted hover:border-white/25 focus:outline-2 focus:outline-offset-2 focus:outline-brand";
+	"h-9 w-full rounded-[8px] border border-white/8 bg-black/25 pr-3 pl-8 text-[13px] text-ink transition-colors duration-200 placeholder:text-ink-muted hover:border-white/25 focus:outline-2 focus:outline-offset-2 focus:outline-brand";
 
 const SEARCH_ICON = "M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14ZM16 16l4.5 4.5";
 
@@ -49,12 +51,15 @@ function Glyph({ className, path }: { className?: string; path: string }) {
 
 export function StarterBrowser({
 	busyId,
+	onCreate,
 	onDelete,
 	onDownload,
 	starters,
 }: {
 	/** The starter currently being downloaded or deleted, if any. */
 	busyId?: string | null;
+	/** Opens the wizard. Lives in this toolbar rather than the page header, next to the controls it needs to be seen beside. */
+	onCreate: () => void;
 	onDelete: (record: StarterRecord) => Promise<void>;
 	onDownload: (record: StarterRecord) => void;
 	starters: StarterRecord[];
@@ -87,7 +92,7 @@ export function StarterBrowser({
 		<div className="flex w-full flex-col gap-5">
 			{/* One bordered strip rather than loose boxes on the page, so the
 			    controls read as a single toolbar that belongs to the grid. */}
-			<div className="flex flex-col gap-2 rounded-[12px] border border-white/10 bg-surface-raised/60 p-2 sm:flex-row sm:items-center">
+			<div className="flex flex-col gap-2 rounded-[12px] border border-white/8 bg-surface-raised/60 p-2 sm:flex-row sm:items-center">
 				<div className="relative w-full sm:w-[240px]">
 					<label className="sr-only" htmlFor="starter-search">
 						Search starters
@@ -139,7 +144,7 @@ export function StarterBrowser({
 
 					{hasActiveFilters(filters) && (
 						<button
-							className="rounded-[7px] border border-white/10 px-2.5 py-1 text-[12px] text-ink-muted transition-colors duration-200 hover:border-white/25 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+							className="rounded-[7px] border border-white/8 px-2.5 py-1 text-[12px] text-ink-muted transition-colors duration-200 hover:border-white/25 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
 							onClick={() => {
 								setFilters(NO_FILTERS);
 								setPage(1);
@@ -149,15 +154,41 @@ export function StarterBrowser({
 							Clear
 						</button>
 					)}
+
+					<button
+						className={cn(
+							buttonVariants({ variant: "primary", size: "sm" }),
+							"shrink-0 rounded-[8px]",
+						)}
+						onClick={onCreate}
+						type="button"
+					>
+						{CREATE_LABEL}
+					</button>
 				</div>
 			</div>
 
 			{shown.total === 0 ? (
-				<div className="rounded-[12px] border border-white/10 border-dashed px-6 py-14 text-center">
+				<div className="flex flex-col items-center gap-3 rounded-[12px] border border-white/8 border-dashed px-6 py-14 text-center">
+					<span className="flex size-10 items-center justify-center rounded-[10px] border border-white/8 bg-white/6 text-ink-muted">
+						<Glyph className="size-4" path={SEARCH_ICON} />
+					</span>
 					<p className="text-[14px] text-ink">Nothing matches</p>
-					<p className="mt-1 text-[13px] text-ink-muted">
+					<p className="text-[13px] text-ink-muted">
 						Try a different search, or clear the filters.
 					</p>
+					{hasActiveFilters(filters) && (
+						<button
+							className="rounded-[7px] border border-white/8 px-2.5 py-1 text-[12px] text-ink-muted transition-colors duration-200 hover:border-white/25 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+							onClick={() => {
+								setFilters(NO_FILTERS);
+								setPage(1);
+							}}
+							type="button"
+						>
+							Clear filters
+						</button>
+					)}
 				</div>
 			) : (
 				<ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

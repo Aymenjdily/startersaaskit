@@ -146,7 +146,7 @@ function StarterDetail() {
 						{error ?? "That starter does not exist, or is not yours."}
 					</p>
 					<a
-						className="mt-3 inline-block text-[13px] text-white/50 underline underline-offset-4 hover:text-ink"
+						className="mt-3 inline-block text-[13px] text-ink-muted underline underline-offset-4 hover:text-ink"
 						href="/starters"
 					>
 						Back to starters
@@ -180,7 +180,7 @@ function StarterDetail() {
 			<div className="flex flex-col gap-8">
 				<div className="flex flex-wrap items-center gap-4">
 					<StackMarks record={record} />
-					<p className="text-[12px] text-white/45">
+					<p className="text-[12px] text-ink-muted">
 						Generated{" "}
 						{new Date(record.created_at).toLocaleString(undefined, {
 							dateStyle: "medium",
@@ -214,7 +214,7 @@ function StarterDetail() {
 												className="flex items-center justify-between gap-4 px-4 py-2.5"
 												key={question.id}
 											>
-												<dt className="text-[12px] text-white/45">
+												<dt className="text-[12px] text-ink-muted">
 													{question.label}
 												</dt>
 												<dd className="text-[13px] text-ink">

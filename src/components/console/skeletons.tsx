@@ -1,6 +1,9 @@
+import { RAIL_WIDTH_EXPANDED } from "@/components/console/icon-rail";
 import { Panel } from "@/components/console/panel";
 import { Skeleton, SkeletonRegion } from "@/components/ui/skeleton";
+import { QUESTIONS as ONBOARDING_QUESTIONS } from "@/lib/onboarding";
 import { STARTER_QUESTIONS } from "@/lib/starter-questions";
+import { cn } from "@/lib/utils";
 
 /**
  * The loading state of each console page, shaped like the page.
@@ -49,7 +52,7 @@ const TREE_SHAPE: [number, number][] = [
 export const RECENT_COLUMNS = ["Name", "Stack", "Generated"] as const;
 
 const HEAD_CELL =
-	"px-5 py-3 font-medium text-[11px] text-white/40 uppercase tracking-[0.06em]";
+	"px-5 py-3 font-medium text-[11px] text-ink-muted uppercase tracking-[0.06em]";
 
 export function RecentStartersHead() {
 	return (
@@ -138,9 +141,9 @@ function StarterCardSkeleton() {
 		<div className="flex w-full flex-col">
 			<span
 				aria-hidden="true"
-				className="-mb-px h-3 w-20 rounded-t-[8px] border border-white/10 border-b-0 bg-surface-raised"
+				className="-mb-px h-3 w-20 rounded-t-[8px] border border-white/8 border-b-0 bg-surface-raised"
 			/>
-			<div className="flex flex-1 flex-col gap-4 rounded-[12px] rounded-tl-none border border-white/10 bg-surface-raised p-5">
+			<div className="flex flex-1 flex-col gap-4 rounded-[12px] rounded-tl-none border border-white/8 bg-surface-raised p-5">
 				<div className="min-w-0">
 					<Skeleton className="h-[20px] w-36" />
 					<Skeleton className="mt-1.5 h-[15px] w-24" />
@@ -179,7 +182,7 @@ export function StarterGridSkeleton({ cards = 9 }: { cards?: number }) {
 		>
 			{/* The same strip as the real toolbar: search, a divider, one filter,
 			    and the count on the right. */}
-			<div className="flex flex-col gap-2 rounded-[12px] border border-white/10 bg-surface-raised/60 p-2 sm:flex-row sm:items-center">
+			<div className="flex flex-col gap-2 rounded-[12px] border border-white/8 bg-surface-raised/60 p-2 sm:flex-row sm:items-center">
 				<Skeleton className="h-9 w-full rounded-[8px] sm:w-[240px]" />
 				<span
 					aria-hidden="true"
@@ -286,32 +289,45 @@ export function StarterDetailSkeleton({
  * The console frame itself, while we are still finding out who is asking.
  *
  * This replaced a centred "Loading your console…", which meant the rail and
- * header appeared all at once afterwards and shifted the page. The rail is the
- * same 56px column with the same border and surface, so the only thing that
- * changes on arrival is what is drawn inside it.
+ * header appeared all at once afterwards and shifted the page. The rail
+ * reserves `RAIL_WIDTH_EXPANDED` — the real `IconRail`'s own default — rather
+ * than a number copied by eye, so the only thing that changes on arrival is
+ * what is drawn inside it, not how wide it is.
  */
 export function ConsoleChromeSkeleton({ title }: { title: string }) {
 	return (
-		<div className="flex min-h-screen bg-surface">
+		<div className="flex h-screen overflow-hidden bg-surface">
 			<div
 				aria-hidden="true"
-				className="flex w-14 shrink-0 flex-col items-center gap-1 border-white/8 border-r bg-surface-sunken py-3"
+				className={cn(
+					"flex shrink-0 flex-col gap-1 overflow-y-auto border-white/8 border-r bg-surface-sunken px-3 py-3",
+					RAIL_WIDTH_EXPANDED,
+				)}
 			>
-				<Skeleton className="mb-3 size-8 rounded-[10px]" />
+				<Skeleton className="mb-3 h-8 w-28 rounded-[8px]" />
 				{Array.from({ length: 3 }, (_, index) => (
-					<Skeleton
-						className="size-10 rounded-[10px]"
+					<div
+						className="flex h-10 items-center gap-3 px-3"
 						// biome-ignore lint/suspicious/noArrayIndexKey: placeholder items have no identity
 						key={index}
-					/>
+					>
+						<Skeleton className="size-[18px] shrink-0 rounded-[4px]" />
+						<Skeleton className="h-3 w-20 rounded-[3px]" />
+					</div>
 				))}
-				<div className="mt-auto flex flex-col items-center gap-1">
-					<Skeleton className="size-10 rounded-[10px]" />
-					<Skeleton className="size-8 rounded-full" />
+				<div className="mt-auto flex flex-col gap-1">
+					<div className="flex h-10 items-center gap-3 px-3">
+						<Skeleton className="size-[18px] shrink-0 rounded-[4px]" />
+						<Skeleton className="h-3 w-24 rounded-[3px]" />
+					</div>
+					<div className="flex h-10 items-center gap-3 px-3">
+						<Skeleton className="size-8 shrink-0 rounded-full" />
+						<Skeleton className="h-3 w-16 rounded-[3px]" />
+					</div>
 				</div>
 			</div>
 
-			<div className="flex min-w-0 flex-1 flex-col">
+			<div className="flex min-w-0 flex-1 flex-col overflow-hidden">
 				{/* The title is known before the session is, so it is shown rather
 				    than blocked out — there is nothing to wait for. */}
 				<header className="flex h-14 shrink-0 items-center gap-3 border-white/8 border-b px-4 md:px-6">
@@ -320,7 +336,7 @@ export function ConsoleChromeSkeleton({ title }: { title: string }) {
 					</h1>
 				</header>
 
-				<main className="flex-1 px-4 py-8 md:px-6 md:py-10">
+				<main className="flex-1 overflow-y-auto px-4 py-8 md:px-6 md:py-10">
 					<div className="mx-auto w-full max-w-[1040px]">
 						<SkeletonRegion
 							className="flex flex-col gap-4"
@@ -365,7 +381,7 @@ export function OnboardingSkeleton({ options = 5 }: { options?: number }) {
 			<div className="flex flex-col gap-2">
 				{Array.from({ length: options }, (_, index) => (
 					<div
-						className="flex items-center gap-3 rounded-[8px] border border-white/12 bg-black/25 px-4 py-3"
+						className="flex items-center gap-3 rounded-[8px] border border-white/8 bg-black/25 px-4 py-3"
 						// biome-ignore lint/suspicious/noArrayIndexKey: placeholder rows have no identity
 						key={index}
 					>
@@ -378,6 +394,65 @@ export function OnboardingSkeleton({ options = 5 }: { options?: number }) {
 			</div>
 
 			<Skeleton className="h-11 rounded-[8px]" />
+		</SkeletonRegion>
+	);
+}
+
+/**
+ * The Settings page, mid-load: account, then answers, then the danger zone.
+ *
+ * The answers panel gets one row per onboarding question — derived rather
+ * than a guessed number, for the same reason the recent-starters skeleton
+ * derives its mark count from the real question set instead of a literal.
+ */
+export function SettingsSkeleton() {
+	return (
+		<SkeletonRegion
+			className="flex flex-col gap-10"
+			label="Loading your settings"
+		>
+			<div className="flex flex-col gap-4">
+				<Skeleton className="h-[15px] w-20" />
+				<Panel className="flex flex-col gap-5 p-5">
+					<div className="flex items-center gap-4">
+						<Skeleton className="size-14 shrink-0 rounded-full" />
+						<div className="flex flex-col gap-1.5">
+							<Skeleton className="h-[18px] w-32" />
+							<Skeleton className="h-[15px] w-40" />
+						</div>
+					</div>
+					<Skeleton className="h-11 w-full max-w-[420px] rounded-[8px]" />
+					<Skeleton className="h-9 w-28 rounded-[8px]" />
+				</Panel>
+			</div>
+
+			<div className="flex flex-col gap-4">
+				<Skeleton className="h-[15px] w-28" />
+				<Panel>
+					<div className="divide-y divide-white/8">
+						{ONBOARDING_QUESTIONS.map((question) => (
+							<div
+								className="flex items-center justify-between gap-4 px-5 py-3.5"
+								key={question.id}
+							>
+								<Skeleton className="h-[13px] w-40" />
+								<Skeleton className="h-[13px] w-24" />
+							</div>
+						))}
+					</div>
+				</Panel>
+			</div>
+
+			<div className="flex flex-col gap-4">
+				<Skeleton className="h-[15px] w-24" />
+				<Panel className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+					<div className="flex flex-col gap-1.5">
+						<Skeleton className="h-[15px] w-36" />
+						<Skeleton className="h-[13px] w-56" />
+					</div>
+					<Skeleton className="h-9 w-32 shrink-0 rounded-[8px]" />
+				</Panel>
+			</div>
 		</SkeletonRegion>
 	);
 }

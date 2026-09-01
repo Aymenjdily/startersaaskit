@@ -29,17 +29,19 @@ const record = (
 });
 
 function show(starters: StarterRecord[], overrides = {}) {
+	const onCreate = vi.fn();
 	const onDelete = vi.fn().mockResolvedValue(undefined);
 	const onDownload = vi.fn();
 	const view = render(
 		<StarterBrowser
+			onCreate={onCreate}
 			onDelete={onDelete}
 			onDownload={onDownload}
 			starters={starters}
 			{...overrides}
 		/>,
 	);
-	return { ...view, onDelete, onDownload };
+	return { ...view, onCreate, onDelete, onDownload };
 }
 
 const cards = () => screen.queryAllByRole("heading", { level: 3 });
@@ -107,6 +109,32 @@ describe("StarterBrowser", () => {
 			show(three);
 
 			expect(screen.queryByRole("button", { name: "Clear" })).toBeNull();
+		});
+	});
+
+	/**
+	 * The create button used to live in the page header, away from the
+	 * controls someone is actually looking at while browsing. It belongs in
+	 * this toolbar now, beside the filters rather than a scroll away from them.
+	 */
+	describe("starting a new one", () => {
+		it("offers the create button in the toolbar", () => {
+			show(three);
+
+			expect(
+				screen.getByRole("button", { name: "Create your starter" }),
+			).toBeVisible();
+		});
+
+		it("asks the page to open the wizard when pressed", async () => {
+			const user = userEvent.setup();
+			const { onCreate } = show(three);
+
+			await user.click(
+				screen.getByRole("button", { name: "Create your starter" }),
+			);
+
+			expect(onCreate).toHaveBeenCalledOnce();
 		});
 	});
 
@@ -380,6 +408,7 @@ describe("StarterBrowser", () => {
 
 			rerender(
 				<StarterBrowser
+					onCreate={vi.fn()}
 					onDelete={vi.fn()}
 					onDownload={vi.fn()}
 					starters={plenty.slice(0, PAGE_SIZE)}

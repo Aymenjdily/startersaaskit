@@ -159,7 +159,7 @@ function AnswerRow({ label, value, revealed }: Answer & { revealed: boolean }) {
 	return (
 		<div className="flex items-center justify-between gap-4 border-line/60 border-b py-2.5 last:border-0">
 			<span className="flex min-w-0 items-center gap-2.5">
-				<span className="flex size-7 shrink-0 items-center justify-center rounded-[7px] bg-white/6 text-white/70">
+				<span className="flex size-7 shrink-0 items-center justify-center rounded-[7px] bg-white/6 text-ink-soft">
 					{revealed ? (
 						icon ? (
 							<BrandGlyph className="tile-in size-3.5" icon={icon} />
@@ -256,7 +256,7 @@ export function HowItWorks() {
 				</FadeUp>
 
 				<FadeUp
-					className="rounded-[20px] border border-white/6 bg-white/3 p-3 sm:p-4 md:p-5"
+					className="rounded-[20px] border border-white/8 bg-white/3 p-3 sm:p-4 md:p-5"
 					step={1}
 				>
 					<WizardPanel shown={shown} />
@@ -269,7 +269,7 @@ export function HowItWorks() {
 								"flex flex-col gap-3 rounded-[14px] border p-5 transition-colors duration-500 sm:p-6",
 								i === active
 									? "border-brand/30 bg-brand-dim"
-									: "border-white/6 bg-white/3",
+									: "border-white/8 bg-white/3",
 							)}
 							key={step.n}
 							step={(i % 4) as 0 | 1 | 2 | 3}

@@ -29,7 +29,7 @@ export function Section({
 						{title}
 					</h2>
 					{description && (
-						<p className="mt-1 max-w-[60ch] text-[13px] text-white/50 leading-[1.6]">
+						<p className="mt-1 max-w-[60ch] text-[13px] text-ink-muted leading-[1.6]">
 							{description}
 						</p>
 					)}
@@ -68,6 +68,13 @@ export function Panel({
  * that opens a dialog and a card that navigates should look identical and
  * behave like what they are.
  */
+/**
+ * `variant="primary"` is for the one thing on the page worth outranking
+ * everything else — a coloured icon chip, a brighter border, and an arrow
+ * that steps forward on hover, the same motion the landing page's own CTAs
+ * use. Everything else stays the quieter default so the primary card is the
+ * only one drawing the eye.
+ */
 export function ActionCard({
 	description,
 	disabled = false,
@@ -75,6 +82,7 @@ export function ActionCard({
 	icon,
 	onClick,
 	title,
+	variant = "default",
 }: {
 	description: string;
 	disabled?: boolean;
@@ -82,25 +90,48 @@ export function ActionCard({
 	icon: React.ReactNode;
 	onClick?: () => void;
 	title: string;
+	variant?: "default" | "primary";
 }) {
+	const primary = variant === "primary" && !disabled;
+
 	const body = (
 		<>
-			<span className="flex size-9 items-center justify-center rounded-[8px] bg-white/6 text-white/70 transition-colors duration-200 group-hover:bg-brand/15 group-hover:text-brand">
+			<span
+				className={cn(
+					"flex size-10 items-center justify-center rounded-[10px] border transition-colors duration-200",
+					primary
+						? "border-brand/25 bg-brand-dim text-brand"
+						: "border-white/8 bg-white/6 text-ink-soft group-hover:bg-brand/15 group-hover:text-brand",
+				)}
+			>
 				{icon}
 			</span>
-			<span className="block font-medium text-[14px] text-ink">{title}</span>
-			<span className="block text-[13px] text-white/50 leading-[1.55]">
+			<span className="flex items-center gap-1.5 font-medium text-[14px] text-ink">
+				{title}
+				{primary && (
+					<span
+						aria-hidden="true"
+						className="transition-transform duration-300 group-hover:translate-x-[3px]"
+					>
+						→
+					</span>
+				)}
+			</span>
+			<span className="block text-[13px] text-ink-muted leading-[1.55]">
 				{description}
 			</span>
 		</>
 	);
 
 	const shell = cn(
-		"group flex flex-col gap-3 rounded-[10px] border border-white/8 bg-surface-raised p-5 text-left",
+		"group relative flex flex-col gap-3 overflow-hidden rounded-[12px] border p-5 text-left",
 		"transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand",
-		disabled
-			? "cursor-not-allowed opacity-55"
-			: "hover:border-white/20 hover:bg-white/[0.04]",
+		disabled &&
+			"cursor-not-allowed border-white/8 bg-surface-raised opacity-55",
+		!disabled &&
+			(primary
+				? "border-brand/25 bg-gradient-to-br from-brand-dim to-surface-raised hover:border-brand/40"
+				: "border-white/8 bg-surface-raised hover:border-white/20 hover:bg-white/5"),
 	);
 
 	if (href && !disabled) {

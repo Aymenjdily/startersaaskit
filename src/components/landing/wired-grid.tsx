@@ -188,7 +188,7 @@ export function WiredGrid() {
 							className={cn(
 								// Explicit radii: `rounded-lg` resolves against shadcn's
 								// `--radius: 0.75rem` here, which is 12px, not the 8px we want.
-								"flex h-22 flex-col gap-2 rounded-[8px] border border-white/6 bg-white/3 p-3 sm:h-[110px] sm:gap-3 sm:rounded-[10px] sm:p-4",
+								"flex h-22 flex-col gap-2 rounded-[8px] border border-white/8 bg-white/3 p-3 sm:h-[110px] sm:gap-3 sm:rounded-[10px] sm:p-4",
 								// The reference caps mobile at 10 tiles.
 								"max-sm:[&:nth-child(n+11)]:hidden",
 								tile.phase === "exiting" ? "tile-out" : "tile-in",
@@ -197,13 +197,13 @@ export function WiredGrid() {
 							<div className="flex items-center gap-2 sm:gap-2.5">
 								<BrandGlyph
 									icon={task.icon}
-									className="size-[22px] text-white/70 sm:size-7"
+									className="size-[22px] text-ink-soft sm:size-7"
 								/>
 								<div className="flex min-w-0 flex-col gap-px">
-									<span className="truncate font-medium text-[11px] text-white/70 sm:text-[12px]">
+									<span className="truncate font-medium text-[11px] text-ink-soft sm:text-[12px]">
 										{task.module}
 									</span>
-									<span className="truncate text-[10px] text-white/35 sm:text-[11px]">
+									<span className="truncate text-[10px] text-ink-muted/70 sm:text-[11px]">
 										{task.detail}
 									</span>
 								</div>
@@ -219,7 +219,7 @@ export function WiredGrid() {
 								<span
 									className={cn(
 										"font-mono text-[9px] sm:text-[10px]",
-										done ? "text-sage" : "text-white/30",
+										done ? "text-sage" : "text-ink-muted/70",
 									)}
 								>
 									{done ? "Wired" : "Wiring"}

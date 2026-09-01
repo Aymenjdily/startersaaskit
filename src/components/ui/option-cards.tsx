@@ -57,7 +57,7 @@ export function OptionCards({
 							"has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand",
 							checked
 								? "border-brand/60 bg-brand/10"
-								: "border-white/12 bg-black/25 hover:border-white/25 hover:bg-black/40",
+								: "border-white/8 bg-black/25 hover:border-white/25 hover:bg-black/40",
 						)}
 						key={option.id}
 					>
@@ -72,7 +72,7 @@ export function OptionCards({
 						<span
 							className={cn(
 								"flex size-12 items-center justify-center rounded-[10px] transition-colors duration-200",
-								checked ? "bg-brand/15 text-ink" : "bg-white/6 text-white/70",
+								checked ? "bg-brand/15 text-ink" : "bg-white/6 text-ink-soft",
 							)}
 						>
 							{option.icon ? (
@@ -85,7 +85,7 @@ export function OptionCards({
 						<span
 							className={cn(
 								"text-[13px] transition-colors duration-200",
-								checked ? "text-ink" : "text-white/70",
+								checked ? "text-ink" : "text-ink-soft",
 							)}
 						>
 							{option.label}

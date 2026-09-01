@@ -5,9 +5,14 @@ import {
 	useOpenReport,
 } from "@/components/console/console-shell";
 import { GenerationBalance } from "@/components/console/generation-balance";
+import { NavGlyph } from "@/components/console/nav-icon";
+import { Section } from "@/components/console/panel";
 import { StarterGridSkeleton } from "@/components/console/skeletons";
 import { CreateStarterDialog } from "@/components/starters/create-starter-dialog";
-import { StarterBrowser } from "@/components/starters/starter-browser";
+import {
+	CREATE_LABEL,
+	StarterBrowser,
+} from "@/components/starters/starter-browser";
 import { buttonVariants } from "@/components/ui/button";
 import { createStarter, downloadStarter } from "@/lib/generate/download";
 import {
@@ -33,8 +38,6 @@ export const Route = createFileRoute("/starters/")({
 		}),
 	component: Starters,
 });
-
-export const CREATE_LABEL = "Create your starter";
 
 function Starters() {
 	const [open, setOpen] = useState(false);
@@ -141,23 +144,11 @@ function Starters() {
 
 	return (
 		<ConsoleShell
-			actions={
-				<button
-					className={cn(
-						buttonVariants({ variant: "primary", size: "sm" }),
-						"rounded-[8px]",
-					)}
-					onClick={() => setOpen(true)}
-					type="button"
-				>
-					{CREATE_LABEL}
-				</button>
-			}
 			currentPath="/starters"
 			onReportSent={rewardForFeedback}
 			title="Starters"
 		>
-			<div className="flex flex-col items-start gap-6">
+			<div className="flex flex-col gap-8">
 				<Balance claiming={claiming} error={claimError} quota={quota} />
 
 				{error && (
@@ -166,24 +157,43 @@ function Starters() {
 					</p>
 				)}
 
-				{starters === null ? (
-					<StarterGridSkeleton />
-				) : starters.length === 0 ? (
-					<div className="flex w-full flex-col items-center gap-2 rounded-[12px] border border-white/10 border-dashed px-6 py-16 text-center">
-						<p className="text-[14px] text-ink">No starters yet</p>
-						<p className="max-w-[42ch] text-[13px] text-ink-muted">
-							Answer {QUESTION_COUNT_WORD} questions and the project is yours to
-							download.
-						</p>
-					</div>
-				) : (
-					<StarterBrowser
-						busyId={busyId}
-						onDelete={remove}
-						onDownload={download}
-						starters={starters}
-					/>
-				)}
+				<Section
+					description="Every stack you've generated, ready to redownload or pick up where you left off."
+					title="Your starters"
+				>
+					{starters === null ? (
+						<StarterGridSkeleton />
+					) : starters.length === 0 ? (
+						<div className="flex w-full flex-col items-center gap-3 rounded-[12px] border border-white/8 border-dashed px-6 py-16 text-center">
+							<span className="flex size-10 items-center justify-center rounded-[10px] border border-white/8 bg-white/6 text-ink-muted">
+								<NavGlyph icon="stack" />
+							</span>
+							<p className="text-[14px] text-ink">No starters yet</p>
+							<p className="max-w-[42ch] text-[13px] text-ink-muted">
+								Answer {QUESTION_COUNT_WORD} questions and the project is yours
+								to download.
+							</p>
+							<button
+								className={cn(
+									buttonVariants({ variant: "primary", size: "sm" }),
+									"mt-1 rounded-[8px]",
+								)}
+								onClick={() => setOpen(true)}
+								type="button"
+							>
+								{CREATE_LABEL}
+							</button>
+						</div>
+					) : (
+						<StarterBrowser
+							busyId={busyId}
+							onCreate={() => setOpen(true)}
+							onDelete={remove}
+							onDownload={download}
+							starters={starters}
+						/>
+					)}
+				</Section>
 			</div>
 
 			<CreateStarterDialog

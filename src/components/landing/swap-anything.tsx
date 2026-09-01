@@ -167,15 +167,15 @@ function OptionTile({ label }: { label: string }) {
 	const icon = OPTION_ICONS[label];
 
 	return (
-		<span className="flex items-center gap-2.5 rounded-[10px] border border-white/12 bg-black/25 px-3 py-2.5">
-			<span className="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-white/6 text-white/70">
+		<span className="flex items-center gap-2.5 rounded-[10px] border border-white/8 bg-black/25 px-3 py-2.5">
+			<span className="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-white/6 text-ink-soft">
 				{icon ? (
 					<BrandGlyph className="size-4" icon={icon} />
 				) : (
 					<NeutralGlyph className="size-4" />
 				)}
 			</span>
-			<span className="truncate text-[13px] text-white/80">{label}</span>
+			<span className="truncate text-[13px] text-ink-soft">{label}</span>
 		</span>
 	);
 }
@@ -185,7 +185,7 @@ function OptionTileSlot() {
 	return (
 		<span
 			aria-hidden="true"
-			className="invisible flex items-center gap-2.5 rounded-[10px] border border-white/12 bg-black/25 px-3 py-2.5"
+			className="invisible flex items-center gap-2.5 rounded-[10px] border border-white/8 bg-black/25 px-3 py-2.5"
 		>
 			<span className="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-white/6" />
 			<span className="truncate text-[13px]">&nbsp;</span>
@@ -293,7 +293,7 @@ export function SwapAnything() {
 
 					<FadeUp
 						step={1}
-						className="rounded-[20px] border border-white/6 bg-forest p-4 sm:p-6"
+						className="rounded-[20px] border border-white/8 bg-forest p-4 sm:p-6"
 					>
 						{/*
 						 * A tablist rather than decorative dots: the panel auto-advances,

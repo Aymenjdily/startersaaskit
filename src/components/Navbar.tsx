@@ -112,7 +112,7 @@ export function Navbar() {
 							<a
 								key={link.label}
 								href={link.href}
-								className="text-[14px] text-white/70 transition-colors duration-300 hover:text-ink"
+								className="text-[14px] text-ink-soft transition-colors duration-300 hover:text-ink"
 							>
 								{link.label}
 							</a>
@@ -121,7 +121,7 @@ export function Navbar() {
 						{/* On-site, so it stays in the tab like every other product link. */}
 						<a
 							href={DOCS_HREF}
-							className="text-[14px] text-white/70 transition-colors duration-300 hover:text-ink"
+							className="text-[14px] text-ink-soft transition-colors duration-300 hover:text-ink"
 						>
 							Docs
 						</a>
@@ -131,7 +131,7 @@ export function Navbar() {
 						{user ? (
 							<a
 								href={CONSOLE_HREF}
-								className="flex items-center gap-2 rounded-full border border-white/12 bg-white/5 py-1.5 pr-4 pl-1.5 text-[14px] font-medium text-ink transition-colors duration-300 hover:bg-white/10"
+								className="flex items-center gap-2 rounded-full border border-white/8 bg-white/5 py-1.5 pr-4 pl-1.5 text-[14px] font-medium text-ink transition-colors duration-300 hover:bg-white/10"
 							>
 								<NavAvatar user={user} />
 								Workspace
@@ -141,13 +141,13 @@ export function Navbar() {
 							<div className="flex items-center gap-4">
 								<a
 									href={SIGN_IN_HREF}
-									className="text-[14px] text-white/70 transition-colors duration-300 hover:text-ink"
+									className="text-[14px] text-ink-soft transition-colors duration-300 hover:text-ink"
 								>
 									Sign in
 								</a>
 								<a
 									href={SIGN_UP_HREF}
-									className="rounded-[4px] bg-brand px-3 py-2 text-[14px] font-medium text-ink-inverse transition-opacity duration-300 hover:opacity-85"
+									className="rounded-[4px] bg-brand px-3 py-2 text-[14px] font-semibold text-ink-inverse transition-colors duration-300 hover:bg-brand-hover"
 								>
 									Get started
 								</a>
@@ -191,7 +191,7 @@ export function Navbar() {
 							key={link.label}
 							href={link.href}
 							onClick={() => setMenuOpen(false)}
-							className="border-b border-white/6 py-3.5 text-[18px] text-white/70 transition-colors hover:text-ink"
+							className="border-b border-white/8 py-3.5 text-[18px] text-ink-soft transition-colors hover:text-ink"
 						>
 							{link.label}
 						</a>
@@ -200,7 +200,7 @@ export function Navbar() {
 					<a
 						href={DOCS_HREF}
 						onClick={() => setMenuOpen(false)}
-						className="border-b border-white/6 py-3.5 text-[18px] text-white/70 transition-colors hover:text-ink"
+						className="border-b border-white/8 py-3.5 text-[18px] text-ink-soft transition-colors hover:text-ink"
 					>
 						Docs
 					</a>
@@ -208,7 +208,7 @@ export function Navbar() {
 						<a
 							href={CONSOLE_HREF}
 							onClick={() => setMenuOpen(false)}
-							className="mt-5 flex items-center justify-center gap-2.5 rounded-full bg-brand px-6 py-3 text-center text-[16px] font-medium text-ink-inverse"
+							className="mt-5 flex items-center justify-center gap-2.5 rounded-full bg-brand px-6 py-3 text-center text-[16px] font-semibold text-ink-inverse"
 						>
 							<NavAvatar user={user} />
 							Go to workspace
@@ -217,13 +217,13 @@ export function Navbar() {
 						<>
 							<a
 								href={SIGN_IN_HREF}
-								className="border-b border-white/6 py-3.5 text-[18px] text-white/70 transition-colors hover:text-ink"
+								className="border-b border-white/8 py-3.5 text-[18px] text-ink-soft transition-colors hover:text-ink"
 							>
 								Sign in
 							</a>
 							<a
 								href={SIGN_UP_HREF}
-								className="mt-5 rounded-full bg-brand px-6 py-3 text-center text-[16px] font-medium text-ink-inverse"
+								className="mt-5 rounded-full bg-brand px-6 py-3 text-center text-[16px] font-semibold text-ink-inverse"
 							>
 								Get started
 							</a>

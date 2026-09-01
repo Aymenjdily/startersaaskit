@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import { RAIL_WIDTH_EXPANDED } from "@/components/console/icon-rail";
 import { StarterBrowser } from "@/components/starters/starter-browser";
 import type { StarterRecord } from "@/lib/generate/starters";
 import {
@@ -103,6 +104,7 @@ describe("the skeletons", () => {
 			const { container: skeleton } = render(<StarterGridSkeleton cards={3} />);
 			const { container: real } = render(
 				<StarterBrowser
+					onCreate={() => {}}
 					onDelete={async () => {}}
 					onDownload={() => {}}
 					starters={[record("a"), record("b"), record("c")]}
@@ -152,13 +154,17 @@ describe("the skeletons", () => {
 	/**
 	 * The chrome skeleton replaced a centred "Loading your console…", which
 	 * meant the rail arrived all at once and moved the page sideways. The rail
-	 * has to be the same width before and after.
+	 * has to be the same width before and after — checked against
+	 * `RAIL_WIDTH_EXPANDED`, the same constant `IconRail` itself renders with,
+	 * rather than a class name that could quietly stop matching either one.
 	 */
 	describe("the console chrome", () => {
 		it("reserves the rail at its real width", () => {
 			const { container } = render(<ConsoleChromeSkeleton title="Overview" />);
 
-			expect(container.querySelector(".w-14")).not.toBeNull();
+			expect(
+				container.querySelector(`.${CSS.escape(RAIL_WIDTH_EXPANDED)}`),
+			).not.toBeNull();
 		});
 
 		/** The title is known before the session is, so it is not blocked out. */

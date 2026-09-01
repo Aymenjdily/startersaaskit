@@ -150,7 +150,7 @@ export function CreateStarterDialog({
 							aria-describedby="starter-project-hint"
 							aria-invalid={nameLooksWrong}
 							autoComplete="off"
-							className="h-11 w-full rounded-[8px] border border-white/12 bg-black/25 px-3 text-[14px] text-ink transition-colors duration-200 placeholder:text-ink-muted focus:border-white/25 focus:outline-2 focus:outline-offset-2 focus:outline-brand"
+							className="h-11 w-full rounded-[8px] border border-white/8 bg-black/25 px-3 text-[14px] text-ink transition-colors duration-200 placeholder:text-ink-muted focus:border-white/25 focus:outline-2 focus:outline-offset-2 focus:outline-brand"
 							id="starter-project"
 							onChange={(event) => answer(event.target.value)}
 							placeholder={question.placeholder}
@@ -201,7 +201,7 @@ export function CreateStarterDialog({
 									answers.landing === "none" && "opacity-30",
 								)}
 							>
-								<div className="h-[420px] overflow-y-auto rounded-[10px] border border-white/12 bg-[#efedeb]">
+								<div className="h-[420px] overflow-y-auto rounded-[10px] border border-white/8 bg-[#efedeb]">
 									<LandingPreview />
 								</div>
 								<figcaption className="text-[12px] text-ink-muted">

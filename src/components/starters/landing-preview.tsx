@@ -268,8 +268,8 @@ function Problem() {
 			<div className="flex w-[809px] shrink-0 flex-col gap-4">
 				<Line dark height={28} width="95%" />
 				<Line dark height={28} width="88%" />
-				<div className="h-7 w-[70%] rounded-[3px] bg-white/20" />
-				<div className="h-7 w-[80%] rounded-[3px] bg-white/20" />
+				<div className="h-7 w-[70%] rounded-[3px] bg-white/15" />
+				<div className="h-7 w-[80%] rounded-[3px] bg-white/15" />
 			</div>
 			<div className="flex flex-1 flex-col gap-4">
 				{[0, 1, 2].map((i) => (

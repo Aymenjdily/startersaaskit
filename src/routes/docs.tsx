@@ -127,7 +127,7 @@ function MobileDocsNav() {
 		>
 			{SECTIONS.map((s) => (
 				<a
-					className="shrink-0 rounded-full border border-white/10 bg-elevated px-3.5 py-1.5 text-[13px] text-ink-soft transition-colors duration-200 hover:border-white/20"
+					className="shrink-0 rounded-full border border-white/8 bg-elevated px-3.5 py-1.5 text-[13px] text-ink-soft transition-colors duration-200 hover:border-white/20"
 					href={`#${s.id}`}
 					key={s.id}
 				>
@@ -195,7 +195,7 @@ function CopyCommands({ commands }: { commands: string[] }) {
 
 	return (
 		<button
-			className="flex shrink-0 items-center gap-1.5 self-start rounded-[6px] border border-white/10 px-2.5 py-1.5 text-[12px] text-ink-muted transition-colors duration-200 hover:border-white/20 hover:text-ink-soft"
+			className="flex shrink-0 items-center gap-1.5 self-start rounded-[6px] border border-white/8 px-2.5 py-1.5 text-[12px] text-ink-muted transition-colors duration-200 hover:border-white/20 hover:text-ink-soft"
 			onClick={copy}
 			type="button"
 		>
@@ -287,7 +287,7 @@ export function Docs() {
 										/>
 										{STARTER_QUESTIONS.map((question, i) => (
 											<div
-												className="relative rounded-[12px] border border-white/10 bg-elevated p-4"
+												className="relative rounded-[12px] border border-white/8 bg-elevated p-4"
 												key={question.id}
 											>
 												<p className="flex items-baseline gap-2.5">
@@ -305,16 +305,16 @@ export function Docs() {
 													<div className="mt-3 flex flex-wrap gap-2">
 														{question.options.map((option) => (
 															<span
-																className="flex items-center gap-2 rounded-[8px] border border-white/10 bg-black/25 px-2.5 py-1.5 text-[13px] text-white/80"
+																className="flex items-center gap-2 rounded-[8px] border border-white/8 bg-black/25 px-2.5 py-1.5 text-[13px] text-ink-soft"
 																key={option.id}
 															>
 																{option.icon ? (
 																	<BrandGlyph
-																		className="size-3.5 text-white/70"
+																		className="size-3.5 text-ink-soft"
 																		icon={option.icon}
 																	/>
 																) : (
-																	<NeutralGlyph className="size-3.5 text-white/70" />
+																	<NeutralGlyph className="size-3.5 text-ink-soft" />
 																)}
 																{option.label}
 															</span>

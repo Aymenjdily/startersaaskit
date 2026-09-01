@@ -26,7 +26,9 @@ function GeneratePage() {
 				title="Not built yet"
 			>
 				<Panel className="px-5 py-10 text-center">
-					<p className="text-[13px] text-white/50">Nothing to show here yet.</p>
+					<p className="text-[13px] text-ink-muted">
+						Nothing to show here yet.
+					</p>
 				</Panel>
 			</Section>
 		</ConsoleShell>

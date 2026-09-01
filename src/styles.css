@@ -134,9 +134,33 @@
   --color-surface: #101413;
   --color-surface-raised: #161b19;
 
+  /*
+   * Hairlines and fills stay plain `white/N` opacity rather than named
+   * tokens — a border is not brand-relevant the way a colour is — but the
+   * same drift `text-white/N` had applies to them too: nine near-identical
+   * border opacities (`/6` through `/40`) across the console, none of them a
+   * deliberate second tier, just nobody reusing the last file's number.
+   * Three tiers now, used everywhere:
+   *   border-white/8   default hairline — the only one most components need
+   *   border-white/20  a heavier default (e.g. a control's resting border)
+   *   border-white/25  hover / focus / "this one is active"
+   * Fills follow the same idea, loosely: `/5` for a barely-there hover, `/6`
+   * for a static icon-chip background, `/10` for a pressed or selected fill,
+   * `/15` for a stronger one. Reach for an existing tier before inventing a
+   * tenth number that means the same thing as the ninth.
+   */
+
   /* accent — our brand orange, sampled from public/logo.png */
   --color-brand: #fd6101;
   --color-brand-dim: rgba(253, 97, 1, 0.1);
+  /*
+   * A real darker shade for a primary button's hover, not `opacity` fading
+   * the whole button toward the page background. Opacity dims the text by
+   * the same fraction as the fill, so a button already reported as hard to
+   * read got harder to read for exactly the moment someone's cursor was on
+   * it — this keeps the black label at full strength throughout.
+   */
+  --color-brand-hover: #e35701;
 
   /* greens — warm moss/olive to sit next to the brand orange */
   --color-sage: #84a060;
@@ -152,12 +176,34 @@
   --color-diagram-orange: #fb923c;
   --color-diagram-red: #f87171;
 
-  /* text */
+  /*
+   * text — the one text scale, landing and console alike.
+   *
+   * The console used to reach for `text-white/50`, `/60`, `/70`… a different
+   * translucent grey in nearly every file, each one landing on a slightly
+   * different actual colour depending what surface tier sat behind it. Next
+   * to the landing page's fixed `ink`/`ink-soft`/`ink-muted` — the same hex
+   * everywhere, regardless of background — the console read as a visibly
+   * different, grayer product than the marketing site in front of it.
+   *
+   * Three tiers only. `text-ink` for anything that has to read as primary,
+   * `text-ink-soft` for secondary copy that still needs to be easy, and
+   * `text-ink-muted` for the rest — captions, timestamps, placeholder-grade
+   * text. A fourth, dimmer step is `text-ink-muted/60` or `/70` (opacity on
+   * the token itself), not a new colour: one grey, at a lower strength,
+   * rather than a fourth grey nobody chose on purpose.
+   */
   --color-ink: #f6f6f6;
   --color-ink-soft: #cdcdcd;
   --color-ink-muted: #8a8a8a;
-  /* `text-base` resolves to the font-size token, so dark-on-accent text needs its own name */
-  --color-ink-inverse: #0d100f;
+  /*
+   * `text-base` resolves to the font-size token, so dark-on-accent text needs
+   * its own name. Full black rather than the near-black `#0d100f` this used to
+   * be: on the brand orange it is the difference between roughly 6.3:1 and
+   * 6.9:1 contrast — a small margin, but a free one, and several people
+   * reported the orange buttons across the site as hard to read.
+   */
+  --color-ink-inverse: #000000;
 
   /* fluid type scale */
   --text-display: clamp(32px, 5vw, 70px);

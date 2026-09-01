@@ -83,7 +83,13 @@ pnpm dev
    # supabase/migrations/0005_create_starter_ambiguity.sql
    # supabase/migrations/0006_feedback_reward.sql
    # supabase/migrations/0007_product_feedback.sql
+   # supabase/migrations/0008_delete_own_account.sql
    ```
+
+   `0008` adds `delete_own_account()`, the function Settings' danger zone
+   calls. Without it the delete button fails outright rather than deleting
+   the wrong thing — the function does not exist yet, so there is nothing to
+   call by accident.
 
    `0007` adds the `product_feedback` table and repoints the reward at it, so
    the ten generations are paid for the feedback the button asks for rather
@@ -109,8 +115,31 @@ pnpm dev
    psql "<supabase-connection-string>" -f supabase/seed-admin.sql
    ```
 
-5. *(Optional)* Enable Google OAuth: add the provider in Supabase Auth →
-   Providers, and set the redirect URL to `<SITE_URL>/auth/callback`.
+5. Allow every host you actually use back in: Authentication → URL
+   Configuration → **Redirect URLs**. Both `signInWithOAuth` and `signUp`
+   build their `redirectTo` from `window.location.origin` at request time
+   (`src/components/auth/controls.tsx`), so Supabase is asked to send the
+   reader back to whichever host they started on — but it only honours that
+   if the host is on this list. Add both:
+
+   ```
+   http://localhost:3000/auth/callback
+   https://<your-deployed-domain>/auth/callback
+   ```
+
+   Anything not on the list is silently redirected to the **Site URL** above
+   it instead, which is why a sign-in started on `localhost` while that field
+   still holds the production domain lands you back in production —
+   `strictPort` in `pnpm dev` (`package.json`) exists so `:3000` is always
+   the port you are actually testing on, and never silently becomes `:3001`
+   behind this list's back.
+
+6. *(Optional)* Enable Google OAuth: add the provider in Supabase Auth →
+   Providers. Its "Authorized redirect URI" is **Supabase's own** callback
+   (shown on that screen, shaped like
+   `https://<project-ref>.supabase.co/auth/v1/callback`) — not this app's
+   `/auth/callback`, which is already covered by step 5 and does not change
+   per provider.
 
 ## Scripts
 

@@ -197,16 +197,16 @@ export function AiOptimized() {
 	const lookup = LOOKUPS[index];
 
 	return (
-		<Section className="overflow-hidden border-white/6 border-y" tone="base">
+		<Section className="overflow-hidden border-white/8 border-y" tone="base">
 			<Container>
 				<div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
 					{/* Visual sits left on desktop, but text leads on mobile. */}
 					<FadeUp
-						className="order-2 overflow-hidden rounded-[20px] border border-white/10 bg-gradient-to-b from-elevated to-elevated/70 shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset] lg:order-1"
+						className="order-2 overflow-hidden rounded-[20px] border border-white/8 bg-gradient-to-b from-elevated to-elevated/70 shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset] lg:order-1"
 						step={1}
 					>
 						{/* Window chrome, plus a dot per question so the loop has a face. */}
-						<div className="flex items-center justify-between border-white/6 border-b px-4 py-3 sm:px-5">
+						<div className="flex items-center justify-between border-white/8 border-b px-4 py-3 sm:px-5">
 							<div aria-hidden="true" className="flex items-center gap-1.5">
 								<span className="size-2.5 rounded-full bg-[#ff5f57]/70" />
 								<span className="size-2.5 rounded-full bg-[#febc2e]/70" />
@@ -271,7 +271,7 @@ export function AiOptimized() {
 						<ul className="mt-8 flex flex-col gap-2.5">
 							{PILLARS.map((pillar) => (
 								<li
-									className="flex gap-4 rounded-[12px] border border-white/10 bg-elevated p-4 transition-colors duration-300 hover:border-brand/25 hover:bg-elevated/80"
+									className="flex gap-4 rounded-[12px] border border-white/8 bg-elevated p-4 transition-colors duration-300 hover:border-brand/25 hover:bg-elevated/80"
 									key={pillar.title}
 								>
 									<span className="flex size-9 shrink-0 items-center justify-center rounded-[9px] border border-brand/20 bg-brand-dim text-brand">

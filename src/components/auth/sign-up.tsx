@@ -84,7 +84,7 @@ export function SignUp() {
 				title="Check your inbox"
 			>
 				<div className="flex flex-col gap-6">
-					<p className="text-[14px] leading-[1.6] text-white/60">
+					<p className="text-[14px] leading-[1.6] text-ink-muted">
 						If that address can be signed up, a confirmation link is on its way
 						to <span className="text-ink">{email}</span>. Open it and you are
 						in.

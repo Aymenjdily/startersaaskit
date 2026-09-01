@@ -214,30 +214,11 @@ export function CreateStarterDialog({
 									answers.landing === "none" && "opacity-30",
 								)}
 							>
-								<div className="overflow-hidden rounded-[10px] border border-white/8 shadow-[0_12px_30px_-12px_rgba(0,0,0,0.5)]">
-									<div className="flex items-center gap-3 border-white/8 border-b bg-[#12100f] px-3 py-2.5">
-										<div className="flex gap-1.5">
-											<span className="size-2 rounded-full bg-white/15" />
-											<span className="size-2 rounded-full bg-white/15" />
-											<span className="size-2 rounded-full bg-white/15" />
-										</div>
-										<div className="flex h-6 flex-1 items-center gap-1.5 rounded-[6px] bg-white/6 px-2.5">
-											<span className="size-2.5 rounded-full bg-sage/70" />
-											<span className="truncate text-[11px] text-ink-muted">
-												{(projectName || "your-project").toLowerCase()}.com
-											</span>
-										</div>
-									</div>
-									<div className="h-[380px] overflow-y-auto bg-[#efedeb]">
-										<LandingPreview />
-									</div>
+								<div className="h-[420px] overflow-y-auto rounded-[10px] border border-white/8 bg-[#efedeb]">
+									<LandingPreview />
 								</div>
 								<figcaption className="text-[12px] text-ink-muted">
-									<span className="font-medium text-ink-soft">
-										Live preview.
-									</span>{" "}
-									Every band, in order, at the page&rsquo;s real proportions.
-									Scroll it.
+									A scale model of the page — every band, in order. Scroll it.
 								</figcaption>
 							</figure>
 						)}

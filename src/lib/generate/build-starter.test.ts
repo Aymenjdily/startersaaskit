@@ -353,7 +353,7 @@ describe("buildStarter", () => {
 				"tanstack_start",
 				"react_vite",
 			])("imports Tailwind ahead of any rule in %s's stylesheet", (framework) => {
-				for (const landing of ["none", "editorial"]) {
+				for (const landing of ["none", "editorial", "gallery"]) {
 					const css = build({ ...legal(framework), landing })[
 						"src/styles.css"
 					] as string;
@@ -678,7 +678,8 @@ describe("buildStarter", () => {
 		 */
 		it.each([
 			["without a landing page", { landing: "none" }],
-			["with one", { landing: "editorial" }],
+			["with the Editorial one", { landing: "editorial" }],
+			["with the Gallery one", { landing: "gallery" }],
 		])("puts the project name into the source %s", (_case, overrides) => {
 			const files = build({ ...overrides, project: "ada-app" });
 			const source = Object.entries(files)

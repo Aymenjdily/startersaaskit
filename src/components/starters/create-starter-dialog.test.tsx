@@ -145,6 +145,23 @@ describe("the landing page preview", () => {
 		expect(screen.queryByText("No landing page")).not.toBeInTheDocument();
 	});
 
+	/**
+	 * Gallery is a second, differently-composed page — it gets its own scale
+	 * model rather than reusing Editorial's, so switching to it has to swap
+	 * which preview is mounted rather than just restyling the same one.
+	 */
+	it("shows Gallery's own preview, not Editorial's, once Gallery is chosen", async () => {
+		const user = userEvent.setup();
+
+		openDialog();
+		await toQuestion(user, "landing");
+		await pick(user, "Gallery");
+
+		expect(screen.getByTestId("gallery-landing-preview")).toBeInTheDocument();
+		expect(screen.queryByTestId("landing-preview")).not.toBeInTheDocument();
+		expect(screen.queryByText("No landing page")).not.toBeInTheDocument();
+	});
+
 	/** It is decoration beside the real control, so it must not be announced. */
 	it("is hidden from assistive technology", async () => {
 		const user = userEvent.setup();

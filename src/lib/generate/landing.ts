@@ -4145,6 +4145,1279 @@ export function Home() {
 	},
 };
 
+const GALLERY_STYLES = `/**
+ * Gallery: a grid-ruled, gallery-style landing template.
+ *
+ * Self-contained rather than layered on the shared base stylesheet. CSS
+ * requires every \`@import\` to precede every other rule in the file, and the
+ * shared base already ends in a \`body\` rule — so a font import appended
+ * after it would be silently dropped by the browser (and by the bundler)
+ * rather than loaded. Starting fresh here keeps this template's font load
+ * correct without touching what any other template relies on.
+ */
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap");
+@import "tailwindcss";
+
+:root {
+	color-scheme: light;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+/**
+ * The palette. Warm white rather than stark, and one accent used for
+ * everything that asks for attention — the logo mark, the callout badges,
+ * the icons inline with copy — so the eye learns it once.
+ */
+@theme {
+	--color-paper: #ffffff;
+	--color-ink: #0a0a0a;
+	--color-rule: #e5e5e5;
+	--color-accent: #e0562c;
+}
+
+body {
+	background-color: var(--color-paper);
+	color: var(--color-ink);
+	font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+		sans-serif;
+	-webkit-font-smoothing: antialiased;
+}
+
+/**
+ * The page gutter. Fluid the same way the Editorial template's is: capped
+ * at 1200px, floored at 24px, growing to absorb whatever is left on a wide
+ * monitor rather than running the page edge to edge.
+ */
+.gutter {
+	padding-inline: 24px;
+}
+
+@media (min-width: 768px) {
+	.gutter {
+		padding-inline: max(48px, calc((100% - 1200px) / 2));
+	}
+}
+
+/**
+ * The grid rules. A centred, width-capped column with a hairline border on
+ * each side — applied to every section in turn, so the two lines run
+ * unbroken down the whole page even though no single element is that tall.
+ */
+.frame {
+	margin-inline: auto;
+	max-width: 1248px;
+	border-right: 1px solid var(--color-rule);
+	border-left: 1px solid var(--color-rule);
+}
+
+/**
+ * Display type: the one place the page reaches for a second font. Kept to
+ * headings only — body copy stays on the system stack, which is what it
+ * costs nothing extra to load and reads perfectly well at this size.
+ *
+ * Declared inside \`@layer components\` so a utility class placed alongside
+ * it (a \`text-[32px]\`, say) can still win — see \`EDITORIAL_STYLES\` for the
+ * same note about unlayered rules beating layered ones regardless of
+ * specificity.
+ */
+@layer components {
+	.display {
+		font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+		font-weight: 400;
+		letter-spacing: -0.01em;
+		line-height: 1.08;
+	}
+}
+`;
+
+const GALLERY_CONTENT = `/**
+ * Every word on the Gallery landing page.
+ *
+ * Copy is data here, not JSX — the same reason the Editorial template does
+ * it this way: changing the page is changing this file, sections can be
+ * reordered without touching prose, and a second language is a second
+ * object rather than a second set of components.
+ *
+ * Written for a product with no name yet — these are placeholders, sized so
+ * the layout holds when your own copy goes in. Each section below says what
+ * belongs in it and roughly how long it can run before the layout it sits in
+ * starts to fight it.
+ */
+
+export const content = {
+	/**
+	 * Left as \`{{project}}\` on purpose. The generator fills this in at
+	 * download time with the name you typed into the wizard — leave the
+	 * token alone and every mention of your product across the page (nav,
+	 * hero, footer) updates together instead of needing to be found and
+	 * replaced by hand.
+	 */
+	brand: "{{project}}",
+
+	nav: {
+		/**
+		 * The bar's own links. Three or four is the sweet spot — a fifth
+		 * wraps to a second row on a laptop-width screen, and the mobile
+		 * menu below repeats these same entries, so a long label reads
+		 * awkwardly twice.
+		 *
+		 * Each \`href\` starting with \`#\` has to match an id a section below
+		 * actually sets (\`precision.id\`, \`inspiration.id\`, \`directions.id\`)
+		 * — the generated test checks this, because a link that scrolls
+		 * nowhere is the first thing a visitor clicks.
+		 */
+		links: [
+			{ label: "Overview", href: "#precision" },
+			{ label: "Work", href: "#inspiration" },
+			{ label: "Directions", href: "#directions" },
+		],
+		/**
+		 * The word that sits where your logo goes. Left as literal
+		 * placeholder text rather than the product name: a brand name in
+		 * the corner already looks finished, so nobody replaces it — "Logo"
+		 * asks to be. Swap the mark itself in \`logo.tsx\`.
+		 */
+		logo: "Logo",
+		/** The one button every visitor sees, so it should name the actual next step — "Get started", "Book a demo", "Join the waitlist" — not a generic "Learn more". */
+		action: { label: "Get started", href: "#directions" },
+	},
+
+	hero: {
+		/**
+		 * The headline, as composed lines rather than one long string.
+		 *
+		 * Each entry renders on its own line — the break is a typographic
+		 * decision, not something left to the browser. Three or four short
+		 * lines read as a considered headline; one long sentence just wraps
+		 * wherever the viewport happens to end, which looks like an
+		 * accident rather than a design. Keep each line under about
+		 * 24 characters so it survives down to a phone-width screen without
+		 * wrapping a second time.
+		 */
+		headline: ["Explore dozens of", "directions for what", "you build next."],
+		/** One or two sentences under the headline. This is the only place on the page allowed to explain what the product actually does — every other section assumes the reader already knows and talks about how, not what. */
+		body: "{{project}} lays every option out where you can actually see it. Vary the layout, the copy, the pricing, then ship the one that works.",
+		/** The primary call to action, repeated nowhere else above the fold. */
+		action: { label: "Start exploring", href: "#directions" },
+		/**
+		 * Labels on the mockup's window chrome — a tab title and a status
+		 * pill, not real copy. Change \`title\` to whatever your product's
+		 * main screen is actually called ("Dashboard", "Editor", "Board");
+		 * \`badge\` is meant to be a short live-status word ("Live", "Beta",
+		 * "Synced").
+		 */
+		mockup: {
+			title: "Project preview",
+			badge: "Live",
+		},
+	},
+
+	/**
+	 * The single-line mission statement between the hero and the first
+	 * detailed section. Nothing else sits in this band — one sentence, said
+	 * plainly, is the whole point of the pause it creates.
+	 */
+	mission: {
+		heading:
+			"{{project}} helps teams explore more directions for the products they ship.",
+	},
+
+	precision: {
+		/** Referenced by the nav link that points here — change both together or the link breaks. */
+		id: "precision",
+		/** Two lines, same rule as the hero headline: composed, not wrapped. */
+		heading: ["Explore more directions", "with precision."],
+		/** One sentence explaining the specific capability this section is about — not a repeat of the hero's body, which stays product-wide. */
+		body: "Vary layout, copy, pricing and tone, then compare every version side by side before anything ships.",
+		mockup: {
+			/** The mockup's tab title, same idea as the hero's. */
+			title: "Comparison",
+			/**
+			 * Exactly two entries render side by side with numbered
+			 * callouts — this section is built around a *pair* being
+			 * compared, so a third or a single entry will not lay out
+			 * correctly. Keep each label to a few words; it sits under a
+			 * small box, not a paragraph.
+			 */
+			points: [
+				{ label: "This version" },
+				{ label: "Compared against the original" },
+			],
+		},
+	},
+
+	inspiration: {
+		id: "inspiration",
+		heading: ["Build on the references", "your team already trusts."],
+		/**
+		 * Deliberately left unfinished, with an em dash — the sentence
+		 * completes itself with the \`sources\` list right after it, inline,
+		 * icon and all. Keep it that way so the two read as one sentence
+		 * rather than a caption followed by a bullet list.
+		 */
+		body: "Pull in inspiration from wherever the idea started —",
+		/**
+		 * Two to four short phrases, each a few words, inserted into the
+		 * sentence above with a small glyph in front. \`icon\` has to be one
+		 * of the keys in the \`ICONS\` map at the top of \`inspiration.tsx\` —
+		 * add a key there before you add a source here, or the glyph comes
+		 * back blank.
+		 */
+		sources: [
+			{ icon: "roadmap", label: "your roadmap" },
+			{ icon: "compare", label: "past releases" },
+			{ icon: "folder", label: "your own files" },
+		],
+		/** How many tiles fill the mosaic below. 12–20 reads as "a lot of references" without the grid growing taller than the section above it. */
+		tileCount: 15,
+	},
+
+	directions: {
+		id: "directions",
+		heading: ["Start new directions", "from your team."],
+		/** Same pattern as \`inspiration.body\` — left open, finished by the \`tools\` list right after it, then closed with "teams." in \`directions.tsx\`. Change that trailing word too if you change what follows "your". */
+		body: "Use {{project}} across your",
+		/**
+		 * The teams or roles this reaches, each with an \`icon\` key from the
+		 * \`ICONS\` map in \`directions.tsx\`. Two to four items, lower-case,
+		 * so they read naturally after "your" in the sentence above.
+		 */
+		tools: [
+			{ icon: "design", label: "design" },
+			{ icon: "code", label: "engineering" },
+			{ icon: "support", label: "support" },
+		],
+		/** The console mockup's own copy — an input placeholder and a one-word status. Keep the placeholder a genuine example of what someone would type, not a generic "Enter text here". */
+		terminal: {
+			placeholder: "Describe what you want to try…",
+			status: "Ready",
+		},
+	},
+
+	footer: {
+		/** One short sentence, under the logo. This is the closing line of the whole page — it can restate the hero's promise in fewer words, but should not introduce a new idea this late. */
+		tagline: "Explore more directions, ship the one that works.",
+		/**
+		 * Two columns is what the layout is built for; a third wraps to a
+		 * second row on a laptop-width screen rather than sitting beside
+		 * the first two. Real destinations belong here — \`/about\`,
+		 * \`/pricing\` — not \`#\` placeholders, which read as broken links
+		 * even before anyone clicks them.
+		 */
+		columns: [
+			{
+				title: "Product",
+				links: [
+					{ label: "Overview", href: "#precision" },
+					{ label: "Work", href: "#inspiration" },
+					{ label: "Directions", href: "#directions" },
+				],
+			},
+			{
+				title: "Company",
+				links: [
+					{ label: "About", href: "/about" },
+					{ label: "Contact", href: "/contact" },
+					{ label: "Careers", href: "/careers" },
+				],
+			},
+		],
+		/** The name printed after "©" in the copyright line. Usually the same as \`brand\`, kept separate in case your legal entity's name is not your product's name. */
+		legal: { entity: "{{project}}" },
+	},
+};
+`;
+
+const GALLERY_LOGO = `import { content } from "./content";
+
+/**
+ * The placeholder mark, and the lockup that pairs it with the name.
+ *
+ * Drawn in \`currentColor\` so it takes the colour of whatever wraps it —
+ * the accent on a light background, white on the dark console mockup.
+ * Replace the \`<svg>\` below with your own artwork and nothing around it
+ * moves; keep the 24-unit viewBox and \`fill="currentColor"\`.
+ */
+export function LogoMark({ className }: { className?: string }) {
+	return (
+		<svg
+			aria-hidden="true"
+			className={className}
+			fill="currentColor"
+			viewBox="0 0 24 24"
+		>
+			<path d="M12 1.5 22.5 7v10L12 22.5 1.5 17V7L12 1.5Zm0 3.4L4.8 8.6v6.8l7.2 3.7 7.2-3.7V8.6L12 4.9Z" />
+		</svg>
+	);
+}
+
+/**
+ * Mark plus wordmark. The word is still \`content.nav.logo\` — literally
+ * "Logo" — because a placeholder that reads as a design decision is one
+ * that survives into production.
+ */
+export function Logo() {
+	return (
+		<span className="flex items-center gap-2">
+			<LogoMark className="size-6 shrink-0 text-accent" />
+			<span className="display text-[17px]">{content.nav.logo}</span>
+		</span>
+	);
+}
+`;
+
+const GALLERY_NAV = `"use client";
+
+import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
+import { content } from "./content";
+import { Logo } from "./logo";
+
+/**
+ * The bar. Flat links rather than the dropdown menus the Editorial template
+ * uses — Gallery's whole point is that the page itself is the demonstration,
+ * so the nav stays out of the way rather than becoming a second interface.
+ *
+ * The links collapse into a menu button below \`md\`. Hiding them with no
+ * replacement — which this section did until it was pointed out — is a real
+ * bug, not a design choice: it takes every in-page link off a phone-width
+ * screen with nothing standing in for it.
+ */
+export function Nav() {
+	const { links, action } = content.nav;
+	const [open, setOpen] = useState(false);
+
+	return (
+		<motion.header
+			animate={{ opacity: 1, y: 0 }}
+			className="frame relative"
+			initial={{ opacity: 0, y: -12 }}
+			transition={{ duration: 0.5, ease: "easeOut" }}
+		>
+			<div className="flex h-[72px] items-center gap-8 px-6 md:px-[60px]">
+				<a
+					aria-label="Home"
+					className="text-ink transition-opacity hover:opacity-70"
+					href="/"
+				>
+					<Logo />
+				</a>
+
+				<nav className="hidden items-center gap-7 md:flex">
+					{links.map((link) => (
+						<a
+							className="relative text-[14px] text-ink/70 transition-colors hover:text-ink [&>span]:absolute [&>span]:right-0 [&>span]:-bottom-1 [&>span]:left-0 [&>span]:h-px [&>span]:origin-left [&>span]:scale-x-0 [&>span]:bg-ink [&>span]:transition-transform [&>span]:duration-200 hover:[&>span]:scale-x-100"
+							href={link.href}
+							key={link.label}
+						>
+							{link.label}
+							<span aria-hidden="true" />
+						</a>
+					))}
+				</nav>
+
+				<a
+					className="ml-auto hidden h-9 items-center rounded-full bg-ink px-4 text-[13px] text-paper transition-all duration-200 hover:scale-[1.03] hover:opacity-85 active:scale-[0.98] md:flex"
+					href={action.href}
+				>
+					{action.label}
+				</a>
+
+				{/* The menu button, visible only where the links above are not. */}
+				<button
+					aria-controls="mobile-nav"
+					aria-expanded={open}
+					aria-label={open ? "Close menu" : "Open menu"}
+					className="ml-auto flex size-9 flex-col items-center justify-center gap-1.5 rounded-full transition-colors hover:bg-black/5 md:hidden"
+					onClick={() => setOpen((value) => !value)}
+					type="button"
+				>
+					<motion.span
+						animate={open ? { rotate: 45, y: 3.5 } : { rotate: 0, y: 0 }}
+						className="h-px w-4.5 bg-ink"
+					/>
+					<motion.span
+						animate={open ? { rotate: -45, y: -3.5 } : { rotate: 0, y: 0 }}
+						className="h-px w-4.5 bg-ink"
+					/>
+				</button>
+			</div>
+
+			<AnimatePresence>
+				{open && (
+					<motion.nav
+						animate={{ height: "auto", opacity: 1 }}
+						className="overflow-hidden border-rule border-t md:hidden"
+						exit={{ height: 0, opacity: 0 }}
+						id="mobile-nav"
+						initial={{ height: 0, opacity: 0 }}
+						transition={{ duration: 0.25, ease: "easeInOut" }}
+					>
+						<div className="flex flex-col gap-1 px-6 py-4">
+							{links.map((link) => (
+								<a
+									className="rounded-[8px] px-2 py-2.5 text-[15px] text-ink transition-colors hover:bg-black/5"
+									href={link.href}
+									key={link.label}
+									onClick={() => setOpen(false)}
+								>
+									{link.label}
+								</a>
+							))}
+							<a
+								className="mt-2 flex h-10 items-center justify-center rounded-full bg-ink text-[14px] text-paper"
+								href={action.href}
+							>
+								{action.label}
+							</a>
+						</div>
+					</motion.nav>
+				)}
+			</AnimatePresence>
+		</motion.header>
+	);
+}
+`;
+
+const GALLERY_HERO = `"use client";
+
+import { motion } from "framer-motion";
+import { content } from "./content";
+
+/** Each line staggers in as a unit, and each word rises within it. */
+const lineVariants = {
+	hidden: {},
+	show: { transition: { staggerChildren: 0.09 } },
+};
+
+const wordVariants = {
+	hidden: { opacity: 0, y: "0.4em" },
+	show: {
+		opacity: 1,
+		y: 0,
+		transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const },
+	},
+};
+
+/**
+ * The hero: a centred display headline over a full-bleed product mockup.
+ *
+ * The mockup is a real "browser chrome" — traffic-light dots, a tab title —
+ * rather than a screenshot, for the reason \`landing-preview.tsx\` gives for
+ * drawing rather than embedding: it is markup, so it never goes stale and
+ * never ships a binary asset nobody remembers to update. The colourful
+ * backdrop behind it is a CSS gradient, not an image, for the same reason.
+ *
+ * The headline rises in word by word on mount rather than all at once —
+ * \`staggerChildren\` on each line, \`AnimatePresence\` deliberately not
+ * involved, because this runs once on load and never needs to reverse.
+ */
+export function Hero() {
+	const { headline, body, action, mockup } = content.hero;
+
+	return (
+		<section className="frame">
+			<div className="gutter flex flex-col items-center pt-16 pb-20 text-center md:pt-24">
+				<h1 className="display max-w-[720px] text-[40px] text-ink sm:text-[52px] md:text-[60px]">
+					{headline.map((line, lineIndex) => (
+						<motion.span
+							animate="show"
+							className="block text-balance"
+							// biome-ignore lint/suspicious/noArrayIndexKey: a fixed, never-reordered set of composed lines
+							key={lineIndex}
+							initial="hidden"
+							transition={{ delayChildren: lineIndex * 0.28 }}
+							variants={lineVariants}
+						>
+							{line.split(" ").map((word, wordIndex) => (
+								<motion.span
+									className="inline-block"
+									// biome-ignore lint/suspicious/noArrayIndexKey: a fixed, never-reordered set of words
+									key={wordIndex}
+									variants={wordVariants}
+								>
+									{word}
+									{wordIndex < line.split(" ").length - 1 ? " " : ""}
+								</motion.span>
+							))}
+						</motion.span>
+					))}
+				</h1>
+
+				<motion.p
+					animate={{ opacity: 1, y: 0 }}
+					className="mt-6 max-w-[480px] text-[16px] text-ink/70 leading-[26px]"
+					initial={{ opacity: 0, y: 12 }}
+					transition={{ duration: 0.6, delay: 0.5 }}
+				>
+					{body}
+				</motion.p>
+
+				<motion.a
+					animate={{ opacity: 1, y: 0 }}
+					className="mt-8 flex h-11 items-center rounded-full bg-ink px-6 text-[14px] text-paper transition-opacity hover:opacity-80"
+					href={action.href}
+					initial={{ opacity: 0, y: 12 }}
+					transition={{ duration: 0.6, delay: 0.65 }}
+					whileHover={{ scale: 1.04 }}
+					whileTap={{ scale: 0.97 }}
+				>
+					{action.label}
+				</motion.a>
+			</div>
+
+			<motion.div
+				animate={{ opacity: 1 }}
+				className="relative overflow-hidden border-rule border-t"
+				initial={{ opacity: 0 }}
+				transition={{ duration: 0.8, delay: 0.4 }}
+			>
+				<div
+					aria-hidden="true"
+					className="absolute inset-0"
+					style={{
+						backgroundImage:
+							"linear-gradient(115deg, #ffd23f 0%, #6fcf97 28%, #2f9e8f 52%, #2d6ca6 76%, #1a1a1a 100%)",
+						backgroundSize: "140% 140%",
+					}}
+				/>
+				<div className="relative px-4 py-10 sm:px-8 md:py-16">
+					<motion.div
+						className="mx-auto max-w-[1040px] overflow-hidden rounded-[10px] border border-black/10 bg-white shadow-[0_40px_80px_-24px_rgba(0,0,0,0.45)]"
+						initial={{ opacity: 0, y: 24, scale: 0.98 }}
+						transition={{
+							duration: 0.7,
+							delay: 0.55,
+							ease: [0.22, 1, 0.36, 1] as const,
+						}}
+						viewport={{ once: true }}
+						whileHover={{ y: -4 }}
+						whileInView={{ opacity: 1, y: 0, scale: 1 }}
+					>
+						<div className="flex items-center gap-2 border-black/8 border-b bg-[#f6f5f4] px-4 py-2.5">
+							<span className="size-2.5 rounded-full bg-[#ff5f57]" />
+							<span className="size-2.5 rounded-full bg-[#febc2e]" />
+							<span className="size-2.5 rounded-full bg-[#28c840]" />
+							<span className="ml-3 font-medium text-[12px] text-ink/70">
+								{mockup.title}
+							</span>
+							<span className="ml-auto flex items-center gap-1.5 text-[11px] text-ink/55">
+								<span className="size-1.5 animate-pulse rounded-full bg-[#3f8f5f]" />
+								{mockup.badge}
+							</span>
+						</div>
+
+						<div className="flex flex-col gap-6 p-6 sm:flex-row sm:p-8">
+							<div className="h-[220px] flex-1 rounded-[6px] bg-[linear-gradient(135deg,#f4b942,#e0562c)] transition-transform duration-300 sm:h-[260px]" />
+
+							<div className="flex w-full flex-col gap-4 sm:w-[220px]">
+								{["Layout", "Colour", "Copy"].map((row) => (
+									<div className="flex flex-col gap-2" key={row}>
+										<span className="font-medium text-[11px] text-ink/60 uppercase tracking-[0.06em]">
+											{row}
+										</span>
+										<div className="flex gap-1.5">
+											{[
+												"#1a1a1a",
+												"#e0562c",
+												"#2f9e8f",
+												"#2d6ca6",
+												"#f4b942",
+											].map((swatch) => (
+												<motion.span
+													className="size-5 cursor-pointer rounded-full border border-black/10"
+													key={swatch}
+													style={{ backgroundColor: swatch }}
+													whileHover={{ scale: 1.25 }}
+													whileTap={{ scale: 0.9 }}
+												/>
+											))}
+										</div>
+									</div>
+								))}
+							</div>
+						</div>
+					</motion.div>
+				</div>
+			</motion.div>
+		</section>
+	);
+}
+`;
+
+const GALLERY_MISSION = `"use client";
+
+import { motion } from "framer-motion";
+import { content } from "./content";
+
+/**
+ * One plain-spoken line of mission statement, between the hero mockup and
+ * the first detailed section. No card, no image — the grid rules either
+ * side of it are doing all the decoration this band needs.
+ */
+export function Mission() {
+	return (
+		<section className="frame">
+			<div className="gutter py-16 md:py-24">
+				<motion.p
+					className="display max-w-[720px] text-[28px] text-ink sm:text-[32px]"
+					initial={{ opacity: 0, y: 20 }}
+					transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] as const }}
+					viewport={{ once: true, margin: "-80px" }}
+					whileInView={{ opacity: 1, y: 0 }}
+				>
+					{content.mission.heading}
+				</motion.p>
+			</div>
+		</section>
+	);
+}
+`;
+
+const GALLERY_PRECISION = `"use client";
+
+import { motion } from "framer-motion";
+import { content } from "./content";
+
+/**
+ * The second mockup carries numbered callouts — small circled digits over
+ * the two things the copy just told the reader to compare. They are placed
+ * with percentage \`top\`/\`left\` rather than a grid, because the two points
+ * sit over specific spots on the faux screen below rather than in a layout
+ * of their own. Each pops in with a spring after the box around it settles,
+ * so the callout reads as pointing at something already there rather than
+ * arriving at the same time as it.
+ */
+export function Precision() {
+	const { id, heading, body, mockup } = content.precision;
+
+	return (
+		<section className="frame" id={id}>
+			<div className="gutter py-16 md:py-24">
+				<motion.h2
+					className="display max-w-[620px] text-[28px] text-ink sm:text-[32px]"
+					initial={{ opacity: 0, y: 20 }}
+					transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] as const }}
+					viewport={{ once: true, margin: "-80px" }}
+					whileInView={{ opacity: 1, y: 0 }}
+				>
+					{heading.map((line) => (
+						<span className="block" key={line}>
+							{line}
+						</span>
+					))}
+				</motion.h2>
+				<motion.p
+					className="mt-4 max-w-[440px] text-[16px] text-ink/70 leading-[24px]"
+					initial={{ opacity: 0, y: 20 }}
+					transition={{
+						duration: 0.6,
+						delay: 0.1,
+						ease: [0.22, 1, 0.36, 1] as const,
+					}}
+					viewport={{ once: true, margin: "-80px" }}
+					whileInView={{ opacity: 1, y: 0 }}
+				>
+					{body}
+				</motion.p>
+
+				<motion.div
+					className="relative mt-14 overflow-hidden rounded-[10px] border border-black/10 bg-[#f6f5f4]"
+					initial={{ opacity: 0, y: 28 }}
+					transition={{
+						duration: 0.6,
+						delay: 0.2,
+						ease: [0.22, 1, 0.36, 1] as const,
+					}}
+					viewport={{ once: true, margin: "-80px" }}
+					whileInView={{ opacity: 1, y: 0 }}
+				>
+					<div className="flex items-center gap-2 border-black/8 border-b bg-white px-4 py-2.5">
+						<span className="size-2.5 rounded-full bg-[#ff5f57]" />
+						<span className="size-2.5 rounded-full bg-[#febc2e]" />
+						<span className="size-2.5 rounded-full bg-[#28c840]" />
+						<span className="ml-3 font-medium text-[12px] text-ink/70">
+							{mockup.title}
+						</span>
+					</div>
+
+					<div className="relative flex flex-col gap-6 p-6 sm:flex-row sm:gap-4 sm:p-10">
+						{mockup.points.map((point, index) => (
+							<div className="relative flex-1" key={point.label}>
+								<motion.div
+									className={
+										index === 0
+											? "h-[180px] cursor-default rounded-[6px] border-2 border-accent bg-white"
+											: "h-[180px] cursor-default rounded-[6px] border border-black/15 bg-white/60"
+									}
+									whileHover={{
+										borderColor:
+											index === 0 ? undefined : "rgba(224,86,44,0.5)",
+										y: -3,
+									}}
+								/>
+								<motion.span
+									className="-top-3 -left-3 absolute flex size-6 items-center justify-center rounded-full bg-accent font-medium text-[12px] text-white"
+									initial={{ scale: 0, opacity: 0 }}
+									style={{ boxShadow: "0 0 0 3px var(--color-paper)" }}
+									transition={{
+										type: "spring",
+										stiffness: 400,
+										damping: 15,
+										delay: 0.45 + index * 0.15,
+									}}
+									viewport={{ once: true, margin: "-80px" }}
+									whileInView={{ scale: 1, opacity: 1 }}
+								>
+									{index + 1}
+								</motion.span>
+								<p className="mt-3 text-[13px] text-ink/60">{point.label}</p>
+							</div>
+						))}
+					</div>
+				</motion.div>
+			</div>
+		</section>
+	);
+}
+`;
+
+const GALLERY_INSPIRATION = `"use client";
+
+import { motion } from "framer-motion";
+import { content } from "./content";
+
+/**
+ * The glyphs that sit inline with the copy, one per source. Small enough
+ * that a proper icon set would be overkill for three shapes — see the same
+ * call made for \`ICONS\` in \`assurance.tsx\`.
+ */
+const ICONS: Record<string, string> = {
+	roadmap: "M3 12h4l2-6 4 12 2-6h6",
+	compare: "M8 3v18M16 3v18M4 8h4M16 8h4M4 16h4M16 16h4",
+	folder:
+		"M3 6.5a1.5 1.5 0 0 1 1.5-1.5H9l2 2h8.5A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-11Z",
+};
+
+/**
+ * A reference grid: a dense mosaic of tiles, like \`integrations.tsx\`'s tool
+ * grid but static rather than looping, and standing in for "every board and
+ * file the idea could have come from" rather than a specific screenshot of
+ * any one of them. Tiles fade in with a short stagger and lift slightly on
+ * hover, so the grid reads as a surface you could actually reach into.
+ */
+export function Inspiration() {
+	const { id, heading, body, sources, tileCount } = content.inspiration;
+
+	return (
+		<section className="frame" id={id}>
+			<div className="gutter py-16 md:py-24">
+				<motion.h2
+					className="display max-w-[620px] text-[28px] text-ink sm:text-[32px]"
+					initial={{ opacity: 0, y: 20 }}
+					transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] as const }}
+					viewport={{ once: true, margin: "-80px" }}
+					whileInView={{ opacity: 1, y: 0 }}
+				>
+					{heading.map((line) => (
+						<span className="block" key={line}>
+							{line}
+						</span>
+					))}
+				</motion.h2>
+
+				<motion.p
+					className="mt-4 flex max-w-[540px] flex-wrap items-center gap-x-1.5 text-[16px] text-ink/70 leading-[26px]"
+					initial={{ opacity: 0, y: 20 }}
+					transition={{
+						duration: 0.6,
+						delay: 0.1,
+						ease: [0.22, 1, 0.36, 1] as const,
+					}}
+					viewport={{ once: true, margin: "-80px" }}
+					whileInView={{ opacity: 1, y: 0 }}
+				>
+					<span>{body}</span>
+					{sources.map((source, index) => (
+						<span
+							className="inline-flex items-center gap-1.5 rounded-full py-0.5 pr-2 pl-1 transition-colors hover:bg-accent/8"
+							key={source.label}
+						>
+							{index > 0 && (
+								<span className="text-ink/40">
+									{index === sources.length - 1 ? "and" : ","}
+								</span>
+							)}
+							<svg
+								aria-hidden="true"
+								className="size-4 text-accent"
+								fill="none"
+								stroke="currentColor"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								strokeWidth="1.5"
+								viewBox="0 0 24 24"
+							>
+								<path d={ICONS[source.icon]} />
+							</svg>
+							<span className="font-medium text-ink">{source.label}</span>
+						</span>
+					))}
+					<span>.</span>
+				</motion.p>
+
+				<motion.div
+					className="mt-14 overflow-hidden rounded-[10px] border border-black/10 bg-[#f6f5f4] p-1.5"
+					initial={{ opacity: 0, y: 24 }}
+					transition={{
+						duration: 0.6,
+						delay: 0.2,
+						ease: [0.22, 1, 0.36, 1] as const,
+					}}
+					viewport={{ once: true, margin: "-80px" }}
+					whileInView={{ opacity: 1, y: 0 }}
+				>
+					<motion.div
+						className="grid grid-cols-3 gap-1.5 sm:grid-cols-5"
+						initial="hidden"
+						transition={{ staggerChildren: 0.02 }}
+						viewport={{ once: true, margin: "-80px" }}
+						whileInView="show"
+					>
+						{Array.from({ length: tileCount }, (_, index) => (
+							<motion.div
+								className={
+									index % 7 === 0
+										? "aspect-square cursor-pointer rounded-[4px] bg-ink"
+										: index % 5 === 0
+											? "aspect-square cursor-pointer rounded-[4px] bg-accent/70"
+											: "aspect-square cursor-pointer rounded-[4px] bg-white"
+								}
+								// biome-ignore lint/suspicious/noArrayIndexKey: a fixed decorative grid, never reordered
+								key={index}
+								variants={{
+									hidden: { opacity: 0, scale: 0.85 },
+									show: { opacity: 1, scale: 1 },
+								}}
+								whileHover={{ scale: 1.08, transition: { duration: 0.15 } }}
+							/>
+						))}
+					</motion.div>
+				</motion.div>
+			</div>
+		</section>
+	);
+}
+`;
+
+const GALLERY_DIRECTIONS = `"use client";
+
+import { motion } from "framer-motion";
+import { content } from "./content";
+
+/**
+ * The colour break between Inspiration and Directions: three swatches and
+ * nothing else. Purely a visual rest — the reference uses the same beat
+ * before its closing sections, and a page of nothing but text bands reads
+ * as a slide deck rather than a product. Each swatch lifts slightly on
+ * hover, which is the only interaction this band offers and enough to make
+ * it feel like part of the same product rather than a static divider.
+ */
+export function Swatches() {
+	return (
+		<section aria-hidden="true" className="frame">
+			<div className="gutter grid grid-cols-3 gap-3 py-10 md:py-14">
+				<motion.div
+					className="aspect-[4/3] cursor-default rounded-[10px] bg-[#2f9e8f] sm:aspect-[16/9]"
+					whileHover={{ y: -4, scale: 1.02 }}
+				/>
+				<motion.div
+					className="aspect-[4/3] cursor-default rounded-[10px] border border-dashed border-black/15 bg-transparent sm:aspect-[16/9]"
+					whileHover={{ y: -4, scale: 1.02 }}
+				/>
+				<motion.div
+					className="aspect-[4/3] cursor-default rounded-[10px] bg-[#e0562c] sm:aspect-[16/9]"
+					whileHover={{ y: -4, scale: 1.02 }}
+				/>
+			</div>
+		</section>
+	);
+}
+
+const ICONS: Record<string, string> = {
+	design: "M12 2 3 7v10l9 5 9-5V7L12 2Zm0 5.5 6 3.5-6 3.5-6-3.5 6-3.5Z",
+	code: "m8 6-6 6 6 6m8-12 6 6-6 6M14 4l-4 16",
+	support:
+		"M12 2a7 7 0 0 0-7 7v3a2 2 0 0 0 2 2h1v-6a4 4 0 0 1 8 0v6h1a2 2 0 0 0 2-2v-3a7 7 0 0 0-7-7Zm-4 12v2a3 3 0 0 0 3 3h2",
+};
+
+/**
+ * The closing pitch and a console mockup: a rounded input bar rather than a
+ * chat transcript, because the point is "bring your own tools", not a
+ * scripted conversation.
+ */
+export function Directions() {
+	const { id, heading, body, tools, terminal } = content.directions;
+
+	return (
+		<section className="frame" id={id}>
+			<div className="gutter py-16 md:py-24">
+				<motion.h2
+					className="display max-w-[560px] text-[28px] text-ink sm:text-[32px]"
+					initial={{ opacity: 0, y: 20 }}
+					transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] as const }}
+					viewport={{ once: true, margin: "-80px" }}
+					whileInView={{ opacity: 1, y: 0 }}
+				>
+					{heading.map((line) => (
+						<span className="block" key={line}>
+							{line}
+						</span>
+					))}
+				</motion.h2>
+
+				<motion.p
+					className="mt-4 flex max-w-[520px] flex-wrap items-center gap-x-1.5 text-[16px] text-ink/70 leading-[26px]"
+					initial={{ opacity: 0, y: 20 }}
+					transition={{
+						duration: 0.6,
+						delay: 0.1,
+						ease: [0.22, 1, 0.36, 1] as const,
+					}}
+					viewport={{ once: true, margin: "-80px" }}
+					whileInView={{ opacity: 1, y: 0 }}
+				>
+					<span>{body}</span>
+					{tools.map((tool, index) => (
+						<span
+							className="inline-flex items-center gap-1.5 rounded-full py-0.5 pr-2 pl-1 transition-colors hover:bg-accent/8"
+							key={tool.label}
+						>
+							{index > 0 && (
+								<span className="text-ink/40">
+									{index === tools.length - 1 ? "and" : ","}
+								</span>
+							)}
+							<svg
+								aria-hidden="true"
+								className="size-4 text-accent"
+								fill="none"
+								stroke="currentColor"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								strokeWidth="1.5"
+								viewBox="0 0 24 24"
+							>
+								<path d={ICONS[tool.icon]} />
+							</svg>
+							<span className="font-medium text-ink">{tool.label}</span>
+						</span>
+					))}
+					<span>teams.</span>
+				</motion.p>
+			</div>
+
+			<motion.div
+				className="relative overflow-hidden border-rule border-t"
+				initial={{ opacity: 0 }}
+				transition={{ duration: 0.7 }}
+				viewport={{ once: true, margin: "-80px" }}
+				whileInView={{ opacity: 1 }}
+			>
+				<div
+					aria-hidden="true"
+					className="absolute inset-0"
+					style={{
+						backgroundImage:
+							"linear-gradient(115deg, #2d6ca6 0%, #2f9e8f 35%, #f4b942 68%, #e0562c 100%)",
+						backgroundSize: "140% 140%",
+					}}
+				/>
+				<div className="relative px-4 py-10 sm:px-8 md:py-16">
+					<motion.div
+						className="mx-auto max-w-[720px] overflow-hidden rounded-[10px] border border-black/10 bg-ink text-paper shadow-[0_40px_80px_-24px_rgba(0,0,0,0.5)]"
+						initial={{ opacity: 0, y: 24, scale: 0.98 }}
+						transition={{
+							duration: 0.6,
+							delay: 0.15,
+							ease: [0.22, 1, 0.36, 1] as const,
+						}}
+						viewport={{ once: true, margin: "-80px" }}
+						whileHover={{ y: -4 }}
+						whileInView={{ opacity: 1, y: 0, scale: 1 }}
+					>
+						<div className="flex items-center gap-2 border-white/10 border-b px-4 py-2.5">
+							<span className="size-2.5 rounded-full bg-white/15" />
+							<span className="size-2.5 rounded-full bg-white/15" />
+							<span className="size-2.5 rounded-full bg-white/15" />
+						</div>
+
+						<div className="flex flex-col gap-3 p-4">
+							<div className="flex h-11 items-center rounded-[8px] border border-white/10 bg-white/5 px-3.5 text-[14px] text-paper/60 transition-colors focus-within:border-white/25">
+								{terminal.placeholder}
+							</div>
+							<div className="flex items-center justify-between text-[12px] text-paper/50">
+								<span className="cursor-default transition-colors hover:text-paper/80">
+									Add context
+								</span>
+								<span className="flex items-center gap-1.5">
+									<span className="size-1.5 animate-pulse rounded-full bg-[#3f8f5f]" />
+									{terminal.status}
+								</span>
+							</div>
+						</div>
+					</motion.div>
+				</div>
+			</motion.div>
+		</section>
+	);
+}
+`;
+
+const GALLERY_FOOTER = `import { content } from "./content";
+import { Logo } from "./logo";
+
+/**
+ * The footer: minimal on purpose. The reference this template borrows its
+ * rhythm from closes on almost nothing — a mark, a line, two short columns —
+ * because eight sections of grid rules and colour have already made the
+ * case; the footer's only job left is to say who this is.
+ *
+ * Left without motion on purpose, unlike everything above it: the page has
+ * already made its case by the time a reader scrolls this far, and a
+ * footer that still reveals itself reads as the page still trying.
+ */
+export function Footer() {
+	const { tagline, columns, legal } = content.footer;
+
+	return (
+		<footer className="frame">
+			<div className="gutter py-16">
+				<div className="flex flex-col gap-12 sm:flex-row sm:justify-between">
+					<div className="flex flex-col gap-4">
+						<Logo />
+						<p className="max-w-[220px] text-[13px] text-ink/60 leading-[18px]">
+							{tagline}
+						</p>
+					</div>
+
+					<div className="flex gap-16">
+						{columns.map((column) => (
+							<div key={column.title}>
+								<p className="font-medium text-[13px] text-ink/55">
+									{column.title}
+								</p>
+								<ul className="mt-4 flex flex-col gap-2.5">
+									{column.links.map((link) => (
+										<li key={link.label}>
+											<a
+												className="text-[13px] text-ink/75 underline-offset-4 transition-colors hover:text-ink hover:underline"
+												href={link.href}
+											>
+												{link.label}
+											</a>
+										</li>
+									))}
+								</ul>
+							</div>
+						))}
+					</div>
+				</div>
+
+				<div className="mt-16 flex items-center justify-between border-rule border-t pt-6">
+					<p className="text-[13px] text-ink/55">
+						© {new Date().getFullYear()} {legal.entity}
+					</p>
+
+					{/* A small hand-drawn flourish, the one place on the page that is
+					    not straight lines and right angles. */}
+					<svg
+						aria-hidden="true"
+						className="size-8 text-ink/25 transition-colors hover:text-accent"
+						fill="none"
+						stroke="currentColor"
+						strokeLinecap="round"
+						strokeLinejoin="round"
+						strokeWidth="1.5"
+						viewBox="0 0 32 32"
+					>
+						<path d="M6 20c3-8 7-11 10-11s3 5-1 8-9 3-9-2 6-9 12-8 8 6 4 9-8 1-9-3" />
+					</svg>
+				</div>
+			</div>
+		</footer>
+	);
+}
+`;
+
+const GALLERY_INDEX = `import { Directions, Swatches } from "./directions";
+import { Footer } from "./footer";
+import { Hero } from "./hero";
+import { Inspiration } from "./inspiration";
+import { Mission } from "./mission";
+import { Nav } from "./nav";
+import { Precision } from "./precision";
+
+/**
+ * The landing page, composed.
+ *
+ * Reordering the page is reordering these lines; removing a band is
+ * removing one line and (usually) one file. No framework imports anywhere
+ * beneath this, so the same components render under Next, TanStack Start
+ * and a Vite SPA without a fork.
+ */
+export function Landing() {
+	return (
+		<>
+			<Nav />
+			<main>
+				<Hero />
+				<Mission />
+				<Precision />
+				<Inspiration />
+				<Swatches />
+				<Directions />
+			</main>
+			<Footer />
+		</>
+	);
+}
+`;
+
+const GALLERY_TEST = `import { readdirSync, readFileSync } from "node:fs";
+import { describe, expect, it } from "vitest";
+import { content } from "./content.js";
+
+/**
+ * The landing page is the first thing a visitor sees, so what is worth
+ * asserting is not that it renders — a snapshot would do that and then
+ * rot — but the two properties that make it a *template*: the copy is all
+ * in one place, and the components are portable between frameworks. Same
+ * mechanism as the Editorial template's own \`landing.test.ts\`, aimed at
+ * this template's own content shape.
+ */
+describe("the landing page", () => {
+	const dir = "src/components/landing";
+	const sections = readdirSync(dir).filter(
+		(file) => file.endsWith(".tsx") && file !== "index.tsx",
+	);
+
+	it("has the sections the page composes", () => {
+		expect(sections.length).toBeGreaterThan(5);
+	});
+
+	/**
+	 * The portability rule. These files are shared by three frameworks, so
+	 * an import of \`next/link\` or \`@tanstack/react-router\` compiles under
+	 * one and breaks the other two — and it would break them at build time
+	 * in someone else's project, not here.
+	 */
+	it.each(sections)("keeps %s free of framework imports", (file) => {
+		const source = readFileSync(\`\${dir}/\${file}\`, "utf8");
+
+		expect(source).not.toMatch(/from "next\\//);
+		expect(source).not.toMatch(/from "@tanstack\\//);
+		expect(source).not.toMatch(/from "react-router/);
+	});
+
+	/**
+	 * Copy is data. A string typed straight into JSX is a string the person
+	 * rewriting this page will not find in \`content.ts\`, which is where
+	 * they were told to look.
+	 */
+	it.each(sections)("takes its words from content.ts, not from JSX", (file) => {
+		const source = readFileSync(\`\${dir}/\${file}\`, "utf8");
+
+		expect(source).toContain('from "./content"');
+	});
+
+	it("still has every slot the sections read", () => {
+		expect(content.brand).toBeTruthy();
+		expect(content.hero.headline.length).toBeGreaterThan(0);
+		expect(content.precision.heading.length).toBeGreaterThan(0);
+		expect(content.precision.mockup.points.length).toBeGreaterThan(0);
+		expect(content.inspiration.sources.length).toBeGreaterThan(0);
+		expect(content.inspiration.tileCount).toBeGreaterThan(0);
+		expect(content.directions.tools.length).toBeGreaterThan(0);
+		expect(content.footer.columns.length).toBeGreaterThan(0);
+	});
+
+	/**
+	 * Every list React renders is keyed by label, so labels have to be
+	 * unique within their list — a duplicate makes React drop rows rather
+	 * than render them, which is a quiet failure: a warning in the console
+	 * and a menu missing an item.
+	 */
+	it("keeps labels unique inside every list it renders", () => {
+		const lists: [string, string[]][] = [
+			["nav", content.nav.links.map((link) => link.label)],
+			["inspiration sources", content.inspiration.sources.map((s) => s.label)],
+			["directions tools", content.directions.tools.map((t) => t.label)],
+			...content.footer.columns.map((column): [string, string[]] => [
+				\`footer/\${column.title}\`,
+				column.links.map((link) => link.label),
+			]),
+		];
+
+		for (const [where, labels] of lists) {
+			expect(new Set(labels).size, \`duplicate label in \${where}\`).toBe(
+				labels.length,
+			);
+		}
+	});
+
+	/**
+	 * The anchors the nav points at have to exist, or the first thing a
+	 * visitor clicks does nothing. Checked against the ids the sections
+	 * actually set rather than against a list typed twice.
+	 */
+	it("gives every in-page nav link something to land on", () => {
+		const ids = [
+			content.precision.id,
+			content.inspiration.id,
+			content.directions.id,
+		];
+
+		for (const link of content.nav.links) {
+			if (!link.href.startsWith("#")) continue;
+			expect(ids, \`nothing has id "\${link.href}"\`).toContain(
+				link.href.slice(1),
+			);
+		}
+
+		for (const column of content.footer.columns) {
+			for (const link of column.links) {
+				if (!link.href.startsWith("#")) continue;
+				expect(ids, \`nothing has id "\${link.href}"\`).toContain(
+					link.href.slice(1),
+				);
+			}
+		}
+	});
+});
+`;
+
+const GALLERY: Fragment = {
+	dependencies: { "framer-motion": "^13.2.0" },
+	files: {
+		"src/styles.css": GALLERY_STYLES,
+		"src/components/landing/content.ts": GALLERY_CONTENT,
+		"src/components/landing/index.tsx": GALLERY_INDEX,
+		"src/components/landing/logo.tsx": GALLERY_LOGO,
+		"src/components/landing/nav.tsx": GALLERY_NAV,
+		"src/components/landing/hero.tsx": GALLERY_HERO,
+		"src/components/landing/mission.tsx": GALLERY_MISSION,
+		"src/components/landing/precision.tsx": GALLERY_PRECISION,
+		"src/components/landing/inspiration.tsx": GALLERY_INSPIRATION,
+		"src/components/landing/directions.tsx": GALLERY_DIRECTIONS,
+		"src/components/landing/footer.tsx": GALLERY_FOOTER,
+		"src/components/landing/landing.test.ts": GALLERY_TEST,
+	},
+};
+
 const EDITORIAL: Fragment = {
 	files: {
 		"src/styles.css": EDITORIAL_STYLES,
@@ -4185,6 +5458,7 @@ const EDITORIAL: Fragment = {
  */
 export const LANDINGS: Record<string, Fragment> = {
 	editorial: EDITORIAL,
+	gallery: GALLERY,
 };
 
 export function landingFragment(framework: string, landing: string): Fragment {

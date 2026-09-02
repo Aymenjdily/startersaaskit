@@ -59,6 +59,33 @@ export function PageGlyph({ className }: { className?: string }) {
 	);
 }
 
+/**
+ * For a second page-style choice that needs to read as distinct from
+ * {@link PageGlyph} in the picker — "Gallery" is also a page rather than a
+ * product, so it shares that glyph's reasoning, but two identical icons
+ * beside each other would make the two options look like the same choice
+ * twice.
+ */
+export function GridGlyph({ className }: { className?: string }) {
+	return (
+		<svg
+			aria-hidden="true"
+			className={cn("size-6", className)}
+			fill="none"
+			stroke="currentColor"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			strokeWidth="1.5"
+			viewBox="0 0 24 24"
+		>
+			<rect height="7" rx="1.5" width="7" x="3.5" y="3.5" />
+			<rect height="7" rx="1.5" width="7" x="13.5" y="3.5" />
+			<rect height="7" rx="1.5" width="7" x="3.5" y="13.5" />
+			<rect height="7" rx="1.5" width="7" x="13.5" y="13.5" />
+		</svg>
+	);
+}
+
 export function OptionCards({
 	name,
 	onChange,

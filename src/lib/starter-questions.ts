@@ -348,6 +348,11 @@ export const STARTER_QUESTIONS: readonly StarterQuestion[] = [
 				label: "Editorial",
 				icon: null,
 			},
+			{
+				id: "gallery",
+				label: "Gallery",
+				icon: null,
+			},
 			{ id: "none", label: "Not yet", icon: null },
 		],
 	},

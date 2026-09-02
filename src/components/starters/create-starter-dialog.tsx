@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { FormError } from "@/components/auth/controls";
 import { LandingPreview } from "@/components/starters/landing-preview";
+import { GalleryLandingPreview } from "@/components/starters/landing-preview-gallery";
 import { buttonVariants } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import {
+	GridGlyph,
 	NeutralGlyph,
 	OptionCards,
 	PageGlyph,
@@ -17,6 +19,16 @@ import {
 	type StarterAnswers,
 } from "@/lib/starter-questions";
 import { cn } from "@/lib/utils";
+
+/**
+ * Both landing templates are real pages rather than vendors, so neither has
+ * a mark in `brand-icons.ts` to borrow — each gets its own glyph here
+ * instead, keyed by the `landing` question's option id.
+ */
+const LANDING_GLYPHS: Record<string, ReactNode> = {
+	editorial: <PageGlyph />,
+	gallery: <GridGlyph />,
+};
 
 /**
  * The generator's questions, one screen at a time.
@@ -183,16 +195,15 @@ export function CreateStarterDialog({
 								onChange={answer}
 								options={optionsFor(question, answers)}
 								/**
-								 * "Editorial" is a real page, not a vendor — the generic
-								 * neutral glyph is a crossed-out circle, which reads as
-								 * "none of these" and is backwards for the one option that
-								 * is a positive choice. "Not yet" keeps that glyph; it is
-								 * the option it was written for.
+								 * Both landing templates are real pages, not vendors — the
+								 * generic neutral glyph is a crossed-out circle, which reads
+								 * as "none of these" and is backwards for a positive choice.
+								 * "Not yet" keeps that glyph; it is the option it was
+								 * written for.
 								 */
 								renderIcon={
 									showsPreview
-										? (option) =>
-												option.id === "editorial" ? <PageGlyph /> : undefined
+										? (option) => LANDING_GLYPHS[option.id]
 										: undefined
 								}
 								value={answers[question.id]}
@@ -222,8 +233,19 @@ export function CreateStarterDialog({
 										</p>
 									</div>
 								) : (
-									<div className="h-[420px] overflow-y-auto rounded-[10px] border border-white/8 bg-[#efedeb]">
-										<LandingPreview />
+									<div
+										className={cn(
+											"h-[420px] overflow-y-auto rounded-[10px] border border-white/8",
+											answers.landing === "gallery"
+												? "bg-white"
+												: "bg-[#efedeb]",
+										)}
+									>
+										{answers.landing === "gallery" ? (
+											<GalleryLandingPreview />
+										) : (
+											<LandingPreview />
+										)}
 									</div>
 								)}
 								<figcaption className="text-[12px] text-ink-muted">

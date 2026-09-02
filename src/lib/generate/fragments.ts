@@ -1328,16 +1328,23 @@ export const db = drizzle(
 );
 `,
 	"prisma:mongodb": `import { PrismaClient } from "@prisma/client";
+import { env } from "@/lib/env";
 
 /**
  * Cached across hot reloads. Without this, every save in development opens
  * another connection pool until the database refuses new ones.
+ *
+ * The mode comes from \`env\` rather than the raw environment. This file is
+ * application code, and the rule the rest of the project follows is that the
+ * environment is parsed in \`src/lib/env.ts\` and read from there everywhere
+ * else — reading it directly here skipped that validation and tripped this
+ * project's own \`src/lib/env.test.ts\` on a clean checkout.
  */
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
 export const db = globalForPrisma.prisma ?? new PrismaClient();
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = db;
+if (env.NODE_ENV !== "production") globalForPrisma.prisma = db;
 `,
 	"mongoose:mongodb": `import mongoose from "mongoose";
 import { env } from "@/lib/env";

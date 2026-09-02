@@ -498,13 +498,25 @@ describe("buildStarter", () => {
 			 * substitute an unprefixed name into browser code at all.
 			 */
 			it("reads the raw environment in the two env modules and nowhere else", () => {
-				for (const framework of ["nextjs", "tanstack_start"]) {
-					const files = build({ ...withPublicEnv, framework });
+				/**
+				 * Every stack, not one fixture.
+				 *
+				 * This used to build a single Supabase/Better Auth combination,
+				 * which pinned the ORM to Drizzle — so the Prisma client, which
+				 * read `process.env.NODE_ENV` directly to decide whether to cache
+				 * itself across hot reloads, was never generated here and the
+				 * violation shipped. Every starter with Prisma in it failed its
+				 * own `src/lib/env.test.ts` on a clean checkout.
+				 *
+				 * The matrix is already built and cached for the suites below, so
+				 * covering all of it costs nothing but this loop.
+				 */
+				for (const { answers, files } of everyGeneratedStarter()) {
 					const readers = Object.entries(files)
 						.filter(
 							([path, contents]) =>
 								path.startsWith("src/") &&
-								path.endsWith(".ts") &&
+								/\.tsx?$/.test(path) &&
 								!path.endsWith(".test.ts") &&
 								/* Application code only. `vite.config.ts` touches
 								   `process.env` to *fill* it from `.env`, which is the
@@ -514,10 +526,15 @@ describe("buildStarter", () => {
 						.map(([path]) => path)
 						.sort();
 
-					expect(readers, framework).toEqual([
-						"src/lib/env.ts",
-						"src/lib/public-env.ts",
-					]);
+					/* A browser-only app has no server half, so it gets the public
+					   module and nothing else. */
+					const sanctioned = files["src/lib/env.ts"]
+						? ["src/lib/env.ts", "src/lib/public-env.ts"]
+						: ["src/lib/public-env.ts"];
+
+					expect(readers, JSON.stringify(answers)).toEqual(
+						sanctioned.filter((path) => files[path]),
+					);
 				}
 			});
 

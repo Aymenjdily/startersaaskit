@@ -4230,11 +4230,61 @@ body {
 		letter-spacing: -0.01em;
 		line-height: 1.08;
 	}
+
+	/**
+	 * The one button on this page, wherever it appears.
+	 *
+	 * Every solid call to action — the bar, the hero, the mobile menu —
+	 * carries this class and nothing else that touches hover. They had each
+	 * grown their own treatment: the bar scaled and faded on hover, the hero
+	 * did the same thing again through a motion prop with different numbers,
+	 * and the one inside the mobile menu did nothing at all. Three buttons
+	 * that look identical are supposed to *feel* identical, and the only way
+	 * that survives a fourth being added is for the behaviour to live in one
+	 * place.
+	 *
+	 * Size is deliberately not set here. The bar's button is 36px and the
+	 * hero's is 44px because they sit in different places; height, padding
+	 * and type size stay on the element as utilities.
+	 */
+	.pill {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 9999px;
+		background-color: var(--color-ink);
+		color: var(--color-paper);
+		transition:
+			transform 200ms ease,
+			opacity 200ms ease;
+	}
+
+	.pill:hover {
+		opacity: 0.85;
+		transform: translateY(-1px) scale(1.02);
+	}
+
+	.pill:active {
+		transform: translateY(0) scale(0.98);
+	}
+
+	/* The lift is the first thing to go; the fade carries the affordance on
+	   its own and nothing is lost but the movement. */
+	@media (prefers-reduced-motion: reduce) {
+		.pill {
+			transition: opacity 200ms ease;
+		}
+
+		.pill:hover,
+		.pill:active {
+			transform: none;
+		}
+	}
 }
 `;
 
 const GALLERY_CONTENT = `/**
- * Every word on the Gallery landing page.
+ * Every word — and every stand-in image — on the Gallery landing page.
  *
  * Copy is data here, not JSX — the same reason the Editorial template does
  * it this way: changing the page is changing this file, sections can be
@@ -4245,6 +4295,14 @@ const GALLERY_CONTENT = `/**
  * the layout holds when your own copy goes in. Each section below says what
  * belongs in it and roughly how long it can run before the layout it sits in
  * starts to fight it.
+ *
+ * Every image is a plain placehold.co box. There is deliberately no faked
+ * product UI anywhere on this page — no browser chrome, no invented console,
+ * no screenshot of an app that does not exist. A drawn-on mockup flatters a
+ * template in a screenshot and then has to be torn out by whoever ships it;
+ * a grey box with its own dimensions printed on it cannot be mistaken for
+ * anything but a slot waiting for your own picture. Replace every \`image\`
+ * and \`src\` below.
  */
 
 export const content = {
@@ -4302,21 +4360,12 @@ export const content = {
 		body: "{{project}} lays every option out where you can actually see it. Vary the layout, the copy, the pricing, then ship the one that works.",
 		/** The primary call to action, repeated nowhere else above the fold. */
 		action: { label: "Start exploring", href: "#directions" },
-		/**
-		 * Labels on the mockup's window chrome — a tab title and a status
-		 * pill, not real copy. Change \`title\` to whatever your product's
-		 * main screen is actually called ("Dashboard", "Editor", "Board");
-		 * \`badge\` is meant to be a short live-status word ("Live", "Beta",
-		 * "Synced").
-		 */
-		mockup: {
-			title: "Project preview",
-			badge: "Live",
-		},
+		/** The one wide image under the hero. A screenshot of your product's main screen belongs here — put the real file in \`public/\` and point at it. */
+		image: "https://placehold.co/1240x520",
 	},
 
 	/**
-	 * The single-line mission statement between the hero and the first
+	 * The single-line mission statement between the hero image and the first
 	 * detailed section. Nothing else sits in this band — one sentence, said
 	 * plainly, is the whole point of the pause it creates.
 	 */
@@ -4332,21 +4381,19 @@ export const content = {
 		heading: ["Explore more directions", "with precision."],
 		/** One sentence explaining the specific capability this section is about — not a repeat of the hero's body, which stays product-wide. */
 		body: "Vary layout, copy, pricing and tone, then compare every version side by side before anything ships.",
-		mockup: {
-			/** The mockup's tab title, same idea as the hero's. */
-			title: "Comparison",
-			/**
-			 * Exactly two entries render side by side with numbered
-			 * callouts — this section is built around a *pair* being
-			 * compared, so a third or a single entry will not lay out
-			 * correctly. Keep each label to a few words; it sits under a
-			 * small box, not a paragraph.
-			 */
-			points: [
-				{ label: "This version" },
-				{ label: "Compared against the original" },
-			],
-		},
+		/**
+		 * Exactly two entries render side by side with numbered callouts —
+		 * this section is built around a *pair* being compared, so a third
+		 * or a single entry will not lay out correctly. Keep each label to
+		 * a few words; it sits under an image, not in a paragraph.
+		 */
+		points: [
+			{ label: "This version", image: "https://placehold.co/1100x620" },
+			{
+				label: "Compared against the original",
+				image: "https://placehold.co/1100x620",
+			},
+		],
 	},
 
 	inspiration: {
@@ -4371,8 +4418,66 @@ export const content = {
 			{ icon: "compare", label: "past releases" },
 			{ icon: "folder", label: "your own files" },
 		],
-		/** How many tiles fill the mosaic below. 12–20 reads as "a lot of references" without the grid growing taller than the section above it. */
-		tileCount: 15,
+		/**
+		 * The mosaic below the copy: square tiles standing in for "every
+		 * board and file the idea could have come from". 12–18 reads as
+		 * "a lot of references" without the grid growing taller than the
+		 * section above it.
+		 */
+		tiles: [
+			"https://placehold.co/480x480",
+			"https://placehold.co/480x480",
+			"https://placehold.co/480x480",
+			"https://placehold.co/480x480",
+			"https://placehold.co/480x480",
+			"https://placehold.co/480x480",
+			"https://placehold.co/480x480",
+			"https://placehold.co/480x480",
+			"https://placehold.co/480x480",
+			"https://placehold.co/480x480",
+			"https://placehold.co/480x480",
+			"https://placehold.co/480x480",
+			"https://placehold.co/480x480",
+			"https://placehold.co/480x480",
+			"https://placehold.co/480x480",
+		],
+	},
+
+	/**
+	 * Three captioned images between Inspiration and Directions — the band
+	 * that shows what came out of everything above it.
+	 *
+	 * It needs its own heading. Three pictures dropped into the page with
+	 * nothing but a word under each read as decoration that lost its
+	 * caption; one line of context is what turns them into evidence.
+	 */
+	showcase: {
+		/** Two lines, same rule as every other heading here: composed, not wrapped. */
+		heading: ["Three directions,", "one afternoon."],
+		/** One sentence. What the reader is looking at, and why there are three of them. */
+		body: "Each one is a real, finished version — not a sketch you would still have to build.",
+		/**
+		 * Exactly three items fit the row on a laptop; a fourth wraps to a
+		 * second row and leaves a gap. \`label\` is a couple of words, \`meta\`
+		 * a short count or status that sits at the end of the caption line.
+		 */
+		items: [
+			{
+				label: "Layout",
+				meta: "12 variants",
+				image: "https://placehold.co/760x430",
+			},
+			{
+				label: "Pricing",
+				meta: "8 variants",
+				image: "https://placehold.co/760x430",
+			},
+			{
+				label: "Onboarding",
+				meta: "5 variants",
+				image: "https://placehold.co/760x430",
+			},
+		],
 	},
 
 	directions: {
@@ -4390,11 +4495,8 @@ export const content = {
 			{ icon: "code", label: "engineering" },
 			{ icon: "support", label: "support" },
 		],
-		/** The console mockup's own copy — an input placeholder and a one-word status. Keep the placeholder a genuine example of what someone would type, not a generic "Enter text here". */
-		terminal: {
-			placeholder: "Describe what you want to try…",
-			status: "Ready",
-		},
+		/** The closing image, the last thing on the page above the footer. */
+		image: "https://placehold.co/1240x520",
 	},
 
 	footer: {
@@ -4519,8 +4621,10 @@ export function Nav() {
 					))}
 				</nav>
 
+				{/* \`.pill\` carries the hover for every button on this page — see
+				    \`styles.css\`. Only size and placement belong here. */}
 				<a
-					className="ml-auto hidden h-9 items-center rounded-full bg-ink px-4 text-[13px] text-paper transition-all duration-200 hover:scale-[1.03] hover:opacity-85 active:scale-[0.98] md:flex"
+					className="pill ml-auto hidden h-9 px-4 text-[13px] md:inline-flex"
 					href={action.href}
 				>
 					{action.label}
@@ -4567,10 +4671,7 @@ export function Nav() {
 									{link.label}
 								</a>
 							))}
-							<a
-								className="mt-2 flex h-10 items-center justify-center rounded-full bg-ink text-[14px] text-paper"
-								href={action.href}
-							>
+							<a className="pill mt-2 h-10 text-[14px]" href={action.href}>
 								{action.label}
 							</a>
 						</div>
@@ -4585,6 +4686,7 @@ export function Nav() {
 const GALLERY_HERO = `"use client";
 
 import { motion } from "framer-motion";
+import { Fragment } from "react";
 import { content } from "./content";
 
 /** Each line staggers in as a unit, and each word rises within it. */
@@ -4603,20 +4705,19 @@ const wordVariants = {
 };
 
 /**
- * The hero: a centred display headline over a full-bleed product mockup.
+ * The hero: a centred display headline over one wide image.
  *
- * The mockup is a real "browser chrome" — traffic-light dots, a tab title —
- * rather than a screenshot, for the reason \`landing-preview.tsx\` gives for
- * drawing rather than embedding: it is markup, so it never goes stale and
- * never ships a binary asset nobody remembers to update. The colourful
- * backdrop behind it is a CSS gradient, not an image, for the same reason.
+ * No drawn-on browser chrome around the image, and no invented product UI
+ * inside it. A faked window flatters a template in a screenshot and then has
+ * to be unpicked by whoever ships it; a plain image slot is the thing they
+ * were going to replace anyway.
  *
  * The headline rises in word by word on mount rather than all at once —
  * \`staggerChildren\` on each line, \`AnimatePresence\` deliberately not
  * involved, because this runs once on load and never needs to reverse.
  */
 export function Hero() {
-	const { headline, body, action, mockup } = content.hero;
+	const { headline, body, action, image } = content.hero;
 
 	return (
 		<section className="frame">
@@ -4633,15 +4734,24 @@ export function Hero() {
 							variants={lineVariants}
 						>
 							{line.split(" ").map((word, wordIndex) => (
-								<motion.span
-									className="inline-block"
-									// biome-ignore lint/suspicious/noArrayIndexKey: a fixed, never-reordered set of words
-									key={wordIndex}
-									variants={wordVariants}
-								>
-									{word}
-									{wordIndex < line.split(" ").length - 1 ? " " : ""}
-								</motion.span>
+								/**
+								 * The space sits *between* the words, never inside one.
+								 *
+								 * Each word is its own \`inline-block\` so it can be
+								 * translated independently, and CSS trims whitespace at
+								 * the end of an inline-block — so a trailing space put
+								 * inside the span disappears and the headline renders
+								 * as "Exploredozensof". As a text node between the
+								 * spans it is a real space again, and still collapses
+								 * the way a space should at a line break.
+								 */
+								// biome-ignore lint/suspicious/noArrayIndexKey: a fixed, never-reordered set of words
+								<Fragment key={wordIndex}>
+									{wordIndex > 0 ? " " : null}
+									<motion.span className="inline-block" variants={wordVariants}>
+										{word}
+									</motion.span>
+								</Fragment>
 							))}
 						</motion.span>
 					))}
@@ -4656,93 +4766,43 @@ export function Hero() {
 					{body}
 				</motion.p>
 
-				<motion.a
+				{/**
+				 * The reveal rides on a wrapper, not on the button itself.
+				 *
+				 * \`.pill\` owns hover and press for every button on the page, and
+				 * it does that in CSS. A motion component leaves its animated
+				 * \`transform\` and \`opacity\` behind as *inline* styles, which beat
+				 * any class rule — so animating the anchor directly would leave
+				 * the shared hover silently dead on this one button. Wrapping
+				 * keeps the two concerns on separate elements.
+				 */}
+				<motion.div
 					animate={{ opacity: 1, y: 0 }}
-					className="mt-8 flex h-11 items-center rounded-full bg-ink px-6 text-[14px] text-paper transition-opacity hover:opacity-80"
-					href={action.href}
+					className="mt-8"
 					initial={{ opacity: 0, y: 12 }}
 					transition={{ duration: 0.6, delay: 0.65 }}
-					whileHover={{ scale: 1.04 }}
-					whileTap={{ scale: 0.97 }}
 				>
-					{action.label}
-				</motion.a>
+					<a className="pill h-11 px-6 text-[14px]" href={action.href}>
+						{action.label}
+					</a>
+				</motion.div>
 			</div>
 
-			<motion.div
-				animate={{ opacity: 1 }}
-				className="relative overflow-hidden border-rule border-t"
-				initial={{ opacity: 0 }}
-				transition={{ duration: 0.8, delay: 0.4 }}
-			>
-				<div
-					aria-hidden="true"
-					className="absolute inset-0"
-					style={{
-						backgroundImage:
-							"linear-gradient(115deg, #ffd23f 0%, #6fcf97 28%, #2f9e8f 52%, #2d6ca6 76%, #1a1a1a 100%)",
-						backgroundSize: "140% 140%",
+			<div className="gutter border-rule border-t pt-10 pb-4 md:pt-14">
+				<motion.img
+					alt=""
+					className="w-full rounded-[10px] border border-rule object-cover"
+					initial={{ opacity: 0, y: 24 }}
+					src={image}
+					transition={{
+						duration: 0.7,
+						delay: 0.4,
+						ease: [0.22, 1, 0.36, 1] as const,
 					}}
+					viewport={{ once: true }}
+					whileInView={{ opacity: 1, y: 0 }}
 				/>
-				<div className="relative px-4 py-10 sm:px-8 md:py-16">
-					<motion.div
-						className="mx-auto max-w-[1040px] overflow-hidden rounded-[10px] border border-black/10 bg-white shadow-[0_40px_80px_-24px_rgba(0,0,0,0.45)]"
-						initial={{ opacity: 0, y: 24, scale: 0.98 }}
-						transition={{
-							duration: 0.7,
-							delay: 0.55,
-							ease: [0.22, 1, 0.36, 1] as const,
-						}}
-						viewport={{ once: true }}
-						whileHover={{ y: -4 }}
-						whileInView={{ opacity: 1, y: 0, scale: 1 }}
-					>
-						<div className="flex items-center gap-2 border-black/8 border-b bg-[#f6f5f4] px-4 py-2.5">
-							<span className="size-2.5 rounded-full bg-[#ff5f57]" />
-							<span className="size-2.5 rounded-full bg-[#febc2e]" />
-							<span className="size-2.5 rounded-full bg-[#28c840]" />
-							<span className="ml-3 font-medium text-[12px] text-ink/70">
-								{mockup.title}
-							</span>
-							<span className="ml-auto flex items-center gap-1.5 text-[11px] text-ink/55">
-								<span className="size-1.5 animate-pulse rounded-full bg-[#3f8f5f]" />
-								{mockup.badge}
-							</span>
-						</div>
-
-						<div className="flex flex-col gap-6 p-6 sm:flex-row sm:p-8">
-							<div className="h-[220px] flex-1 rounded-[6px] bg-[linear-gradient(135deg,#f4b942,#e0562c)] transition-transform duration-300 sm:h-[260px]" />
-
-							<div className="flex w-full flex-col gap-4 sm:w-[220px]">
-								{["Layout", "Colour", "Copy"].map((row) => (
-									<div className="flex flex-col gap-2" key={row}>
-										<span className="font-medium text-[11px] text-ink/60 uppercase tracking-[0.06em]">
-											{row}
-										</span>
-										<div className="flex gap-1.5">
-											{[
-												"#1a1a1a",
-												"#e0562c",
-												"#2f9e8f",
-												"#2d6ca6",
-												"#f4b942",
-											].map((swatch) => (
-												<motion.span
-													className="size-5 cursor-pointer rounded-full border border-black/10"
-													key={swatch}
-													style={{ backgroundColor: swatch }}
-													whileHover={{ scale: 1.25 }}
-													whileTap={{ scale: 0.9 }}
-												/>
-											))}
-										</div>
-									</div>
-								))}
-							</div>
-						</div>
-					</motion.div>
-				</div>
-			</motion.div>
+			</div>
 		</section>
 	);
 }
@@ -4783,16 +4843,17 @@ import { motion } from "framer-motion";
 import { content } from "./content";
 
 /**
- * The second mockup carries numbered callouts — small circled digits over
- * the two things the copy just told the reader to compare. They are placed
- * with percentage \`top\`/\`left\` rather than a grid, because the two points
- * sit over specific spots on the faux screen below rather than in a layout
- * of their own. Each pops in with a spring after the box around it settles,
- * so the callout reads as pointing at something already there rather than
- * arriving at the same time as it.
+ * Two images side by side with numbered callouts — the pair the copy just
+ * told the reader to compare. The numbers are the only ornament here: no
+ * window chrome, no faked toolbar, nothing that has to be torn out before
+ * a real screenshot can go in.
+ *
+ * Each badge pops in with a spring after the image it sits on has settled,
+ * so it reads as pointing at something already there rather than arriving
+ * at the same time as it.
  */
 export function Precision() {
-	const { id, heading, body, mockup } = content.precision;
+	const { id, heading, body, points } = content.precision;
 
 	return (
 		<section className="frame" id={id}>
@@ -4824,61 +4885,49 @@ export function Precision() {
 					{body}
 				</motion.p>
 
-				<motion.div
-					className="relative mt-14 overflow-hidden rounded-[10px] border border-black/10 bg-[#f6f5f4]"
-					initial={{ opacity: 0, y: 28 }}
-					transition={{
-						duration: 0.6,
-						delay: 0.2,
-						ease: [0.22, 1, 0.36, 1] as const,
-					}}
-					viewport={{ once: true, margin: "-80px" }}
-					whileInView={{ opacity: 1, y: 0 }}
-				>
-					<div className="flex items-center gap-2 border-black/8 border-b bg-white px-4 py-2.5">
-						<span className="size-2.5 rounded-full bg-[#ff5f57]" />
-						<span className="size-2.5 rounded-full bg-[#febc2e]" />
-						<span className="size-2.5 rounded-full bg-[#28c840]" />
-						<span className="ml-3 font-medium text-[12px] text-ink/70">
-							{mockup.title}
-						</span>
-					</div>
-
-					<div className="relative flex flex-col gap-6 p-6 sm:flex-row sm:gap-4 sm:p-10">
-						{mockup.points.map((point, index) => (
-							<div className="relative flex-1" key={point.label}>
-								<motion.div
-									className={
-										index === 0
-											? "h-[180px] cursor-default rounded-[6px] border-2 border-accent bg-white"
-											: "h-[180px] cursor-default rounded-[6px] border border-black/15 bg-white/60"
-									}
-									whileHover={{
-										borderColor:
-											index === 0 ? undefined : "rgba(224,86,44,0.5)",
-										y: -3,
-									}}
-								/>
-								<motion.span
-									className="-top-3 -left-3 absolute flex size-6 items-center justify-center rounded-full bg-accent font-medium text-[12px] text-white"
-									initial={{ scale: 0, opacity: 0 }}
-									style={{ boxShadow: "0 0 0 3px var(--color-paper)" }}
-									transition={{
-										type: "spring",
-										stiffness: 400,
-										damping: 15,
-										delay: 0.45 + index * 0.15,
-									}}
-									viewport={{ once: true, margin: "-80px" }}
-									whileInView={{ scale: 1, opacity: 1 }}
-								>
-									{index + 1}
-								</motion.span>
-								<p className="mt-3 text-[13px] text-ink/60">{point.label}</p>
-							</div>
-						))}
-					</div>
-				</motion.div>
+				<div className="mt-12 flex flex-col gap-8 sm:flex-row sm:gap-6">
+					{points.map((point, index) => (
+						<motion.div
+							className="relative flex-1"
+							initial={{ opacity: 0, y: 24 }}
+							key={point.label}
+							transition={{
+								duration: 0.6,
+								delay: 0.15 + index * 0.1,
+								ease: [0.22, 1, 0.36, 1] as const,
+							}}
+							viewport={{ once: true, margin: "-80px" }}
+							whileInView={{ opacity: 1, y: 0 }}
+						>
+							<motion.img
+								alt=""
+								className={
+									index === 0
+										? "w-full rounded-[8px] border-2 border-accent object-cover"
+										: "w-full rounded-[8px] border border-rule object-cover"
+								}
+								src={point.image}
+								whileHover={{ y: -3 }}
+							/>
+							<motion.span
+								className="-top-3 -left-3 absolute flex size-6 items-center justify-center rounded-full bg-accent font-medium text-[12px] text-white"
+								initial={{ scale: 0, opacity: 0 }}
+								style={{ boxShadow: "0 0 0 3px var(--color-paper)" }}
+								transition={{
+									type: "spring",
+									stiffness: 400,
+									damping: 15,
+									delay: 0.45 + index * 0.15,
+								}}
+								viewport={{ once: true, margin: "-80px" }}
+								whileInView={{ scale: 1, opacity: 1 }}
+							>
+								{index + 1}
+							</motion.span>
+							<p className="mt-3 text-[13px] text-ink/60">{point.label}</p>
+						</motion.div>
+					))}
+				</div>
 			</div>
 		</section>
 	);
@@ -4903,14 +4952,13 @@ const ICONS: Record<string, string> = {
 };
 
 /**
- * A reference grid: a dense mosaic of tiles, like \`integrations.tsx\`'s tool
- * grid but static rather than looping, and standing in for "every board and
- * file the idea could have come from" rather than a specific screenshot of
- * any one of them. Tiles fade in with a short stagger and lift slightly on
- * hover, so the grid reads as a surface you could actually reach into.
+ * A reference grid: square image slots standing in for "every board and file
+ * the idea could have come from". Tiles fade in with a short stagger and
+ * lift slightly on hover, so the grid reads as a surface you could actually
+ * reach into.
  */
 export function Inspiration() {
-	const { id, heading, body, sources, tileCount } = content.inspiration;
+	const { id, heading, body, sources, tiles } = content.inspiration;
 
 	return (
 		<section className="frame" id={id}>
@@ -4987,15 +5035,9 @@ export function Inspiration() {
 						viewport={{ once: true, margin: "-80px" }}
 						whileInView="show"
 					>
-						{Array.from({ length: tileCount }, (_, index) => (
+						{tiles.map((tile, index) => (
 							<motion.div
-								className={
-									index % 7 === 0
-										? "aspect-square cursor-pointer rounded-[4px] bg-ink"
-										: index % 5 === 0
-											? "aspect-square cursor-pointer rounded-[4px] bg-accent/70"
-											: "aspect-square cursor-pointer rounded-[4px] bg-white"
-								}
+								className="aspect-square cursor-pointer overflow-hidden rounded-[4px] border border-rule"
 								// biome-ignore lint/suspicious/noArrayIndexKey: a fixed decorative grid, never reordered
 								key={index}
 								variants={{
@@ -5003,7 +5045,9 @@ export function Inspiration() {
 									show: { opacity: 1, scale: 1 },
 								}}
 								whileHover={{ scale: 1.08, transition: { duration: 0.15 } }}
-							/>
+							>
+								<img alt="" className="h-full w-full object-cover" src={tile} />
+							</motion.div>
 						))}
 					</motion.div>
 				</motion.div>
@@ -5019,29 +5063,90 @@ import { motion } from "framer-motion";
 import { content } from "./content";
 
 /**
- * The colour break between Inspiration and Directions: three swatches and
- * nothing else. Purely a visual rest — the reference uses the same beat
- * before its closing sections, and a page of nothing but text bands reads
- * as a slide deck rather than a product. Each swatch lifts slightly on
- * hover, which is the only interaction this band offers and enough to make
- * it feel like part of the same product rather than a static divider.
+ * Three captioned images between Inspiration and Directions.
+ *
+ * This band used to be three flat blocks of colour with nothing in them,
+ * then three pictures with a word under each — both read as decoration
+ * that had lost its caption. It now carries its own heading, and each
+ * image gets a numbered caption line ruled off from the picture, so the
+ * three read as a numbered set of results rather than clip art.
+ *
+ * The zoom on hover lives on the image inside a fixed, clipping frame
+ * rather than on the figure itself: scaling the whole card would drag its
+ * caption along and knock the three baselines out of line with each other.
  */
-export function Swatches() {
+export function Showcase() {
+	const { heading, body, items } = content.showcase;
+
 	return (
-		<section aria-hidden="true" className="frame">
-			<div className="gutter grid grid-cols-3 gap-3 py-10 md:py-14">
-				<motion.div
-					className="aspect-[4/3] cursor-default rounded-[10px] bg-[#2f9e8f] sm:aspect-[16/9]"
-					whileHover={{ y: -4, scale: 1.02 }}
-				/>
-				<motion.div
-					className="aspect-[4/3] cursor-default rounded-[10px] border border-dashed border-black/15 bg-transparent sm:aspect-[16/9]"
-					whileHover={{ y: -4, scale: 1.02 }}
-				/>
-				<motion.div
-					className="aspect-[4/3] cursor-default rounded-[10px] bg-[#e0562c] sm:aspect-[16/9]"
-					whileHover={{ y: -4, scale: 1.02 }}
-				/>
+		<section className="frame">
+			<div className="gutter py-16 md:py-20">
+				<motion.h2
+					className="display max-w-[520px] text-[28px] text-ink sm:text-[32px]"
+					initial={{ opacity: 0, y: 20 }}
+					transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] as const }}
+					viewport={{ once: true, margin: "-80px" }}
+					whileInView={{ opacity: 1, y: 0 }}
+				>
+					{heading.map((line) => (
+						<span className="block" key={line}>
+							{line}
+						</span>
+					))}
+				</motion.h2>
+
+				<motion.p
+					className="mt-4 max-w-[460px] text-[16px] text-ink/70 leading-[26px]"
+					initial={{ opacity: 0, y: 20 }}
+					transition={{
+						duration: 0.6,
+						delay: 0.1,
+						ease: [0.22, 1, 0.36, 1] as const,
+					}}
+					viewport={{ once: true, margin: "-80px" }}
+					whileInView={{ opacity: 1, y: 0 }}
+				>
+					{body}
+				</motion.p>
+
+				<div className="mt-12 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-3">
+					{items.map((item, index) => (
+						<motion.figure
+							className="group flex flex-col"
+							initial={{ opacity: 0, y: 20 }}
+							key={item.label}
+							transition={{
+								duration: 0.5,
+								delay: 0.15 + index * 0.08,
+								ease: [0.22, 1, 0.36, 1] as const,
+							}}
+							viewport={{ once: true, margin: "-80px" }}
+							whileInView={{ opacity: 1, y: 0 }}
+						>
+							<div className="overflow-hidden rounded-[10px] border border-rule bg-[#fafafa]">
+								<img
+									alt=""
+									className="w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+									src={item.image}
+								/>
+							</div>
+
+							{/* Ruled off from the picture, so the caption reads as a
+							    label on the work rather than a stray line under it. */}
+							<figcaption className="mt-4 flex items-baseline gap-3 border-rule border-t pt-3">
+								<span className="font-medium text-[11px] text-accent tabular-nums">
+									{String(index + 1).padStart(2, "0")}
+								</span>
+								<span className="font-medium text-[15px] text-ink">
+									{item.label}
+								</span>
+								<span className="ml-auto text-[13px] text-ink/50">
+									{item.meta}
+								</span>
+							</figcaption>
+						</motion.figure>
+					))}
+				</div>
 			</div>
 		</section>
 	);
@@ -5055,12 +5160,12 @@ const ICONS: Record<string, string> = {
 };
 
 /**
- * The closing pitch and a console mockup: a rounded input bar rather than a
- * chat transcript, because the point is "bring your own tools", not a
- * scripted conversation.
+ * The closing pitch and the last image on the page. Like every other band
+ * here it ends on a plain image slot rather than an invented console — the
+ * page never pretends to show software that does not exist yet.
  */
 export function Directions() {
-	const { id, heading, body, tools, terminal } = content.directions;
+	const { id, heading, body, tools, image } = content.directions;
 
 	return (
 		<section className="frame" id={id}>
@@ -5118,60 +5223,21 @@ export function Directions() {
 					))}
 					<span>teams.</span>
 				</motion.p>
-			</div>
 
-			<motion.div
-				className="relative overflow-hidden border-rule border-t"
-				initial={{ opacity: 0 }}
-				transition={{ duration: 0.7 }}
-				viewport={{ once: true, margin: "-80px" }}
-				whileInView={{ opacity: 1 }}
-			>
-				<div
-					aria-hidden="true"
-					className="absolute inset-0"
-					style={{
-						backgroundImage:
-							"linear-gradient(115deg, #2d6ca6 0%, #2f9e8f 35%, #f4b942 68%, #e0562c 100%)",
-						backgroundSize: "140% 140%",
+				<motion.img
+					alt=""
+					className="mt-12 w-full rounded-[10px] border border-rule object-cover"
+					initial={{ opacity: 0, y: 24 }}
+					src={image}
+					transition={{
+						duration: 0.6,
+						delay: 0.2,
+						ease: [0.22, 1, 0.36, 1] as const,
 					}}
+					viewport={{ once: true, margin: "-80px" }}
+					whileInView={{ opacity: 1, y: 0 }}
 				/>
-				<div className="relative px-4 py-10 sm:px-8 md:py-16">
-					<motion.div
-						className="mx-auto max-w-[720px] overflow-hidden rounded-[10px] border border-black/10 bg-ink text-paper shadow-[0_40px_80px_-24px_rgba(0,0,0,0.5)]"
-						initial={{ opacity: 0, y: 24, scale: 0.98 }}
-						transition={{
-							duration: 0.6,
-							delay: 0.15,
-							ease: [0.22, 1, 0.36, 1] as const,
-						}}
-						viewport={{ once: true, margin: "-80px" }}
-						whileHover={{ y: -4 }}
-						whileInView={{ opacity: 1, y: 0, scale: 1 }}
-					>
-						<div className="flex items-center gap-2 border-white/10 border-b px-4 py-2.5">
-							<span className="size-2.5 rounded-full bg-white/15" />
-							<span className="size-2.5 rounded-full bg-white/15" />
-							<span className="size-2.5 rounded-full bg-white/15" />
-						</div>
-
-						<div className="flex flex-col gap-3 p-4">
-							<div className="flex h-11 items-center rounded-[8px] border border-white/10 bg-white/5 px-3.5 text-[14px] text-paper/60 transition-colors focus-within:border-white/25">
-								{terminal.placeholder}
-							</div>
-							<div className="flex items-center justify-between text-[12px] text-paper/50">
-								<span className="cursor-default transition-colors hover:text-paper/80">
-									Add context
-								</span>
-								<span className="flex items-center gap-1.5">
-									<span className="size-1.5 animate-pulse rounded-full bg-[#3f8f5f]" />
-									{terminal.status}
-								</span>
-							</div>
-						</div>
-					</motion.div>
-				</div>
-			</motion.div>
+			</div>
 		</section>
 	);
 }
@@ -5253,7 +5319,7 @@ export function Footer() {
 }
 `;
 
-const GALLERY_INDEX = `import { Directions, Swatches } from "./directions";
+const GALLERY_INDEX = `import { Directions, Showcase } from "./directions";
 import { Footer } from "./footer";
 import { Hero } from "./hero";
 import { Inspiration } from "./inspiration";
@@ -5278,7 +5344,7 @@ export function Landing() {
 				<Mission />
 				<Precision />
 				<Inspiration />
-				<Swatches />
+				<Showcase />
 				<Directions />
 			</main>
 			<Footer />
@@ -5337,12 +5403,45 @@ describe("the landing page", () => {
 	it("still has every slot the sections read", () => {
 		expect(content.brand).toBeTruthy();
 		expect(content.hero.headline.length).toBeGreaterThan(0);
+		expect(content.hero.image).toBeTruthy();
 		expect(content.precision.heading.length).toBeGreaterThan(0);
-		expect(content.precision.mockup.points.length).toBeGreaterThan(0);
+		for (const point of content.precision.points) {
+			expect(point.image, \`"\${point.label}" has no image\`).toBeTruthy();
+		}
 		expect(content.inspiration.sources.length).toBeGreaterThan(0);
-		expect(content.inspiration.tileCount).toBeGreaterThan(0);
+		expect(content.inspiration.tiles.length).toBeGreaterThan(0);
+		expect(content.showcase.items.length).toBeGreaterThan(0);
 		expect(content.directions.tools.length).toBeGreaterThan(0);
+		expect(content.directions.image).toBeTruthy();
 		expect(content.footer.columns.length).toBeGreaterThan(0);
+	});
+
+	/**
+	 * \`precision\` is built around exactly two entries side by side with
+	 * numbered callouts — a third would overflow the row, and one would
+	 * leave a callout pointing at nothing.
+	 */
+	it("compares exactly two versions, not more or fewer", () => {
+		expect(content.precision.points.length).toBe(2);
+	});
+
+	/**
+	 * Every image the copy points at is at least an https URL — a
+	 * mixed-content image is blocked outright and the band renders a hole
+	 * where the picture was.
+	 */
+	it("points every image at something that can actually load", () => {
+		const sources = [
+			content.hero.image,
+			content.directions.image,
+			...content.precision.points.map((point) => point.image),
+			...content.showcase.items.map((item) => item.image),
+			...content.inspiration.tiles,
+		];
+
+		for (const source of sources) {
+			expect(source, "remote images must be https").toMatch(/^https:\\/\\//);
+		}
 	});
 
 	/**
@@ -5355,6 +5454,8 @@ describe("the landing page", () => {
 		const lists: [string, string[]][] = [
 			["nav", content.nav.links.map((link) => link.label)],
 			["inspiration sources", content.inspiration.sources.map((s) => s.label)],
+			["showcase items", content.showcase.items.map((i) => i.label)],
+			["precision points", content.precision.points.map((p) => p.label)],
 			["directions tools", content.directions.tools.map((t) => t.label)],
 			...content.footer.columns.map((column): [string, string[]] => [
 				\`footer/\${column.title}\`,

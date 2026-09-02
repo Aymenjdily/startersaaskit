@@ -9,7 +9,9 @@ import type { ReactNode } from "react";
  * and palette and then shrunk with `zoom`.
  *
  * It carries no copy, only the composition — band order, the grid rules,
- * where the colour sits — because copy at this size is illegible noise.
+ * where the image slots sit — because copy at this size is illegible noise.
+ * Every picture on the real page is a plain placeholder slot, so every one
+ * of them is a plain bordered box here too.
  */
 export function GalleryLandingPreview({ className }: { className?: string }) {
 	return (
@@ -25,7 +27,7 @@ export function GalleryLandingPreview({ className }: { className?: string }) {
 					<Mission />
 					<Precision />
 					<Inspiration />
-					<Swatches />
+					<Showcase />
 					<Directions />
 					<Footer />
 				</Frame>
@@ -50,6 +52,15 @@ function Line({ height = 12, width }: { height?: number; width: string }) {
 	);
 }
 
+/** An image slot: the bordered grey box the real page fills with a picture. */
+function Slot({ className }: { className?: string }) {
+	return (
+		<div
+			className={`rounded-[6px] border border-[#e5e5e5] bg-[#ececec] ${className ?? ""}`}
+		/>
+	);
+}
+
 function Nav() {
 	return (
 		<div className="flex h-[72px] items-center gap-6 px-[60px]">
@@ -67,52 +78,23 @@ function Nav() {
 
 function Hero() {
 	return (
-		<div className="flex flex-col items-center px-[60px] pt-16 pb-20 text-center">
-			<div className="flex flex-col items-center gap-3">
-				<Line height={34} width="420px" />
-				<Line height={34} width="460px" />
-				<Line height={34} width="380px" />
-			</div>
-			<div className="mt-6 flex flex-col items-center gap-2">
-				<Line height={9} width="380px" />
-				<Line height={9} width="320px" />
-			</div>
-			<div className="mt-8 h-10 w-[150px] rounded-full bg-black" />
-
-			<div className="mt-14 w-full overflow-hidden rounded-[10px]">
-				<div
-					className="flex flex-col gap-6 p-10"
-					style={{
-						backgroundImage:
-							"linear-gradient(115deg, #ffd23f 0%, #6fcf97 28%, #2f9e8f 52%, #2d6ca6 76%, #1a1a1a 100%)",
-					}}
-				>
-					<div className="mx-auto w-full max-w-[1040px] overflow-hidden rounded-[8px] bg-white">
-						<div className="flex items-center gap-1.5 border-black/8 border-b px-4 py-2.5">
-							<span className="size-2 rounded-full bg-black/15" />
-							<span className="size-2 rounded-full bg-black/15" />
-							<span className="size-2 rounded-full bg-black/15" />
-						</div>
-						<div className="flex gap-6 p-6">
-							<div className="h-[180px] flex-1 rounded-[6px] bg-[linear-gradient(135deg,#f4b942,#e0562c)]" />
-							<div className="flex w-[160px] flex-col gap-4">
-								{[0, 1, 2].map((row) => (
-									<div className="flex flex-col gap-2" key={row}>
-										<Line height={7} width="50px" />
-										<div className="flex gap-1">
-											{[0, 1, 2, 3].map((dot) => (
-												<span
-													className="size-3.5 rounded-full bg-black/10"
-													key={dot}
-												/>
-											))}
-										</div>
-									</div>
-								))}
-							</div>
-						</div>
-					</div>
+		<div>
+			<div className="flex flex-col items-center px-[60px] pt-16 pb-20 text-center">
+				<div className="flex flex-col items-center gap-3">
+					<Line height={34} width="420px" />
+					<Line height={34} width="460px" />
+					<Line height={34} width="380px" />
 				</div>
+				<div className="mt-6 flex flex-col items-center gap-2">
+					<Line height={9} width="380px" />
+					<Line height={9} width="320px" />
+				</div>
+				<div className="mt-8 h-10 w-[150px] rounded-full bg-black" />
+			</div>
+
+			{/* One wide image slot, ruled off from the copy above it. */}
+			<div className="border-[#e5e5e5] border-t px-[60px] pt-10 pb-4">
+				<Slot className="h-[420px] w-full" />
 			</div>
 		</div>
 	);
@@ -141,17 +123,22 @@ function Precision() {
 				<Line height={8} width="340px" />
 			</div>
 
-			<div className="relative mt-12 flex gap-4 rounded-[8px] bg-[#f6f5f4] p-8">
+			{/* Two slots side by side, the first ringed in the accent, each
+			    with its numbered callout and caption. */}
+			<div className="mt-12 flex gap-6">
 				{[0, 1].map((i) => (
 					<div className="relative flex-1" key={i}>
 						<div
 							className={
 								i === 0
-									? "h-[150px] rounded-[6px] border-2 border-[#e0562c] bg-white"
-									: "h-[150px] rounded-[6px] border border-black/10 bg-white/60"
+									? "h-[300px] rounded-[8px] border-2 border-[#e0562c] bg-[#ececec]"
+									: "h-[300px] rounded-[8px] border border-[#e5e5e5] bg-[#ececec]"
 							}
 						/>
-						<span className="-top-2.5 -left-2.5 absolute flex size-5 items-center justify-center rounded-full bg-[#e0562c]" />
+						<span className="-top-2.5 -left-2.5 absolute size-5 rounded-full bg-[#e0562c]" />
+						<div className="mt-3">
+							<Line height={8} width={i === 0 ? "90px" : "170px"} />
+						</div>
 					</div>
 				))}
 			</div>
@@ -170,17 +157,11 @@ function Inspiration() {
 				<Line height={8} width="260px" />
 			</div>
 
-			<div className="mt-12 rounded-[8px] bg-[#f6f5f4] p-1.5">
+			<div className="mt-12 rounded-[8px] border border-[#e5e5e5] bg-[#f6f5f4] p-1.5">
 				<div className="grid grid-cols-5 gap-1.5">
 					{Array.from({ length: 15 }, (_, i) => (
 						<div
-							className={
-								i % 7 === 0
-									? "aspect-square rounded-[3px] bg-black"
-									: i % 5 === 0
-										? "aspect-square rounded-[3px] bg-[#e0562c]/60"
-										: "aspect-square rounded-[3px] bg-white"
-							}
+							className="aspect-square rounded-[3px] border border-[#e5e5e5] bg-[#ececec]"
 							// biome-ignore lint/suspicious/noArrayIndexKey: a fixed decorative grid, never reordered
 							key={i}
 						/>
@@ -191,47 +172,47 @@ function Inspiration() {
 	);
 }
 
-function Swatches() {
+function Showcase() {
 	return (
-		<div className="grid grid-cols-3 gap-3 px-[60px] py-10">
-			<div className="aspect-[16/9] rounded-[8px] bg-[#2f9e8f]" />
-			<div className="aspect-[16/9] rounded-[8px] border border-dashed border-black/15" />
-			<div className="aspect-[16/9] rounded-[8px] bg-[#e0562c]" />
+		<div className="px-[60px] py-20">
+			<div className="flex flex-col gap-3">
+				<Line height={26} width="440px" />
+				<Line height={26} width="360px" />
+			</div>
+			<div className="mt-4 flex flex-col gap-2">
+				<Line height={8} width="400px" />
+			</div>
+
+			{/* Three slots, each with a ruled-off caption line under it. */}
+			<div className="mt-12 grid grid-cols-3 gap-6">
+				{[0, 1, 2].map((i) => (
+					<div className="flex flex-col" key={i}>
+						<Slot className="h-[190px] w-full rounded-[10px]" />
+						<div className="mt-4 flex items-center gap-3 border-[#e5e5e5] border-t pt-3">
+							<div className="h-2 w-4 rounded-[2px] bg-[#e0562c]" />
+							<Line height={9} width="70px" />
+							<div className="ml-auto">
+								<Line height={7} width="60px" />
+							</div>
+						</div>
+					</div>
+				))}
+			</div>
 		</div>
 	);
 }
 
 function Directions() {
 	return (
-		<div>
-			<div className="px-[60px] py-20">
-				<div className="flex flex-col gap-3">
-					<Line height={26} width="480px" />
-					<Line height={26} width="380px" />
-				</div>
-				<div className="mt-4 flex items-center gap-2">
-					<Line height={8} width="300px" />
-				</div>
+		<div className="px-[60px] py-20">
+			<div className="flex flex-col gap-3">
+				<Line height={26} width="480px" />
+				<Line height={26} width="380px" />
 			</div>
-
-			<div
-				className="p-16"
-				style={{
-					backgroundImage:
-						"linear-gradient(115deg, #2d6ca6 0%, #2f9e8f 35%, #f4b942 68%, #e0562c 100%)",
-				}}
-			>
-				<div className="mx-auto max-w-[560px] overflow-hidden rounded-[8px] bg-black">
-					<div className="flex items-center gap-1.5 border-white/10 border-b px-4 py-2.5">
-						<span className="size-2 rounded-full bg-white/15" />
-						<span className="size-2 rounded-full bg-white/15" />
-						<span className="size-2 rounded-full bg-white/15" />
-					</div>
-					<div className="p-4">
-						<div className="h-9 rounded-[6px] bg-white/5" />
-					</div>
-				</div>
+			<div className="mt-4 flex items-center gap-2">
+				<Line height={8} width="300px" />
 			</div>
+			<Slot className="mt-12 h-[420px] w-full rounded-[10px]" />
 		</div>
 	);
 }

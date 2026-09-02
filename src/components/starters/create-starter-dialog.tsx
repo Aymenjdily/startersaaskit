@@ -3,7 +3,11 @@ import { FormError } from "@/components/auth/controls";
 import { LandingPreview } from "@/components/starters/landing-preview";
 import { buttonVariants } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
-import { OptionCards, PageGlyph } from "@/components/ui/option-cards";
+import {
+	NeutralGlyph,
+	OptionCards,
+	PageGlyph,
+} from "@/components/ui/option-cards";
 import {
 	isProjectNameValid,
 	isStarterAnswered,
@@ -200,25 +204,32 @@ export function CreateStarterDialog({
 
 						{showsPreview && (
 							/**
-							 * Shown whichever option is selected, and dimmed when the
-							 * answer is "Not yet".
-							 *
-							 * Hiding it on "Not yet" would collapse the dialog width every
-							 * time somebody clicked between the two, which turns a
-							 * comparison into a flicker. Dimming says the same thing and
-							 * holds the layout still.
+							 * Kept mounted across both options, never removed — swapping
+							 * its whole width in and out on every click between "Editorial"
+							 * and "Not yet" would collapse and reflow the dialog, turning a
+							 * comparison into a flicker. Only what is inside it changes.
 							 */
-							<figure
-								className={cn(
-									"hidden w-[440px] shrink-0 flex-col gap-2 transition-opacity duration-300 md:flex",
-									answers.landing === "none" && "opacity-30",
+							<figure className="hidden w-[440px] shrink-0 flex-col gap-2 md:flex">
+								{answers.landing === "none" ? (
+									<div
+										aria-hidden="true"
+										className="flex h-[420px] flex-col items-center justify-center gap-3 rounded-[10px] border border-white/10 border-dashed bg-white/[0.02] px-8 text-center"
+									>
+										<NeutralGlyph className="text-ink-muted" />
+										<p className="text-[13px] text-ink-soft">No landing page</p>
+										<p className="max-w-[220px] text-[12px] text-ink-muted">
+											Boots straight to the stack list instead.
+										</p>
+									</div>
+								) : (
+									<div className="h-[420px] overflow-y-auto rounded-[10px] border border-white/8 bg-[#efedeb]">
+										<LandingPreview />
+									</div>
 								)}
-							>
-								<div className="h-[420px] overflow-y-auto rounded-[10px] border border-white/8 bg-[#efedeb]">
-									<LandingPreview />
-								</div>
 								<figcaption className="text-[12px] text-ink-muted">
-									A scale model of the page — every band, in order. Scroll it.
+									{answers.landing === "none"
+										? "What “Not yet” means for the generated repo."
+										: "A scale model of the page — every band, in order. Scroll it."}
 								</figcaption>
 							</figure>
 						)}

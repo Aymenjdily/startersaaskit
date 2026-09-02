@@ -115,34 +115,34 @@ describe("the landing page preview", () => {
 	});
 
 	/**
-	 * Dimmed rather than removed on "Not yet".
+	 * A placeholder rather than a dimmed copy of the real preview on "Not
+	 * yet" — a grayed-out page implies a page is still coming, which is the
+	 * opposite of what the answer means.
 	 *
-	 * Unmounting it would collapse the dialog's width on every click between the
-	 * two options, which turns a comparison into a flicker.
+	 * The figure itself stays mounted and the same width either way.
+	 * Unmounting it would collapse the dialog's width on every click between
+	 * the two options, which turns a comparison into a flicker.
 	 */
-	it("stays in place, dimmed, when the answer is no", async () => {
+	it("shows a placeholder, not the page, when the answer is no", async () => {
 		const user = userEvent.setup();
 
 		openDialog();
 		await toQuestion(user, "landing");
 		await pick(user, "Not yet");
 
-		const figure = screen.getByTestId("landing-preview").closest("figure");
-
-		expect(screen.getByTestId("landing-preview")).toBeInTheDocument();
-		expect(figure?.className).toContain("opacity-30");
+		expect(screen.queryByTestId("landing-preview")).not.toBeInTheDocument();
+		expect(screen.getByText("No landing page")).toBeInTheDocument();
 	});
 
-	it("is at full strength when a template is chosen", async () => {
+	it("shows the real preview once a template is chosen", async () => {
 		const user = userEvent.setup();
 
 		openDialog();
 		await toQuestion(user, "landing");
 		await pick(user, "Editorial");
 
-		const figure = screen.getByTestId("landing-preview").closest("figure");
-
-		expect(figure?.className).not.toContain("opacity-30");
+		expect(screen.getByTestId("landing-preview")).toBeInTheDocument();
+		expect(screen.queryByText("No landing page")).not.toBeInTheDocument();
 	});
 
 	/** It is decoration beside the real control, so it must not be announced. */

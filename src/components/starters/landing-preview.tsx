@@ -31,10 +31,11 @@ export function LandingPreview({ className }: { className?: string }) {
 				<ClientStrip />
 				<Services />
 				<Proof />
+				<Workflow />
 				<Quote />
 				<Assurance />
 				<Problem />
-				<Stack />
+				<Integrations />
 				<Cta />
 				<Footer />
 			</div>
@@ -217,6 +218,74 @@ function Proof() {
 	);
 }
 
+/** The tabbed "what it does, per audience" band, between Proof and Quote. */
+function Workflow() {
+	return (
+		<div className="px-[100px] pt-[120px]">
+			<div className="flex flex-col gap-3">
+				<Line height={28} width="620px" />
+				<Line height={28} width="420px" />
+			</div>
+			<div className="mt-6 flex flex-col gap-2">
+				<Line height={9} width="380px" />
+				<Line height={9} width="320px" />
+			</div>
+
+			<div className="mt-16 flex gap-10">
+				{[0, 1].map((i) => (
+					<div className="flex items-center gap-3" key={i}>
+						<div
+							className={
+								i === 0
+									? "size-11 rounded-[4px] bg-[rgba(84,82,82,0.12)]"
+									: "size-11 rounded-[4px] bg-[rgba(84,82,82,0.06)]"
+							}
+						/>
+						<Line height={12} width="90px" />
+					</div>
+				))}
+			</div>
+
+			<div className="mt-6 flex gap-6 rounded-[4px] bg-[#e8e5e3] p-6">
+				<div className="flex w-[420px] shrink-0 flex-col gap-8">
+					<div className="flex flex-col gap-2">
+						<Line height={20} width="95%" />
+						<Line height={20} width="70%" />
+					</div>
+					<div className="flex flex-col">
+						{[0, 1].map((i) => (
+							<div
+								className="flex items-center justify-between gap-4 border-[#d9d5d1] border-t py-4 first:border-t-0"
+								key={i}
+							>
+								<div className="flex flex-col gap-1.5">
+									<Line height={9} width="140px" />
+									<Line height={7} width="180px" />
+								</div>
+								<div className="size-9 shrink-0 rounded-full border border-[#d9d5d1]" />
+							</div>
+						))}
+					</div>
+				</div>
+				<div className="min-w-0 flex-1 rounded-[4px] bg-white p-5">
+					<div className="flex items-center justify-between">
+						<Line height={9} width="90px" />
+						<div className="flex items-center gap-1.5">
+							<div className="size-1.5 rounded-full bg-[#3f8f5f]" />
+							<Line height={7} width="30px" />
+						</div>
+					</div>
+					<div className="mt-5 flex flex-col gap-2.5">
+						{[0, 1, 2, 3].map((i) => (
+							<Line height={8} key={i} width={i % 2 === 0 ? "90%" : "65%"} />
+						))}
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+}
+
 function Quote() {
 	return (
 		<div className="flex flex-col items-center gap-4 px-[100px] py-[120px]">
@@ -287,7 +356,8 @@ function Problem() {
 	);
 }
 
-function Stack() {
+/** The tools mosaic, between Problem and Cta. */
+function Integrations() {
 	return (
 		<div className="relative overflow-hidden pt-[120px]">
 			<div className="flex flex-col items-center gap-3">

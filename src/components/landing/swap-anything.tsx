@@ -274,7 +274,7 @@ export function SwapAnything() {
 	const seam = SEAMS[index];
 
 	return (
-		<Section tone="base">
+		<Section className="border-white/8 border-y" tone="base">
 			<Container>
 				<div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
 					<FadeUp>

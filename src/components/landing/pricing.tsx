@@ -28,7 +28,7 @@ const FEATURES = [
 
 export function Pricing() {
 	return (
-		<Section id="pricing" tone="base">
+		<Section className="border-white/8 border-y" id="pricing" tone="base">
 			<Container>
 				<SectionHeading
 					align="center"

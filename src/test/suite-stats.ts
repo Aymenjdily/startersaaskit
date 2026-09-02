@@ -2,11 +2,11 @@
 // Do not edit by hand — your change will be overwritten by the next run.
 
 export const SUITE_STATS = {
-	files: 63,
-	total: 1207,
+	files: 64,
+	total: 1213,
 	byDir: {
 		src: 4,
-		"src/components": 593,
+		"src/components": 599,
 		"src/lib": 490,
 		"src/routes": 110,
 		"src/test": 10,

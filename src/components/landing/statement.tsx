@@ -22,28 +22,35 @@ function MobileBr() {
 
 export function Statement() {
 	return (
-		<section className="mx-auto w-full max-w-[1348px] px-4 pt-15 pb-0 md:px-6 md:pt-20">
-			<FadeUp>
-				<h2 className="w-full text-center font-medium text-[clamp(22px,6vw,36px)] leading-[1.15] tracking-[-0.03em] text-ink max-[480px]:text-[8vw] md:text-h2">
-					Any stack.
-					<MobileBr /> Any provider.
-					<MobileBr /> Already wired.
-				</h2>
+		/* The rule is on a full-width wrapper, not on the capped column inside
+		   it: every other band's border spans the viewport, and one that stopped
+		   at 1348px would read as a ragged edge rather than a divider.
+		   Only a top border — the grid below is this heading's own content, so a
+		   line between them would cut a heading off from what it introduces. */
+		<section className="border-white/8 border-t">
+			<div className="mx-auto w-full max-w-[1348px] px-4 pt-15 pb-0 md:px-6 md:pt-20">
+				<FadeUp>
+					<h2 className="w-full text-center font-medium text-[clamp(22px,6vw,36px)] leading-[1.15] tracking-[-0.03em] text-ink max-[480px]:text-[8vw] md:text-h2">
+						Any stack.
+						<MobileBr /> Any provider.
+						<MobileBr /> Already wired.
+					</h2>
 
-				{/**
-				 * A supporting line, because the heading had none.
-				 *
-				 * This is the grid's header, and it was the only heading on the page
-				 * standing on its own — every other section pairs one with a sentence.
-				 * Alone above a wall of tiles it read as a caption someone forgot to
-				 * finish rather than as the start of a band.
-				 */}
-				<p className="mx-auto mt-5 max-w-[640px] text-center text-body-lg leading-[1.5] tracking-[-0.01em] text-ink-soft">
-					Every tile below is a module the generator can wire for you. No single
-					starter contains all of them — the grid is the menu, and the questions
-					are what pick from it.
-				</p>
-			</FadeUp>
+					{/**
+					 * A supporting line, because the heading had none.
+					 *
+					 * This is the grid's header, and it was the only heading on the page
+					 * standing on its own — every other section pairs one with a sentence.
+					 * Alone above a wall of tiles it read as a caption someone forgot to
+					 * finish rather than as the start of a band.
+					 */}
+					<p className="mx-auto mt-5 max-w-[640px] text-center text-body-lg leading-[1.5] tracking-[-0.01em] text-ink-soft">
+						Every tile below is a module the generator can wire for you. No
+						single starter contains all of them — the grid is the menu, and the
+						questions are what pick from it.
+					</p>
+				</FadeUp>
+			</div>
 		</section>
 	);
 }

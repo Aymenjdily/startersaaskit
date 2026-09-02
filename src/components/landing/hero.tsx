@@ -3,7 +3,11 @@ import { SIGN_UP_HREF } from "@/lib/brand";
 
 export function Hero() {
 	return (
-		<section className="relative flex flex-col items-center overflow-hidden px-gutter pt-[180px] pb-[30px] sm:pt-[200px] sm:pb-10 md:px-6 md:pt-[240px] md:pb-8">
+		/* Top rule only. The bottom one drew a line directly above the trust
+		   strip, which is the one band on the page that carries no borders —
+		   the strip has none of its own, so the hero's was the line showing up
+		   over it. */
+		<section className="relative flex flex-col items-center overflow-hidden border-white/8 border-t px-gutter pt-[180px] pb-[30px] sm:pt-[200px] sm:pb-10 md:px-6 md:pt-[240px] md:pb-8">
 			<div className="relative z-10 mb-8 w-full max-w-content text-left md:mb-15">
 				<p
 					className="hero-in mb-4 text-[14px] font-medium text-ink-soft"
@@ -54,24 +58,24 @@ export function Hero() {
 				</div>
 			</div>
 
-		<div className="hero-image-in relative z-10 w-full max-w-content">
-			<div
-				aria-hidden
-				className="-z-10 pointer-events-none absolute inset-x-[10%] top-[10%] bottom-[20%] rounded-full bg-pine/20 blur-[120px]"
-			/>
-			<div className="overflow-hidden rounded-xl border border-line bg-elevated">
-				<video
-					className="h-full w-full object-cover"
-					autoPlay
-					loop
-					muted
-					playsInline
-					poster="/intro-poster.svg"
-					preload="metadata"
-					src="/intro.mp4"
+			<div className="hero-image-in relative z-10 w-full max-w-content">
+				<div
+					aria-hidden
+					className="-z-10 pointer-events-none absolute inset-x-[10%] top-[10%] bottom-[20%] rounded-full bg-pine/20 blur-[120px]"
 				/>
+				<div className="overflow-hidden rounded-xl border border-line bg-elevated">
+					<video
+						className="h-full w-full object-cover"
+						autoPlay
+						loop
+						muted
+						playsInline
+						poster="/intro-poster.svg"
+						preload="metadata"
+						src="/intro.mp4"
+					/>
+				</div>
 			</div>
-		</div>
 		</section>
 	);
 }

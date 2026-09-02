@@ -5,6 +5,7 @@ import { FinalCta } from "@/components/landing/final-cta";
 import { Hero } from "@/components/landing/hero";
 import { HowItWorks } from "@/components/landing/how-it-works";
 import { Pricing } from "@/components/landing/pricing";
+import { Reels } from "@/components/landing/reels";
 import { Statement } from "@/components/landing/statement";
 import { SwapAnything } from "@/components/landing/swap-anything";
 import { TrustStrip } from "@/components/landing/trust-strip";
@@ -32,6 +33,7 @@ function Home() {
 				<SwapAnything />
 				<AiOptimized />
 				<HowItWorks />
+				<Reels />
 				<Pricing />
 				<FinalCta />
 			</main>

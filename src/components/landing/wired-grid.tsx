@@ -156,89 +156,95 @@ export function WiredGrid() {
 	const { tiles, reduced } = useWiredTiles();
 
 	return (
-		<section
-			/* Tight to the heading above it — this grid is that heading's content, and
+		/* Only a bottom border, on a full-width wrapper. The heading above is
+		   part of this band — it carries the band's top rule — so a second line
+		   between the two would split the grid from the sentence introducing it.
+		   The wrapper exists because the column below is capped at 1348px and a
+		   rule that stopped there would not line up with the other bands'. */
+		<section className="border-white/8 border-b" id="features">
+			<div
+				/* Tight to the heading above it — this grid is that heading's content, and
 			   a section-sized gap between the two made them read as separate bands. */
-			className="relative mx-auto w-full max-w-[1348px] overflow-hidden pt-8 pb-[50px] sm:pt-10 sm:pb-20"
-			id="features"
-		>
-			{/* Edge fades so reflowing tiles dissolve into the page rather than clipping. */}
-			<div
-				aria-hidden="true"
-				className="pointer-events-none absolute inset-y-0 left-0 z-2 w-20 bg-[linear-gradient(to_right,var(--color-base)_20%,transparent)] sm:w-[200px]"
-			/>
-			<div
-				aria-hidden="true"
-				className="pointer-events-none absolute inset-y-0 right-0 z-2 w-20 bg-[linear-gradient(to_left,var(--color-base)_20%,transparent)] sm:w-[200px]"
-			/>
+				className="relative mx-auto w-full max-w-[1348px] overflow-hidden pt-8 pb-[50px] sm:pt-10 sm:pb-20"
+			>
+				{/* Edge fades so reflowing tiles dissolve into the page rather than clipping. */}
+				<div
+					aria-hidden="true"
+					className="pointer-events-none absolute inset-y-0 left-0 z-2 w-20 bg-[linear-gradient(to_right,var(--color-base)_20%,transparent)] sm:w-[200px]"
+				/>
+				<div
+					aria-hidden="true"
+					className="pointer-events-none absolute inset-y-0 right-0 z-2 w-20 bg-[linear-gradient(to_left,var(--color-base)_20%,transparent)] sm:w-[200px]"
+				/>
 
-			<ul className="grid grid-cols-2 gap-1.5 px-4 sm:grid-cols-3 sm:gap-2 sm:px-6 lg:grid-cols-6">
-				{tiles.map((tile) => {
-					const task = TASKS[tile.taskIndex];
-					const done = tile.phase === "done";
+				<ul className="grid grid-cols-2 gap-1.5 px-4 sm:grid-cols-3 sm:gap-2 sm:px-6 lg:grid-cols-6">
+					{tiles.map((tile) => {
+						const task = TASKS[tile.taskIndex];
+						const done = tile.phase === "done";
 
-					return (
-						<li
-							key={tile.slot}
-							style={
-								tile.cycle === 0 && !reduced
-									? { animationDelay: `${tile.slot * STAGGER_MS}ms` }
-									: undefined
-							}
-							className={cn(
-								// Explicit radii: `rounded-lg` resolves against shadcn's
-								// `--radius: 0.75rem` here, which is 12px, not the 8px we want.
-								"flex h-22 flex-col gap-2 rounded-[8px] border border-white/8 bg-white/3 p-3 sm:h-[110px] sm:gap-3 sm:rounded-[10px] sm:p-4",
-								// The reference caps mobile at 10 tiles.
-								"max-sm:[&:nth-child(n+11)]:hidden",
-								tile.phase === "exiting" ? "tile-out" : "tile-in",
-							)}
-						>
-							<div className="flex items-center gap-2 sm:gap-2.5">
-								<BrandGlyph
-									icon={task.icon}
-									className="size-[22px] text-ink-soft sm:size-7"
-								/>
-								<div className="flex min-w-0 flex-col gap-px">
-									<span className="truncate font-medium text-[11px] text-ink-soft sm:text-[12px]">
-										{task.module}
-									</span>
-									<span className="truncate text-[10px] text-ink-muted/70 sm:text-[11px]">
-										{task.detail}
+						return (
+							<li
+								key={tile.slot}
+								style={
+									tile.cycle === 0 && !reduced
+										? { animationDelay: `${tile.slot * STAGGER_MS}ms` }
+										: undefined
+								}
+								className={cn(
+									// Explicit radii: `rounded-lg` resolves against shadcn's
+									// `--radius: 0.75rem` here, which is 12px, not the 8px we want.
+									"flex h-22 flex-col gap-2 rounded-[8px] border border-white/8 bg-white/3 p-3 sm:h-[110px] sm:gap-3 sm:rounded-[10px] sm:p-4",
+									// The reference caps mobile at 10 tiles.
+									"max-sm:[&:nth-child(n+11)]:hidden",
+									tile.phase === "exiting" ? "tile-out" : "tile-in",
+								)}
+							>
+								<div className="flex items-center gap-2 sm:gap-2.5">
+									<BrandGlyph
+										icon={task.icon}
+										className="size-[22px] text-ink-soft sm:size-7"
+									/>
+									<div className="flex min-w-0 flex-col gap-px">
+										<span className="truncate font-medium text-[11px] text-ink-soft sm:text-[12px]">
+											{task.module}
+										</span>
+										<span className="truncate text-[10px] text-ink-muted/70 sm:text-[11px]">
+											{task.detail}
+										</span>
+									</div>
+								</div>
+
+								<div className="flex items-center gap-1.5">
+									<span
+										className={cn(
+											"size-[5px] shrink-0 rounded-full sm:size-1.5",
+											done ? "bg-sage" : "dot-pulse bg-brand",
+										)}
+									/>
+									<span
+										className={cn(
+											"font-mono text-[9px] sm:text-[10px]",
+											done ? "text-sage" : "text-ink-muted/70",
+										)}
+									>
+										{done ? "Wired" : "Wiring"}
 									</span>
 								</div>
-							</div>
 
-							<div className="flex items-center gap-1.5">
-								<span
-									className={cn(
-										"size-[5px] shrink-0 rounded-full sm:size-1.5",
-										done ? "bg-sage" : "dot-pulse bg-brand",
-									)}
-								/>
-								<span
-									className={cn(
-										"font-mono text-[9px] sm:text-[10px]",
-										done ? "text-sage" : "text-ink-muted/70",
-									)}
-								>
-									{done ? "Wired" : "Wiring"}
-								</span>
-							</div>
-
-							<div className="h-0.5 overflow-hidden rounded-[1px] bg-white/6">
-								<div
-									className={cn(
-										"h-full rounded-[1px] transition-[width] duration-400 ease-out",
-										done ? "bg-sage" : "bg-white/15",
-									)}
-									style={{ width: done ? "100%" : "0%" }}
-								/>
-							</div>
-						</li>
-					);
-				})}
-			</ul>
+								<div className="h-0.5 overflow-hidden rounded-[1px] bg-white/6">
+									<div
+										className={cn(
+											"h-full rounded-[1px] transition-[width] duration-400 ease-out",
+											done ? "bg-sage" : "bg-white/15",
+										)}
+										style={{ width: done ? "100%" : "0%" }}
+									/>
+								</div>
+							</li>
+						);
+					})}
+				</ul>
+			</div>
 		</section>
 	);
 }

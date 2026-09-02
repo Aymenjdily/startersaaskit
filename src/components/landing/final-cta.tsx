@@ -25,7 +25,7 @@ function DotField() {
 
 export function FinalCta() {
 	return (
-		<section className="relative flex min-h-[620px] items-center justify-center overflow-hidden bg-base pb-0 text-center md:min-h-[720px]">
+		<section className="relative flex min-h-[620px] items-center justify-center overflow-hidden border-white/8 border-y bg-base pb-0 text-center md:min-h-[720px]">
 			{/* The field is out of flow. In flow it pushed the ask into the top
 			    third, because most of its height is masked away and the eye does
 			    not count space it cannot see. */}

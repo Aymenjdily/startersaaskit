@@ -244,7 +244,7 @@ export function HowItWorks() {
 	const active = activeStep(shown);
 
 	return (
-		<Section id="how-it-works" tone="base">
+		<Section className="border-white/8 border-y" id="how-it-works" tone="base">
 			<Container>
 				<FadeUp className="mb-12 md:mb-14">
 					<SectionHeading

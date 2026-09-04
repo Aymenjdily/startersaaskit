@@ -7,6 +7,7 @@ import { HowItWorks } from "@/components/landing/how-it-works";
 import { Pricing } from "@/components/landing/pricing";
 import { Reels } from "@/components/landing/reels";
 import { Statement } from "@/components/landing/statement";
+import { StaysCurrent } from "@/components/landing/stays-current";
 import { SwapAnything } from "@/components/landing/swap-anything";
 import { TrustStrip } from "@/components/landing/trust-strip";
 import { WiredGrid } from "@/components/landing/wired-grid";
@@ -28,6 +29,7 @@ function Home() {
 			<main className="min-h-screen bg-base">
 				<Hero />
 				<TrustStrip />
+				<StaysCurrent />
 				<Statement />
 				<WiredGrid />
 				<SwapAnything />

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as BuildRouteImport } from './routes/build'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as GenerateRouteImport } from './routes/generate'
@@ -35,6 +36,11 @@ const IndexRoute = IndexRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BuildRoute = BuildRouteImport.update({
+  id: '/build',
+  path: '/build',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -116,6 +122,7 @@ const StartersIdRoute = StartersIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/build': typeof BuildRoute
   '/dashboard': typeof DashboardRoute
   '/docs': typeof DocsRoute
   '/generate': typeof GenerateRoute
@@ -135,6 +142,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/build': typeof BuildRoute
   '/dashboard': typeof DashboardRoute
   '/docs': typeof DocsRoute
   '/generate': typeof GenerateRoute
@@ -155,6 +163,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/build': typeof BuildRoute
   '/dashboard': typeof DashboardRoute
   '/docs': typeof DocsRoute
   '/generate': typeof GenerateRoute
@@ -176,6 +185,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/build'
     | '/dashboard'
     | '/docs'
     | '/generate'
@@ -195,6 +205,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/build'
     | '/dashboard'
     | '/docs'
     | '/generate'
@@ -214,6 +225,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/build'
     | '/dashboard'
     | '/docs'
     | '/generate'
@@ -234,6 +246,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  BuildRoute: typeof BuildRoute
   DashboardRoute: typeof DashboardRoute
   DocsRoute: typeof DocsRoute
   GenerateRoute: typeof GenerateRoute
@@ -265,6 +278,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/build': {
+      id: '/build'
+      path: '/build'
+      fullPath: '/build'
+      preLoaderRoute: typeof BuildRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -378,6 +398,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  BuildRoute: BuildRoute,
   DashboardRoute: DashboardRoute,
   DocsRoute: DocsRoute,
   GenerateRoute: GenerateRoute,

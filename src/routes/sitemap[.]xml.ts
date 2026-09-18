@@ -18,6 +18,7 @@ import { absolute } from "@/lib/seo";
  */
 const PATHS = [
 	"/",
+	"/build",
 	"/docs",
 	"/sign-up",
 	"/sign-in",

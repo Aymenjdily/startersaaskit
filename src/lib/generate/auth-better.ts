@@ -1,4 +1,5 @@
 import type { StarterAnswers } from "@/lib/starter-questions";
+import { claudeSkill } from "./claude-skill";
 import type { Fragment } from "./fragments";
 
 /**
@@ -508,6 +509,50 @@ export function betterAuthFragment(answers: StarterAnswers): Fragment {
 	const next = answers.framework === "nextjs";
 
 	const files: Record<string, string> = {
+		...claudeSkill(
+			"better_auth",
+			"Better Auth — the cookie plugin every framework needs, the adapter this project picked, and why the schema lives where it does. Use when touching src/lib/auth.ts, auth-client.ts, or sign-in/sign-up.",
+			`
+## The cookie plugin is required, not an optimisation
+
+\`src/lib/auth.ts\` registers \`nextCookies()\` (Next) or
+\`tanstackStartCookies()\` (TanStack Start) in its \`plugins\` array. Without
+it, the \`Set-Cookie\` header on a successful sign-in response is dropped by
+the framework's own response handling, and every request afterwards looks
+signed out — the sign-in call itself appears to succeed. If sign-in "works"
+but the session never sticks, this plugin is the first thing to check.
+
+## Nothing but this file, \`auth-client.ts\` and \`src/server/session.ts\` may import \`better-auth\`
+
+Replacing the provider later means rewriting exactly those three files.
+Importing \`better-auth\` or an adapter directly from a component or a route
+defeats that boundary.
+
+## The database adapter matches the ORM this project chose
+
+\`src/lib/auth.ts\`'s \`database\` option is built by \`adapterCall()\` at
+generation time for whichever ORM was picked — \`drizzleAdapter\`,
+\`prismaAdapter\`, or \`mongodbAdapter\` (which takes its own \`MongoClient\`
+rather than reaching into a Mongoose connection, since Better Auth's Mongo
+adapter wants a driver-level \`Db\`). Do not swap the adapter without also
+changing which ORM the rest of the project uses.
+
+## The schema is Better Auth's, not this project's design
+
+If the ORM is Drizzle, \`src/db/schema.ts\` was replaced with the \`user\`,
+\`session\`, \`account\` and \`verification\` tables Better Auth expects — column
+names and shapes are its contract, not a convention this project chose, so
+renaming a column there breaks sign-in at the database level rather than at
+compile time. Add your own tables beside them, referencing \`user.id\`; do not
+rename theirs.
+
+## Environment
+
+\`BETTER_AUTH_URL\` is validated as a real URL (\`z.url()\`) because the SDK
+itself rejects a base URL that is not one, and does so from inside a
+dependency rather than with a message naming the variable.
+`,
+		),
 		"src/lib/auth.ts": `import { betterAuth } from "better-auth";
 ${cookies.import}
 ${adapter.imports}

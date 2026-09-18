@@ -21,6 +21,7 @@ const complete: StarterAnswers = {
 	auth: "supabase_auth",
 	billing: "stripe",
 	email: "resend",
+	jobs: "none",
 	packageManager: "pnpm",
 	landing: "editorial",
 	project: "my-app",

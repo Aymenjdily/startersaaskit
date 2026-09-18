@@ -4,6 +4,10 @@ import { betterAuthFragment } from "./auth-better";
 import { clerkAuthFragment } from "./auth-clerk";
 import { neonAuthFragment } from "./auth-neon";
 import { supabaseAuthFragment } from "./auth-supabase";
+import { claudeSkill } from "./claude-skill";
+import { inngestJobsFragment } from "./jobs-inngest";
+import { qstashJobsFragment } from "./jobs-qstash";
+import { triggerJobsFragment } from "./jobs-trigger";
 import { landingFragment } from "./landing";
 import { BASE_STYLES } from "./styles";
 
@@ -537,6 +541,15 @@ nobody can hold in their head gets ignored.
 Read \`ARCHITECTURE.md\`. It says where each kind of file goes, and the table
 near the bottom answers most "where should this live?" questions directly.
 
+Then check \`.claude/skills/\`. Every library this project was generated with —
+its framework, database, ORM, auth provider, and any billing or email
+provider — has its own skill there, named after it. Each one exists because
+the library has a rule that is easy to get wrong and does not show up in its
+own error messages: a plugin that has to be registered or sessions quietly
+stop persisting, a route tree that has to be generated before the type
+checker can see it. Read the skill for whatever you are about to touch before
+you touch it, not after something breaks.
+
 ## Conventions
 
 - \`@/\` resolves to \`src/\`. Prefer it over relative paths that climb.
@@ -610,6 +623,46 @@ const NEXTJS: Fragment = {
 	devDependencies: { ...REACT_TYPES, ...TAILWIND_POSTCSS },
 	scripts: { dev: "next dev", build: "next build", start: "next start" },
 	files: {
+		...claudeSkill(
+			"nextjs",
+			"Next.js App Router conventions for this project — routing, metadata, route handlers. Use when adding a page, a layout, or an API route.",
+			`
+## Where routes live
+
+Every route is under \`src/app/\`, not \`app/\` at the repository root — this
+project keeps all source inside \`src/\`. Two route groups split the app
+without splitting the URL: \`(marketing)\` for the public pages and \`(app)\`
+for the signed-in ones. A route group's parentheses are never part of the
+URL, so \`src/app/(marketing)/page.tsx\` serves \`/\`.
+
+## Metadata comes from one place
+
+\`src/lib/seo.ts\` exports \`SITE\`, \`canonical()\`, \`pageTitle()\`, \`metaTags()\`
+and \`jsonLd()\`. \`src/app/layout.tsx\` builds its \`Metadata\` object from these.
+Add a new page's title through \`pageTitle("Pricing")\`, not by writing a
+string — the template in the root layout's \`metadata.title.template\` applies
+to it automatically. Never hand-write an Open Graph or Twitter tag; that is
+exactly the duplication \`lib/seo.ts\` exists to prevent.
+
+\`metadataBase\` is set in the root layout for a reason: without it, every
+Open Graph and Twitter URL Next emits is relative, and crawlers — which fetch
+metadata without a page to resolve it against — drop them silently.
+
+## Route handlers, not pages, for anything that returns data
+
+An API route is a \`route.ts\` file exporting \`GET\`, \`POST\`, etc. — see
+\`src/app/api/health/route.ts\`. It runs on the server, so it may import
+\`@/server/*\` and \`@/lib/env\`; a page component under \`(marketing)\` or
+\`(app)\` may not import \`@/server/*\` unless it is itself an \`async\` Server
+Component, and never as a Client Component (\`"use client"\`).
+
+## Before you say a change works
+
+\`next build\` also runs the type checker and lint over every route, so a
+route that fails \`npm run typecheck\` will fail the build too — check it
+locally first, that feedback loop is faster.
+`,
+		),
 		...TAILWIND_POSTCSS_FILES,
 		"next.config.ts": `import type { NextConfig } from "next";
 
@@ -844,6 +897,50 @@ const TANSTACK_START: Fragment = {
 		typecheck: "tsr generate && tsc --noEmit",
 	},
 	files: {
+		...claudeSkill(
+			"tanstack_start",
+			"TanStack Start file-based routing, the generated route tree, and server functions. Use when adding a route or anything that must run only on the server.",
+			`
+## The route tree is generated, not written
+
+\`src/routeTree.gen.ts\`, imported by \`src/router.tsx\`, does not exist until
+\`tsr generate\` has run. \`dev\` and \`build\` regenerate it through the Vite
+plugin automatically; \`typecheck\` does not go through Vite at all, which is
+why the \`typecheck\` script is \`tsr generate && tsc --noEmit\` rather than
+plain \`tsc\`. If you run the type checker any other way — an editor's "check
+this file" command, a bare \`tsc\`, a CI step copied from a different
+project — run \`npm run generate-routes\` first, or it fails on a file it
+insists does not exist.
+
+## Where routes live
+
+Every route file is under \`src/routes/\`. \`src/routes/__root.tsx\` is the
+document shell — it renders \`<html>\` itself, because unlike Next, TanStack
+Start has no implicit one. A new top-level page is a new file directly under
+\`src/routes/\`; \`createFileRoute\` reads its own URL from the file's path, so
+renaming the file changes the route.
+
+A pathless layout route (a leading underscore, like \`_authed.tsx\`) applies
+\`beforeLoad\` or \`component\` to everything nested under it without adding a
+path segment — that is how the signed-in area is guarded in one place rather
+than at the top of every page.
+
+## Server-only code
+
+\`createServerFn()\` marks a function as server-only; calling it from a
+component compiles to a fetch instead of inlining the body into the client
+bundle. Anything importing \`@/server/*\` (which carries the \`server-only\`
+import) must be reached through a server function or a route's own
+\`server.handlers\`, never called directly from client code.
+
+## The metadata pattern
+
+\`__root.tsx\`'s \`head()\` returns \`meta\`, \`links\` and \`scripts\` arrays built
+from \`src/lib/seo.ts\` — \`metaTags()\`, \`canonical()\`, \`jsonLd()\`. Add a page's
+title through that module's helpers rather than a literal string, so it stays
+in step with the Next starter's metadata, which is built from the same file.
+`,
+		),
 		/**
 		 * `import appCss from "./styles.css?url"` is a Vite feature, not a
 		 * TypeScript one. Without this reference `typecheck` fails on the query
@@ -1035,6 +1132,44 @@ const REACT_VITE: Fragment = {
 		preview: "vite preview",
 	},
 	files: {
+		...claudeSkill(
+			"react_vite",
+			"A browser-only React + Vite app: no server, no secrets, public env only. Use when adding a route, reading configuration, or reaching for data.",
+			`
+## There is no server
+
+This is the one framework choice with nothing behind it but a static bundle.
+\`src/server/\` and \`src/lib/env.ts\` do not exist in this project — not
+because they were left out, but because everything shipped to the browser is
+readable by every visitor, so there is nowhere to put a secret. Do not add
+either back. If a feature seems to need a server (a secret API key, a
+privileged database write), it needs a real backend this generator does not
+provide, not a workaround inside this app.
+
+## Configuration comes from \`public-env.ts\`, always
+
+\`src/lib/public-env.ts\` is the only environment module. Every value in it is
+compiled into the bundle at build time and is public by definition — that is
+why nothing in it is a secret and everything in it must stay that way.
+Reading \`import.meta.env\` anywhere outside this file skips the validation it
+does and reintroduces the bug it exists to prevent; \`src/lib/env.test.ts\`'s
+sibling check enforces this on the server-backed frameworks, and the same
+rule applies here even without that test.
+
+## Routing
+
+\`src/routes/router.tsx\` builds one \`createBrowserRouter\` table; a new page
+is a new entry there and a new file beside \`home.tsx\`, not a nested
+\`<Routes>\` inside a component.
+
+## If the database is Supabase
+
+Data access goes through \`src/lib/supabase.ts\`, built from the publishable
+anon key. Row Level Security policies on the database — not the secrecy of
+that key — are what protect a table; a table with RLS off is world-readable
+and world-writable the moment this app can reach it.
+`,
+		),
 		"src/vite-env.d.ts": `/// <reference types="vite/client" />
 `,
 		"vite.config.ts": `import { fileURLToPath } from "node:url";
@@ -1193,6 +1328,32 @@ const COMPONENTS: Record<string, Fragment> = {
 			"tailwind-merge": "^3.3.1",
 		},
 		files: {
+			...claudeSkill(
+				"shadcn",
+				"shadcn/ui conventions — components are copied into the repo, not imported from a package. Use when adding or styling a UI primitive.",
+				`
+## There is no \`shadcn\` package to import from
+
+Every component is source you own, copied under \`src/components/ui/\`, not a
+dependency in \`package.json\`. \`src/components/ui/button.tsx\` is already one,
+built with \`class-variance-authority\` and merged with \`cn()\` from
+\`src/lib/utils.ts\` — follow its shape for a new primitive rather than
+inventing a different pattern.
+
+To add one from the shadcn registry rather than writing it by hand, run
+\`npx shadcn@latest add <component>\` after installing dependencies; it reads
+\`components.json\` (already generated here) to know the style, the alias for
+\`@/components\`, and which file is the Tailwind entry point (\`src/styles.css\`).
+
+## Styling
+
+Compose with \`cn(...)\` (\`clsx\` + \`tailwind-merge\`) so a later utility class
+wins a conflict instead of both landing in the class list — see
+\`src/lib/utils.ts\`. Colour and radius tokens follow the "new-york" style and
+the \`neutral\` base colour declared in \`components.json\`; keep new
+components consistent with that palette rather than introducing another one.
+`,
+			),
 			"components.json": `${JSON.stringify(
 				{
 					$schema: "https://ui.shadcn.com/schema.json",
@@ -1209,12 +1370,126 @@ const COMPONENTS: Record<string, Fragment> = {
 	},
 	mantine: {
 		dependencies: { "@mantine/core": "^8.0.0", "@mantine/hooks": "^8.0.0" },
+		files: claudeSkill(
+			"mantine",
+			"Mantine UI conventions — the provider it needs to be wrapped in, and its own stylesheet. Use when adding or styling a component.",
+			`
+## It needs a provider, and it is not wired up yet
+
+Mantine components read theme and colour scheme from context. Wrap the app
+in \`MantineProvider\` from \`@mantine/core\` — in the root layout for Next,
+\`__root.tsx\` for TanStack Start, or around the router in \`main.tsx\` for
+React + Vite — before using any component from the library. Without it,
+components render with broken or missing styles rather than failing loudly.
+
+## Its stylesheet is not Tailwind
+
+\`import "@mantine/core/styles.css"\` once, near the provider. Mantine ships
+its own CSS rather than Tailwind utility classes, so \`src/styles.css\`'s
+\`@import "tailwindcss"\` does not style Mantine's own components — Tailwind
+classes still work on your own markup around them.
+
+## Hooks
+
+\`@mantine/hooks\` (already a dependency) is the idiomatic source for the
+small utilities — \`useDisclosure\`, \`useMediaQuery\`, \`useLocalStorage\` — that
+a hand-rolled \`useState\`/\`useEffect\` pair would otherwise reimplement.
+`,
+		),
 	},
-	chakra: { dependencies: { "@chakra-ui/react": "^3.0.0" } },
+	chakra: {
+		dependencies: { "@chakra-ui/react": "^3.0.0" },
+		files: claudeSkill(
+			"chakra",
+			"Chakra UI conventions — the provider it needs, and where its own token system lives. Use when adding or styling a component.",
+			`
+## It needs a provider, and it is not wired up yet
+
+Every Chakra component reads its theme through \`ChakraProvider\` (Chakra UI
+v3) from \`@chakra-ui/react\`. Wrap the app in it — root layout for Next,
+\`__root.tsx\` for TanStack Start, around the router in \`main.tsx\` for React
++ Vite — before rendering any component from the library.
+
+## Styling is a prop system, not utility classes
+
+Chakra components take style props directly (\`<Box p={4} bg="gray.100">\`)
+resolved against its own token scale, which is separate from Tailwind's.
+\`src/styles.css\`'s Tailwind classes still work on your own \`className\`
+props; they do not affect a Chakra component's internal styling, and a
+Chakra component's style props have no effect on the rest of the page.
+
+## v3, not v2
+
+Chakra UI v3 restructured composite components (\`Menu\`, \`Modal\`, \`Select\`)
+into anatomy-based subcomponents rather than the monolithic v2 API — read the
+version actually installed in \`package.json\` before writing against
+remembered v2 patterns.
+`,
+		),
+	},
 	mui: {
 		dependencies: { "@mui/material": "^7.0.0", "@emotion/react": "^11.14.0" },
+		files: claudeSkill(
+			"mui",
+			"MUI (Material UI) conventions — the theme provider and baseline it needs, and its Emotion-based styling. Use when adding or styling a component.",
+			`
+## It needs two things wrapped around the app, not one
+
+\`ThemeProvider\` from \`@mui/material/styles\` supplies the theme every
+component reads; \`CssBaseline\` resets the page to Material's own baseline
+styles. Both belong near the root — Next's root layout, TanStack Start's
+\`__root.tsx\`, or around the router in \`main.tsx\` for React + Vite — and
+skipping \`CssBaseline\` is the usual reason MUI components render with the
+browser's default spacing and font rather than Material's.
+
+## Server-rendered frameworks need an Emotion cache
+
+On Next.js specifically, MUI's \`sx\` prop and \`styled()\` generate class names
+through Emotion at render time; without an Emotion cache configured for App
+Router (\`@mui/material-nextjs\`'s \`AppRouterCacheProvider\`), styles can flash
+unstyled on first paint because the server-generated class names do not match
+the client's. This project's generated \`layout.tsx\` does not include it —
+add it if that flash shows up.
+
+## Styling
+
+\`sx={{ ... }}\` and \`styled()\` are Emotion, resolved against the MUI theme's
+tokens — a separate system from the Tailwind classes already in
+\`src/styles.css\`. Both can coexist on the same page; neither reads the
+other's scale.
+`,
+		),
 	},
-	heroui: { dependencies: { "@heroui/react": "^2.7.0" } },
+	heroui: {
+		dependencies: { "@heroui/react": "^2.7.0" },
+		files: claudeSkill(
+			"heroui",
+			"HeroUI conventions — the provider and Tailwind plugin it needs. Use when adding or styling a component.",
+			`
+## It needs a provider, and it is built on Tailwind
+
+HeroUI components read their theme through \`HeroUIProvider\` from
+\`@heroui/react\`. Wrap the app in it — root layout for Next, \`__root.tsx\` for
+TanStack Start, around the router in \`main.tsx\` for React + Vite.
+
+Unlike Mantine, Chakra and MUI, HeroUI is a Tailwind-based library: its
+components are styled with Tailwind classes and need its plugin registered
+wherever \`@import "tailwindcss"\` lives in \`src/styles.css\`
+(\`@plugin "@heroui/react/tailwind-plugin"\` or the config-based equivalent
+for the version installed) — without it, the classes HeroUI generates
+internally resolve to nothing, the same silent-no-styles failure the
+project's own Tailwind pipeline setup guards against for the framework CSS.
+
+## Routing for navigation-aware components
+
+Some HeroUI components (\`Link\`, \`Tabs\` used for navigation) accept a router
+integration so they navigate via the framework's client-side router instead
+of a full page load — wire it to \`next/link\`, \`@tanstack/react-router\`'s
+\`Link\`, or \`react-router-dom\`'s, matching whichever framework this project
+uses.
+`,
+		),
+	},
 	/**
 	 * Not a library, and it needs no dependency of its own: Tailwind itself is
 	 * wired by the framework fragment, because `src/styles.css` imports it
@@ -1235,6 +1510,36 @@ const DATABASES: Record<string, Fragment> = {
 				"postgresql://user:pass@localhost:5432/app",
 			],
 		],
+		files: claudeSkill(
+			"neon",
+			"Neon Postgres — the serverless HTTP driver this project uses, and why it is not a normal connection pool. Use when writing a query or debugging one that hangs.",
+			`
+## The driver speaks HTTP, not a TCP connection pool
+
+\`src/db/client.ts\` builds its client with \`neon()\` from
+\`@neondatabase/serverless\` over \`drizzle-orm/neon-http\` — each query is a
+single HTTP request, not a checkout from a long-lived pool. There is no
+"connection" to leak or exhaust the way there is with a traditional Postgres
+driver, and there is also no session state: multi-statement transactions
+behave differently than they would over a raw TCP connection, and
+session-level settings (\`SET search_path\`, temp tables) do not persist
+between queries the way they would with \`pg\`.
+
+## The connection string is the only credential
+
+\`DATABASE_URL\` is read once, in \`src/lib/env.ts\`, and passed to \`neon()\` in
+\`src/db/client.ts\` — nowhere else should construct a client or read this
+variable directly.
+
+## Schema and migrations
+
+The table definitions live in \`src/db/schema.ts\` (Drizzle) or
+\`prisma/schema.prisma\` (Prisma), never written by hand against the database.
+Push a schema change with \`npm run db:push\`; do not hand-run \`CREATE TABLE\`
+against the Neon dashboard's SQL editor and let the schema file drift out of
+sync with what actually exists.
+`,
+		),
 	},
 	supabase: {
 		dependencies: { "@supabase/supabase-js": "^2.57.0" },
@@ -1256,6 +1561,41 @@ const DATABASES: Record<string, Fragment> = {
 			],
 			["SUPABASE_ANON_KEY", "Publishable key. Never the service-role key"],
 		],
+		files: claudeSkill(
+			"supabase",
+			"Supabase — the two ways this project can reach it (a server ORM, or the browser client with Row Level Security), and which one this stack uses. Use when writing a query or a policy.",
+			`
+## Which mode this project is in
+
+There are two entirely different shapes, chosen by the framework:
+
+- **A server framework (Next.js, TanStack Start)**: reached over the
+  Postgres wire protocol through \`DATABASE_URL\`, with the ORM you chose
+  (Drizzle or Prisma) in \`src/db/client.ts\`. Query it exactly like Neon or
+  any other Postgres — the fact that it is Supabase underneath is close to
+  incidental here.
+- **React + Vite (no server)**: reached at \`src/lib/supabase.ts\`, a client
+  built from \`SUPABASE_URL\` and the **publishable anon key** — never the
+  service-role key, which has no business in a browser bundle. Check which
+  file exists in this project before assuming the other pattern applies.
+
+## Row Level Security is not optional in the browser-only mode
+
+If \`src/lib/supabase.ts\` exists, the anon key is compiled into the bundle by
+design and reaches every visitor. RLS policies on each table are the entire
+security boundary — a table with RLS disabled is world-readable and
+world-writable the moment this app can reach it. Never suggest disabling RLS
+"to get it working"; that is the vulnerability, not a workaround for one.
+
+## Auth, if this project chose Supabase Auth
+
+Supabase owns the \`auth.users\` table; your own tables reference its \`id\` and
+nothing else. There is no schema to generate for users. Sessions live in
+cookies that expire — Next refreshes them in middleware, TanStack Start's
+server client refreshes on read — and skipping that step is the specific bug
+where everyone gets silently signed out after about an hour.
+`,
+		),
 	},
 	planetscale: {
 		dependencies: { "@planetscale/database": "^1.19.0" },
@@ -1266,6 +1606,34 @@ const DATABASES: Record<string, Fragment> = {
 				"mysql://user:pass@localhost:3306/app",
 			],
 		],
+		files: claudeSkill(
+			"planetscale",
+			"PlanetScale MySQL — the serverless HTTP driver, and the missing foreign keys that trip people coming from other MySQL hosts. Use when writing a query or a schema.",
+			`
+## No foreign key constraints
+
+PlanetScale does not support \`FOREIGN KEY\` constraints — its underlying
+sharding (Vitess) cannot enforce them across shards. \`src/db/schema.ts\` and
+any migration must express relationships without one: an indexed column
+referencing another table's id, with the application enforcing integrity
+rather than the database. Do not add a \`.references()\` call expecting
+Postgres-style enforcement; Drizzle will happily generate the SQL and
+PlanetScale will reject it.
+
+## The driver is HTTP, not a TCP pool
+
+\`@planetscale/database\` talks over HTTP the same way Neon's serverless
+driver does — no persistent connection to size a pool around, and no session
+state carried between queries.
+
+## Schema changes
+
+Push with \`npm run db:push\` (Drizzle) or \`npm run db:push\` (Prisma) rather
+than editing tables through the PlanetScale dashboard directly — otherwise
+\`src/db/schema.ts\` or \`prisma/schema.prisma\` stops describing what is
+actually there.
+`,
+		),
 	},
 	turso: {
 		dependencies: { "@libsql/client": "^0.15.0" },
@@ -1277,6 +1645,36 @@ const DATABASES: Record<string, Fragment> = {
 			],
 			["TURSO_AUTH_TOKEN", "Token with read/write on that database"],
 		],
+		files: claudeSkill(
+			"turso",
+			"Turso (libSQL) — two credentials instead of one connection string, and SQLite's type affinity. Use when writing a query or a schema.",
+			`
+## Two environment variables, not one
+
+Unlike every other database this generator supports, Turso needs
+\`TURSO_DATABASE_URL\` **and** \`TURSO_AUTH_TOKEN\` — the URL alone
+authenticates nothing. Both are read in \`src/lib/env.ts\` and passed to
+\`createClient()\` in \`src/db/client.ts\`; a query failing with an auth error
+almost always means one of the two is missing or stale, not that the query
+itself is wrong.
+
+## It is SQLite, with SQLite's typing rules
+
+\`src/db/schema.ts\` uses \`drizzle-orm/sqlite-core\` — columns have type
+affinity rather than a strict type, timestamps are stored as integers
+(\`{ mode: "timestamp" }\`), and there is no native boolean (stored as
+0/1 integers with \`{ mode: "boolean" }\`). Writing a column the way you would
+for Postgres or MySQL is the usual source of a schema that "works" until a
+value comes back the wrong shape.
+
+## Local vs. remote
+
+Turso can run as an embedded local file for development and sync to the
+remote database — this starter is generated pointed at the remote URL by
+default. Do not assume a local \`.db\` file exists unless one was explicitly
+set up.
+`,
+		),
 	},
 	mongodb: {
 		dependencies: { mongodb: "^6.10.0" },
@@ -1287,6 +1685,35 @@ const DATABASES: Record<string, Fragment> = {
 				"mongodb://localhost:27017/app",
 			],
 		],
+		files: claudeSkill(
+			"mongodb",
+			"MongoDB — a document store with no fixed schema at the database level, and how this project imposes one anyway. Use when adding a field or a query.",
+			`
+## The schema lives in the ORM, not the database
+
+MongoDB itself does not enforce a document shape. Whatever structure this
+project has comes entirely from the ORM layer: a Mongoose \`Schema\` in
+\`src/db/schema.ts\`, or a Prisma \`model\` in \`prisma/schema.prisma\`. Adding a
+field means adding it there first — writing an extra key onto a document
+directly will "work" (Mongo will store it) while leaving the ORM's types and
+the rest of the schema unaware it exists.
+
+## Connections are cached across hot reloads
+
+\`src/db/client.ts\` (Mongoose) or the shared Prisma client memoises the
+connection on \`globalThis\`. Every development save that re-imports the
+module reuses it instead of opening a new one — removing that caching is
+the specific bug where a dev server run for an afternoon exhausts the
+connection pool.
+
+## Ids
+
+Mongo's native id is an ObjectId, not a string. Mongoose exposes it as
+\`_id\`; Prisma's schema here maps it to \`id\` with \`@map("_id") @db.ObjectId\`.
+Compare and query with the type the ORM expects — a raw string comparison
+against an ObjectId field silently matches nothing.
+`,
+		),
 	},
 };
 
@@ -1480,6 +1907,41 @@ const BILLING: Record<string, Fragment> = {
 			["STRIPE_WEBHOOK_SECRET", "From `stripe listen`, or the dashboard"],
 		],
 		files: {
+			...claudeSkill(
+				"stripe",
+				"Stripe billing — checkout sessions and webhook verification as this project wires them. Use when touching src/lib/checkout.ts or any billing flow.",
+				`
+## Everything goes through \`src/lib/checkout.ts\`
+
+Nothing else in the app should import \`stripe\` directly. Starting a
+checkout is \`startCheckout(priceId, returnTo)\`; verifying a webhook is
+\`verifyWebhook(rawBody, signature)\`. Extend this module rather than reaching
+for the SDK from a route handler.
+
+## Webhook signatures need the raw body
+
+\`verifyWebhook\` checks the payload against \`STRIPE_WEBHOOK_SECRET\` using
+the **unparsed** request body. Running the request through \`request.json()\`
+or any body parser before this call changes the bytes the signature was
+computed over, and verification fails even for a genuine event from Stripe —
+this is the single most common way a Stripe webhook integration breaks, and
+it looks like a Stripe problem rather than a body-parsing order problem.
+
+## Keys
+
+\`STRIPE_SECRET_KEY\` is read only in \`src/lib/checkout.ts\`, server-side —
+never exposed through \`public-env.ts\`. A restricted key scoped to Checkout
+and webhooks is enough for everything this module does; there is no need to
+request a fully-privileged key for local development.
+
+## Local webhook testing
+
+\`stripe listen --forward-to localhost:3000/api/webhooks/stripe\` (adjust the
+path to wherever a webhook route is mounted) prints a signing secret for
+\`STRIPE_WEBHOOK_SECRET\` that is different from the one in the dashboard —
+use the CLI's secret while testing locally, not the dashboard's.
+`,
+			),
 			"src/lib/checkout.ts": `import Stripe from "stripe";
 import { env } from "@/lib/env";
 
@@ -1612,6 +2074,30 @@ const EMAILS: Record<string, Fragment> = {
 			],
 		],
 		files: {
+			...claudeSkill(
+				"resend",
+				"Resend transactional email — the shared sendEmail contract this project exposes, and Resend's own failure-reporting quirk. Use when touching src/lib/email.ts or sending mail.",
+				`
+## Everything goes through \`sendEmail\` in \`src/lib/email.ts\`
+
+The rest of the app calls \`sendEmail({ to, subject, html })\` and nothing
+imports \`resend\` directly anywhere else — that is what makes switching
+providers later a one-file change.
+
+## Resend reports failure in the payload, not by throwing
+
+\`resend.emails.send()\` resolves successfully even when the send failed; the
+failure is in \`{ data, error }\`. \`src/lib/email.ts\` already checks
+\`error\` and throws itself — do not \`await\` the raw SDK call elsewhere and
+assume a resolved promise means the email went out.
+
+## The sender must be a verified domain
+
+\`EMAIL_FROM\` has to be an address on a domain verified in the Resend
+dashboard, in the \`Name <address@domain>\` shape. An unverified sender fails
+at send time with an error naming the domain, not a generic auth failure.
+`,
+			),
 			"src/lib/email.ts": `import { Resend } from "resend";
 import { env } from "@/lib/env";
 
@@ -1657,6 +2143,31 @@ export async function sendEmail({ to, subject, html }: Email): Promise<Sent> {
 			],
 		],
 		files: {
+			...claudeSkill(
+				"mailgun",
+				"Mailgun transactional email — the shared sendEmail contract, and the form-data dependency the SDK needs at construction. Use when touching src/lib/email.ts or sending mail.",
+				`
+## Everything goes through \`sendEmail\` in \`src/lib/email.ts\`
+
+The rest of the app calls \`sendEmail({ to, subject, html })\`; nothing else
+imports \`mailgun.js\` directly.
+
+## \`form-data\` is a required construction argument, not an unused import
+
+\`new Mailgun(formData)\` is passed the \`form-data\` package explicitly
+because \`mailgun.js\` builds multipart request bodies itself rather than
+assuming the runtime provides a \`FormData\` implementation it can use. Do not
+remove the \`form-data\` dependency or the import while it still looks unused
+by anything else — the client construction is the thing using it.
+
+## The domain is separate from the API key
+
+\`MAILGUN_DOMAIN\` (the verified sending domain) is passed as an argument to
+\`client.messages.create()\`, distinct from \`MAILGUN_API_KEY\` used to build
+the client. A request failing with a domain-not-found error means the
+domain variable, not the key, is wrong.
+`,
+			),
 			"src/lib/email.ts": `import formData from "form-data";
 import Mailgun from "mailgun.js";
 import { env } from "@/lib/env";
@@ -1705,6 +2216,30 @@ export async function sendEmail({ to, subject, html }: Email): Promise<Sent> {
 			],
 		],
 		files: {
+			...claudeSkill(
+				"brevo",
+				"Brevo transactional email — the shared sendEmail contract, and Brevo's split sender format. Use when touching src/lib/email.ts or sending mail.",
+				`
+## Everything goes through \`sendEmail\` in \`src/lib/email.ts\`
+
+The rest of the app calls \`sendEmail({ to, subject, html })\`; nothing else
+imports \`@getbrevo/brevo\` directly.
+
+## Brevo wants the sender split, unlike the other two providers
+
+\`EMAIL_FROM\` is stored as one string (\`Name <address@domain>\`) so every
+provider's \`.env\` looks the same, but Brevo's API takes \`{ name, email }\`
+separately. \`sender()\` in \`src/lib/email.ts\` does that split locally — if a
+send is going out with the wrong or missing display name, check that
+parser before assuming the environment variable itself is wrong.
+
+## A missing \`messageId\` is treated as a failure
+
+Unlike Resend's explicit \`error\` field, a Brevo response with no
+\`messageId\` is the failure signal this module checks — a response object
+that exists but carries no id did not send anything.
+`,
+			),
 			"src/lib/email.ts": `import { BrevoClient } from "@getbrevo/brevo";
 import { env } from "@/lib/env";
 
@@ -1798,10 +2333,113 @@ model User {
 `;
 }
 
+const ORM_SKILLS: Record<string, Record<string, string>> = {
+	drizzle: claudeSkill(
+		"drizzle",
+		"Drizzle ORM — where the schema lives, how to push it, and the dialect-specific column types this project already chose. Use when writing a query or changing the schema.",
+		`
+## The schema is the one source of truth
+
+\`src/db/schema.ts\` is the only place tables are defined; \`src/db/client.ts\`
+is a configured instance, never a place to inline a second definition of a
+table. After changing the schema, run \`npm run db:push\` to apply it — there
+is no migrations directory generated here, so \`db:push\` (not a
+\`drizzle-kit generate\` + a manual migration run) is the workflow this
+project's \`db:push\` script commits to.
+
+## \`drizzle.config.ts\` is what makes the scripts work at all
+
+\`drizzle-kit\` reads its dialect and its credentials from
+\`drizzle.config.ts\`, not from the schema file. If \`db:push\` or
+\`db:generate\` fails claiming it cannot find a database, check that file's
+\`dialect\` and \`dbCredentials\` before suspecting the connection string
+itself.
+
+## Column types follow the database, not habit
+
+The generated schema already uses the column module for this project's
+actual database — \`drizzle-orm/pg-core\` for Postgres-family databases
+(Neon, Supabase), \`drizzle-orm/mysql-core\` for PlanetScale,
+\`drizzle-orm/sqlite-core\` for Turso. Import from the same module a new
+table needs to match; mixing dialects in one schema file does not error at
+write time and fails only when \`db:push\` runs against the real database.
+
+## Querying
+
+Use the query builder (\`db.select()...\`, \`db.insert()...\`) or the relational
+API against the exported tables — never a raw SQL string for something the
+builder already expresses, which is what keeps queries type-checked against
+the schema.
+`,
+	),
+	prisma: claudeSkill(
+		"prisma",
+		"Prisma — schema.prisma as the source of truth, generating the client, and the cached-instance pattern already in this project. Use when writing a query or changing the schema.",
+		`
+## \`prisma/schema.prisma\` is the schema, not \`src/db/schema.ts\`
+
+Prisma's models live in \`prisma/schema.prisma\`. After changing a model, run
+\`npm run db:generate\` (\`prisma generate\`) to regenerate the typed client
+before the new fields are visible to TypeScript, then \`npm run db:push\` to
+apply the change to the database. Editing a model and querying its new
+field without regenerating first is the most common "but I did add the
+column" report — the client TypeScript is checking against is stale.
+
+## The client is cached across hot reloads on purpose
+
+\`src/db/client.ts\` stores the \`PrismaClient\` instance on \`globalThis\` in
+development and reuses it. Removing that caching — or constructing a new
+\`PrismaClient\` anywhere else in the app — opens a new connection pool on
+every save and exhausts the database's connection limit during a normal dev
+session.
+
+## The one file allowed to read \`process.env\` directly for this reason
+
+\`src/db/client.ts\` reads \`env.NODE_ENV\` (through \`@/lib/env\`, not raw
+\`process.env\`) only to decide whether to cache itself — it is still bound
+by the same rule as the rest of the app: the environment is parsed in
+\`src/lib/env.ts\` and read from there.
+`,
+	),
+	mongoose: claudeSkill(
+		"mongoose",
+		"Mongoose — schema-first modelling over MongoDB, and the cached-connection and cached-model patterns this project already uses. Use when writing a query or changing the schema.",
+		`
+## Schema and model live in \`src/db/schema.ts\`
+
+A field MongoDB will happily store without one, but Mongoose will not
+validate, cast, or expose in types unless it is declared on the \`Schema\`
+there first. Add it to the schema before writing code that relies on it.
+
+## Models are cached against hot reload
+
+\`export const User = models.User ?? model("User", userSchema);\` — reusing
+\`models.User\` if it is already registered — is not a style preference. In a
+framework with hot module reloading, calling \`model()\` unconditionally on
+every reload throws \`OverwriteModelError\` the second time the module is
+re-evaluated. Follow the same \`models.X ?? model(...)\` shape for a new
+model.
+
+## The connection is cached too, and is a function, not a constant
+
+\`src/db/client.ts\` exports a \`db()\` function backed by a memoised promise,
+not a bare client — call it (\`await db()\`) rather than importing a top-level
+connected instance, and do not remove the memoisation, or every hot reload
+opens another connection.
+
+## Ids
+
+Documents get a MongoDB ObjectId as \`_id\` automatically; there is no
+separate string primary key to define unless the schema deliberately adds
+one.
+`,
+	),
+};
+
 function ormFragment(answers: StarterAnswers): Fragment {
 	const { orm, database } = answers;
 	const base = ORMS[orm ?? ""] ?? {};
-	const files: Record<string, string> = {};
+	const files: Record<string, string> = { ...(ORM_SKILLS[orm ?? ""] ?? {}) };
 
 	const client =
 		DB_CLIENT[`${orm}:${database}`] ??
@@ -1995,6 +2633,26 @@ const FRAMEWORKS: Record<string, Fragment> = {
 	react_vite: REACT_VITE,
 };
 
+/**
+ * The background jobs module, for the provider chosen.
+ *
+ * Each provider needs the framework to pick its route shape — Inngest and
+ * QStash mount one, and even Trigger.dev's config differs by nothing here
+ * but is kept in this shape for symmetry with the others — so, like auth,
+ * this dispatches to a function rather than a static per-id map.
+ */
+const JOBS_MODULES: Record<string, (answers: StarterAnswers) => Fragment> = {
+	trigger: triggerJobsFragment,
+	inngest: inngestJobsFragment,
+	qstash: qstashJobsFragment,
+};
+
+function jobsFragment(answers: StarterAnswers): Fragment {
+	const build = JOBS_MODULES[answers.jobs ?? ""];
+
+	return build ? build(answers) : {};
+}
+
 export function fragmentsFor(answers: StarterAnswers): Fragment[] {
 	return [
 		baseFor(answers),
@@ -2005,6 +2663,7 @@ export function fragmentsFor(answers: StarterAnswers): Fragment[] {
 		authFragment(answers),
 		BILLING[answers.billing ?? ""] ?? {},
 		EMAILS[answers.email ?? ""] ?? {},
+		jobsFragment(answers),
 		/* Last, so its route replaces the framework's own placeholder home
 		   page rather than the other way round. */
 		landingFragment(answers.framework ?? "nextjs", answers.landing ?? "none"),

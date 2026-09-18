@@ -21,6 +21,7 @@ function complete(framework: string, database: string): StarterAnswers {
 		components: "shadcn",
 		billing: "none",
 		email: "none",
+		jobs: "none",
 		landing: "none",
 		packageManager: "pnpm",
 		project: "my-app",

@@ -1,4 +1,5 @@
 import type { StarterAnswers } from "@/lib/starter-questions";
+import { claudeSkill } from "./claude-skill";
 import type { Fragment } from "./fragments";
 
 /**
@@ -84,6 +85,56 @@ describe("auth", () => {
 });
 `;
 
+const CLERK_SKILL = claudeSkill(
+	"clerk",
+	"Clerk auth — Core 3's <Show> replaced <SignedIn>/<SignedOut>/<Protect>, and which package each framework uses. Use when touching sign-in, sign-up, or session lookup.",
+	`
+## Clerk Core 3 removed \`<SignedIn>\`, \`<SignedOut>\` and \`<Protect>\`
+
+They are replaced by \`<Show when="signed-in">\` and \`<Show when="signed-out">\`.
+The packages generated here (\`@clerk/nextjs@7\`, \`@clerk/react@6\`,
+\`@clerk/tanstack-react-start@1\`) ship stub components under the old names
+that throw at render time specifically to catch code written from
+out-of-date memory — if you are about to reach for \`<SignedIn>\`, use
+\`<Show>\` instead.
+
+## Which package owns what depends on the framework
+
+- **Next.js**: \`@clerk/nextjs\` alone — provider, \`clerkMiddleware\`, and
+  \`auth()\` / \`currentUser()\` under \`@clerk/nextjs/server\`.
+- **TanStack Start**: \`@clerk/tanstack-react-start\` for the provider and the
+  hosted \`<SignIn>\`/\`<SignUp>\` pages, **plus** \`@clerk/react\` for
+  \`<Show>\`, \`<UserButton>\` and the hooks — the TanStack package
+  deliberately does not re-export them.
+- **React + Vite**: \`@clerk/react\` alone, since there is no server.
+
+Importing a component from the wrong one of these for the framework in use
+is a common source of "this type doesn't exist" errors that look unrelated
+to Clerk.
+
+## Clerk owns the forms; \`src/lib/auth.ts\` only owns the publishable key
+
+There is no client to construct — Clerk hosts sign-in and sign-up. The
+secret key is read directly by the framework package from the environment
+and is never re-exported from \`src/lib/auth.ts\`, so that module staying
+thin is intentional, not unfinished.
+
+## Sign-in and sign-up routes are catch-alls
+
+\`[[...sign-in]]\` (Next) or \`sign-in.$\` (TanStack Start) or a \`/*\` path
+(React Router) — Clerk's hosted components manage their own internal
+navigation for verification steps and second factors, and a fixed single
+path 404s partway through one of those flows.
+
+## Session lookup picks the *primary* email, not the first
+
+A Clerk user can have multiple email addresses, only one of which is
+primary and verified. \`src/server/session.ts\` (or the SPA's session hook)
+already matches on \`primaryEmailAddressId\` — do not simplify that to
+\`user.emailAddresses[0]\`.
+`,
+);
+
 /* ------------------------------------------------------------------- next */
 
 function nextFragment(): Fragment {
@@ -92,6 +143,7 @@ function nextFragment(): Fragment {
 		env: SECRET,
 		publicEnv: PUBLISHABLE,
 		files: {
+			...CLERK_SKILL,
 			"src/lib/auth.ts": `import { publicEnv } from "@/lib/public-env";
 
 /**
@@ -290,6 +342,7 @@ function tanstackFragment(): Fragment {
 		env: SECRET,
 		publicEnv: PUBLISHABLE,
 		files: {
+			...CLERK_SKILL,
 			"src/lib/auth.ts": `import { publicEnv } from "@/lib/public-env";
 
 /**
@@ -477,6 +530,7 @@ function spaFragment(): Fragment {
 		   asking for it would invite someone to try. */
 		publicEnv: PUBLISHABLE,
 		files: {
+			...CLERK_SKILL,
 			"src/lib/auth.ts": `import { publicEnv } from "@/lib/public-env";
 
 /**

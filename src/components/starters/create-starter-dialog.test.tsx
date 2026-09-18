@@ -571,6 +571,7 @@ describe("CreateStarterDialog", () => {
 			auth: "better_auth",
 			billing: "stripe",
 			email: "resend",
+			jobs: "trigger",
 			packageManager: "npm",
 			landing: "editorial",
 			project: "my-app",

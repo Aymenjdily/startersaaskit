@@ -65,6 +65,8 @@ describe("the TypeScript it generates", () => {
 		expect(syntaxErrorsIn("fine.ts", "export const a = 1;\n")).toEqual([]);
 	});
 
+	/* The matrix grows with every question that has real interactions —
+	   background jobs took it past what the default test timeout allows. */
 	it("parses in every combination the wizard allows", () => {
 		const broken: string[] = [];
 
@@ -78,8 +80,8 @@ describe("the TypeScript it generates", () => {
 			}
 		}
 
-		/* Printed rather than counted: a failure here should say which file, in
-		   which stack, on which line. */
+		/* Printed rather than counted: a failure here should say which file,
+			   in which stack, on which line. */
 		expect(broken).toEqual([]);
-	});
+	}, 60_000);
 });

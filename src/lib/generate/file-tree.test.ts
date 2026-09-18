@@ -124,6 +124,7 @@ describe("toFileTree", () => {
 				auth: "better_auth",
 				billing: "stripe",
 				email: "resend",
+				jobs: "none",
 				packageManager: "pnpm",
 				landing: "editorial",
 				project: "my-app",
@@ -141,11 +142,11 @@ describe("toFileTree", () => {
 
 		/* Everything that is source is under one root, so the tree has `src` at
 		   the top and the config files beside it. A landing template adds
-		   `public/` for the assets it serves — the only other top-level folder
-		   the generator emits, and one a browser reads directly rather than a
-		   bundler. */
+		   `public/` for the assets it serves, and every library the answers
+		   chose contributes a skill under `.claude/` — the only other top-level
+		   folders the generator emits, neither one read by a bundler. */
 		const folders = tree.filter((node) => node.children);
-		expect(names(folders)).toEqual(["public", "src"]);
+		expect(names(folders)).toEqual([".claude", "public", "src"]);
 	});
 });
 

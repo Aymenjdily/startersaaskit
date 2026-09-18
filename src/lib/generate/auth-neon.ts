@@ -1,3 +1,4 @@
+import { claudeSkill } from "./claude-skill";
 import type { Fragment } from "./fragments";
 
 /**
@@ -67,6 +68,42 @@ export function neonAuthFragment(_answers?: unknown): Fragment {
 		env: SECRET,
 		publicEnv: PUBLIC,
 		files: {
+			...claudeSkill(
+				"neon_auth",
+				"Neon Auth (Stack Auth) — a client-only SDK and a server-only SDK under different package names, and where the users actually live. Use when touching src/lib/auth.ts or session lookup.",
+				`
+## Two packages, and only one has a server
+
+\`@stackframe/react\` is framework-agnostic but client-only — it has no
+server-side session lookup. \`@stackframe/stack\` (what this project depends
+on) has the server half: \`StackServerApp\` with a \`nextjs-cookie\` token
+store. That is also why this provider is offered with Next.js only in the
+wizard — on a framework with a server but no Next-specific cookie store,
+\`currentUser()\` would have nothing to read during SSR.
+
+## The users are joinable rows, not a separate silo
+
+Neon Auth is Stack Auth with Neon's dashboard on top of it: users end up in
+a \`neon_auth.users_sync\` table in the same Postgres database, not behind a
+webhook or a separate API. Query it like any other table in that database
+when you need to join a user onto your own data — there is no sync step to
+wait for.
+
+## Read the installed version before writing against \`StackHandler\`
+
+\`StackHandler\`'s \`app\`, \`routeProps\`, \`params\` and \`searchParams\` props
+were deprecated in 2.8 — its own types mark them "no longer necessary".
+Passing them is a sign of copying an older tutorial rather than reading the
+package actually installed.
+
+## The project id must be a real UUID
+
+Stack validates the project id as a UUID at construction, not merely at
+request time — a placeholder like \`proj_example\` fails immediately rather
+than during a request, which is also why the test fixture here uses an
+actual UUID shape.
+`,
+			),
 			"src/lib/auth.ts": `import { StackServerApp } from "@stackframe/stack";
 import { publicEnv } from "@/lib/public-env";
 import { env } from "@/lib/env";

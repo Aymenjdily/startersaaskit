@@ -1,3 +1,4 @@
+import { claudeSkill } from "./claude-skill";
 import type { Fragment } from "./fragments";
 
 /**
@@ -59,6 +60,43 @@ export function auth0Fragment(_answers?: unknown): Fragment {
 		dependencies: { "@auth0/nextjs-auth0": "^4.27.0" },
 		env: ENV,
 		files: {
+			...claudeSkill(
+				"auth0",
+				"Auth0 v4 (@auth0/nextjs-auth0) — a different API from v3 under the same name, with no route file and its own variable names. Use when touching src/lib/auth.ts, middleware, or session lookup.",
+				`
+## This is v4, not v3 — assume nothing carried over
+
+If you know Auth0 from an older tutorial or an older project, treat that
+knowledge as wrong until confirmed against the version actually installed
+(\`package.json\`). Specifically:
+
+- v3 exported \`handleAuth()\` and mounted \`app/api/auth/[...auth0]\`. **v4 has
+  no route file at all** — \`auth0.middleware(request)\` (in
+  \`src/middleware.ts\`) serves \`/auth/login\`, \`/auth/logout\`,
+  \`/auth/callback\` and \`/auth/profile\` itself. Adding a route handler for
+  any of those paths creates a conflict with the middleware, not a fix for
+  a missing one.
+- v3 read \`AUTH0_BASE_URL\` and \`AUTH0_ISSUER_BASE_URL\`. v4 reads
+  \`APP_BASE_URL\` and \`AUTH0_DOMAIN\`, plus \`AUTH0_SECRET\` for cookie
+  encryption. Using the v3 names silently does nothing — v4 does not warn
+  about an unrecognised variable.
+- \`getSession()\` is a method on an \`Auth0Client\` instance
+  (\`auth0.getSession()\`), not a free function imported from the package.
+
+## Next.js only
+
+\`@auth0/nextjs-auth0\` is the only Auth0 SDK with a server-side session;
+their other package is browser-only. This project's wizard does not offer
+Auth0 beside TanStack Start or React + Vite for that reason — do not port
+this module to either without a different SDK.
+
+## The client is a module-scope singleton on purpose
+
+\`export const auth0 = new Auth0Client()\` is constructed once. It holds the
+session store and Auth0's discovery cache; building a new instance per
+request would refetch the tenant's OpenID configuration on every request.
+`,
+			),
 			"src/lib/auth.ts": `import { Auth0Client } from "@auth0/nextjs-auth0/server";
 
 /**

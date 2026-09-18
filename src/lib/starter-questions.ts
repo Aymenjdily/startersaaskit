@@ -22,6 +22,7 @@ export type StarterQuestionId =
 	| "auth"
 	| "billing"
 	| "email"
+	| "jobs"
 	| "packageManager"
 	| "landing"
 	| "project";
@@ -334,6 +335,40 @@ export const STARTER_QUESTIONS: readonly StarterQuestion[] = [
 		],
 	},
 	{
+		id: "jobs",
+		label: "Background jobs",
+		prompt: "Should it come with background jobs wired up?",
+		kind: "choice",
+		hint: "Needs a server, so it filters the same way billing and email do.",
+		/* Every starter generated before this question existed queued nothing,
+		   which is exactly what "Not yet" means. */
+		whenMissing: "none",
+		options: [
+			/* All three dispatch a job over the network — Trigger.dev to its own
+			   runners, Inngest and QStash to a route this app mounts — which is a
+			   server capability a browser bundle does not have. */
+			{
+				id: "trigger",
+				label: "Trigger.dev",
+				icon: null,
+				requires: { framework: "server" },
+			},
+			{
+				id: "inngest",
+				label: "Inngest",
+				icon: null,
+				requires: { framework: "server" },
+			},
+			{
+				id: "qstash",
+				label: "QStash",
+				icon: "upstash",
+				requires: { framework: "server" },
+			},
+			{ id: "none", label: "Not yet", icon: null },
+		],
+	},
+	{
 		id: "landing",
 		label: "Landing page",
 		prompt: "Should it come with a landing page?",
@@ -592,7 +627,10 @@ export function answerProblems(answers: StarterAnswers): AnswerProblem[] {
 }
 
 /** "Framework to be Next.js", derived from which options carry the tag. */
-function describeRequirement(id: StarterQuestionId, tag: string): string {
+export function describeRequirement(
+	id: StarterQuestionId,
+	tag: string,
+): string {
 	const question = STARTER_QUESTIONS.find((candidate) => candidate.id === id);
 	const satisfying = (question?.options ?? [])
 		.filter((option) => option.tags?.includes(tag))

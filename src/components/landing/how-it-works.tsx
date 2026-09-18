@@ -67,6 +67,7 @@ export const ANSWERS: Answer[] = [
 	{ label: "Auth", value: "Better Auth" },
 	{ label: "Billing", value: "Stripe" },
 	{ label: "Email", value: "Resend" },
+	{ label: "Background jobs", value: "QStash" },
 	{ label: "Landing page", value: "Editorial" },
 	{ label: "Package manager", value: "pnpm" },
 	{ label: "Project", value: "my-app" },

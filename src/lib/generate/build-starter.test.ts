@@ -19,6 +19,7 @@ const answers: StarterAnswers = {
 	auth: "better_auth",
 	billing: "stripe",
 	email: "resend",
+	jobs: "none",
 	packageManager: "pnpm",
 	landing: "editorial",
 	project: "my-app",
@@ -149,6 +150,7 @@ describe("buildStarter", () => {
 				auth: "supabase_auth",
 				billing: "none",
 				email: "none",
+				jobs: "none",
 			});
 
 			it("ships no server directory and no server-only tripwire", () => {
@@ -247,6 +249,7 @@ describe("buildStarter", () => {
 							orm: framework.id === "react_vite" ? "none" : "drizzle",
 							billing: "none",
 							email: "none",
+							jobs: "none",
 						} as StarterAnswers,
 					}));
 				});
@@ -345,6 +348,7 @@ describe("buildStarter", () => {
 							auth: "supabase_auth",
 							billing: "none",
 							email: "none",
+							jobs: "none",
 						}
 					: { framework };
 
@@ -663,6 +667,7 @@ describe("buildStarter", () => {
 				auth: "better_auth",
 				billing: "stripe",
 				email: "resend",
+				jobs: "none",
 				packageManager: "pnpm",
 				landing: "editorial",
 			});

@@ -1,4 +1,5 @@
 import type { StarterAnswers } from "@/lib/starter-questions";
+import { claudeSkill } from "./claude-skill";
 import type { Fragment } from "./fragments";
 
 /**
@@ -253,6 +254,46 @@ describe("authClient", () => {
 });
 `;
 
+const SUPABASE_AUTH_SKILL = claudeSkill(
+	"supabase_auth",
+	"Supabase Auth — a client per side, cookies that must be refreshed, and where the users actually live. Use when touching src/lib/auth.ts, auth-client.ts, or session lookup.",
+	`
+## Supabase owns the users; there is no schema for them here
+
+Accounts live in Supabase's own \`auth.users\` table, not one this project
+generates or migrates. Your own tables reference that id and nothing else —
+do not add a \`users\` table of your own; that is what Better Auth's module
+does, and this one deliberately does not.
+
+## Two clients, not one
+
+\`src/lib/auth.ts\` builds the **server** client (\`createAuthServerClient\`,
+via \`@supabase/ssr\`'s \`createServerClient\`); \`src/lib/auth-client.ts\` holds
+the **browser** one. Both use the same publishable anon key — the difference
+between them is only where each reads and writes cookies, supplied by the
+caller through a \`CookieStore\` rather than hard-coded, so the module stays
+framework-agnostic.
+
+## The session expires, and something has to refresh it
+
+Cookies carrying the session are short-lived. On Next.js, refreshing happens
+in middleware, on every matching request, before a page renders. On TanStack
+Start, the server client refreshes on read instead. Skipping this step is
+the specific bug where every signed-in visitor is silently signed out after
+roughly an hour and nothing in the logs says why — if that report comes in,
+check the middleware (Next) or the server client's refresh call (TanStack
+Start) before suspecting anything else.
+
+## React + Vite is a different shape entirely
+
+With no server, there is no server client and no middleware — auth runs
+through \`src/lib/supabase.ts\`, the same publishable-key browser client the
+database uses, protected entirely by Row Level Security rather than by
+cookie refresh logic. Check which files exist in this project before
+assuming the server-side pattern applies.
+`,
+);
+
 /** The whole Supabase Auth module, for the framework chosen. */
 export function supabaseAuthFragment(answers: StarterAnswers): Fragment {
 	const next = answers.framework === "nextjs";
@@ -260,6 +301,7 @@ export function supabaseAuthFragment(answers: StarterAnswers): Fragment {
 	if (answers.framework === "react_vite") return spaFragment();
 
 	const files: Record<string, string> = {
+		...SUPABASE_AUTH_SKILL,
 		"src/lib/auth.ts": `import { createServerClient } from "@supabase/ssr";
 import { publicEnv } from "@/lib/public-env";
 
@@ -720,6 +762,7 @@ function spaFragment(): Fragment {
 			],
 		],
 		files: {
+			...SUPABASE_AUTH_SKILL,
 			"src/lib/auth.ts": `import { supabase } from "@/lib/supabase";
 
 /**

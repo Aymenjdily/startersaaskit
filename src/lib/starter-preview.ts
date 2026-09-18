@@ -2,7 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { buildStarter } from "@/lib/generate/build-starter";
 import { type TreeNode, toFileTree } from "@/lib/generate/file-tree";
 import {
+	isProjectNameValid,
 	optionsFor,
+	pruneAnswers,
 	STARTER_QUESTIONS,
 	type StarterAnswers,
 } from "@/lib/starter-questions";
@@ -45,6 +47,7 @@ const HELD: StarterAnswers = {
 	components: "shadcn",
 	billing: "none",
 	email: "none",
+	jobs: "none",
 	landing: "none",
 	packageManager: "pnpm",
 	project: "my-app",
@@ -83,17 +86,55 @@ export function previewKey(framework: string, database: string): string {
  * a rule added to `starter-questions.ts` is honoured here for free.
  */
 function completeAnswers(framework: string, database: string): StarterAnswers {
-	const chosen: StarterAnswers = { framework, database, ...HELD };
+	return sanitiseAnswers({ framework, database, ...HELD });
+}
+
+/**
+ * Any answer set, reduced to one this generator will actually build.
+ *
+ * The hero asks two questions and fills in the rest. `/build` lets a visitor
+ * answer all nine, and those answers arrive over the network from someone who
+ * never had to pass through the wizard — so "the wizard would not have offered
+ * that" has to be enforced here rather than assumed.
+ *
+ * Three steps, in this order:
+ *
+ * 1. **Prune.** `pruneAnswers` walks the questions and keeps an answer only if
+ *    `optionsFor` still offers it given the answers before it. Auth0 beside
+ *    TanStack Start is dropped here, exactly as it is dropped in the dialog,
+ *    through the same function — so a rule added to `starter-questions.ts` is
+ *    honoured on this path without anyone remembering to come back.
+ * 2. **Complete.** Whatever pruning removed, and whatever was never sent, is
+ *    filled with the first still-legal option. A half-answered request
+ *    previews a whole starter rather than failing.
+ * 3. **Name.** The project name is the one free-text answer, and it is
+ *    interpolated into `package.json`. Anything that is not a valid repository
+ *    name is replaced rather than rejected, because a bad name is not a reason
+ *    to refuse someone a preview.
+ *
+ * What this guarantees to its callers: the result is complete, every answer in
+ * it is one the wizard would have offered, and it is safe to hand to
+ * `buildStarter`.
+ */
+export function sanitiseAnswers(requested: StarterAnswers): StarterAnswers {
+	/* Arrives from the network, so it is not necessarily an object at all. */
+	const given: StarterAnswers =
+		typeof requested === "object" && requested !== null ? requested : {};
+
+	const chosen = pruneAnswers(given);
 
 	for (const question of STARTER_QUESTIONS) {
 		if (question.kind === "text") continue;
-		/* Fixed by the caller, or already pinned above. */
 		if (chosen[question.id]) continue;
 
 		const option = optionsFor(question, chosen)[0];
 
 		if (option) chosen[question.id] = option.id;
 	}
+
+	chosen.project = isProjectNameValid(chosen.project ?? "")
+		? chosen.project
+		: "my-app";
 
 	return chosen;
 }
@@ -212,6 +253,75 @@ export const starterFile = createServerFn()
 		if (!legal) throw new Error("No such starter.");
 
 		const files = buildStarter(completeAnswers(data.framework, data.database));
+		const source = files[data.path];
+
+		if (source === undefined) throw new Error("No such file in that starter.");
+
+		return { path: data.path, source };
+	});
+
+/* ------------------------------------------------------------------ /build */
+
+/**
+ * A whole starter described, for the public builder.
+ *
+ * Carries the answers back. What was asked for and what was built are not
+ * always the same set — a request naming Auth0 beside TanStack Start is
+ * pruned to something legal — and the page has to render the stack it
+ * actually got rather than the one it asked for.
+ */
+export type BuiltStarter = {
+	answers: StarterAnswers;
+	tree: TreeNode[];
+	files: number;
+	tests: number;
+	opening: StarterFile;
+};
+
+const TEST_FILE = /\.(test|spec)\.[jt]sx?$/;
+
+/**
+ * One starter, built to order.
+ *
+ * The hero precomputes its eleven combinations because it has eleven. The
+ * builder offers 450 and lets someone change any of nine answers, so this
+ * builds the one that was asked for — a few milliseconds of pure function,
+ * against a round trip that was going to happen anyway.
+ *
+ * File *contents* are dropped, as in `starterPreviews`: the tree draws from
+ * paths, and shipping every source would be a megabyte to render a list of
+ * names. `starterSource` fetches the one file somebody clicks.
+ */
+export const starterBuild = createServerFn()
+	.inputValidator((input: { answers: StarterAnswers }) => input)
+	.handler(({ data }): BuiltStarter => {
+		const answers = sanitiseAnswers(data.answers);
+		const files = buildStarter(answers);
+		const paths = Object.keys(files);
+
+		return {
+			answers,
+			tree: toFileTree(paths),
+			files: paths.length,
+			tests: paths.filter((path) => TEST_FILE.test(path)).length,
+			opening: openingFile(files),
+		};
+	});
+
+/**
+ * One file out of a built starter.
+ *
+ * The path is a key into the map the generator just returned in memory, never
+ * a path on disk, and a miss is an error rather than an empty string. That is
+ * the same property `starterFile` protects, and it matters more here: this
+ * handler takes a whole answer set from the caller instead of a pair drawn
+ * from a fixed list, so `sanitiseAnswers` is what stands between a request and
+ * the generator.
+ */
+export const starterSource = createServerFn()
+	.inputValidator((input: { answers: StarterAnswers; path: string }) => input)
+	.handler(({ data }): StarterFile => {
+		const files = buildStarter(sanitiseAnswers(data.answers));
 		const source = files[data.path];
 
 		if (source === undefined) throw new Error("No such file in that starter.");

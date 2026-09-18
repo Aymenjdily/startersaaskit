@@ -147,6 +147,13 @@ export function starterGuide(
 		});
 	}
 
+	if (files["SETUP_AGENTS.md"]) {
+		steps.push({
+			title: "Write a deeper AGENTS.md",
+			body: "`AGENTS.md` documents this project's conventions, not what your product does — that part only you know. `SETUP_AGENTS.md` is a ready-made prompt, stack already filled in, for drafting that with whichever LLM you plan the work with.",
+		});
+	}
+
 	const rest = Object.entries(scripts).filter(
 		([name]) => !["dev", "test", "typecheck", "db:push"].includes(name),
 	);
@@ -184,6 +191,10 @@ export function starterTour(
 		{
 			path: "AGENTS.md",
 			what: "What to tell an AI assistant before it touches the repo.",
+		},
+		{
+			path: "SETUP_AGENTS.md",
+			what: "A ready-made prompt for drafting a product-specific AGENTS.md.",
 		},
 		{ path: "src/lib/env.ts", what: "Every environment variable, typed." },
 		{ path: "src/lib/auth.ts", what: "Authentication, configured once." },

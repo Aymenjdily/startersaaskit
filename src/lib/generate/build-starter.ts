@@ -8,6 +8,7 @@ import {
 } from "@/lib/starter-questions";
 import { type Fragment, fragmentsFor } from "./fragments";
 import { packageManager, runScript } from "./package-manager";
+import { setupAgentsGuide } from "./setup-agents";
 
 /**
  * Turns a set of answers into the files of a starter.
@@ -374,6 +375,11 @@ fine and fails on the first request.
 \`${runScript(answers, "test")}\` and \`${runScript(answers, "typecheck")}\` pass on a clean install, before you have an
 \`.env\` — the suite supplies its own placeholders in \`vitest.config.ts\`.
 
+Before you write a feature, open \`SETUP_AGENTS.md\`. \`AGENTS.md\` already
+documents this project's conventions; that file is a ready-made prompt for
+turning it into one that also describes your product, for whichever LLM you
+plan the work with.
+
 ## What is here
 
 ${tree}
@@ -600,6 +606,10 @@ export function buildStarter(answers: StarterAnswers): StarterFiles {
 	files["tsconfig.json"] = tsconfig(answers);
 	files[".gitignore"] = GITIGNORE;
 	files[".env.example"] = envExample(merged, answers);
+	files["SETUP_AGENTS.md"] = setupAgentsGuide(
+		answers,
+		merged.env.map(([name]) => name),
+	);
 	/* Last: the README lists the file tree, so it needs the rest in hand. */
 	files["README.md"] = readme(answers, files);
 
